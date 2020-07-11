@@ -189,6 +189,13 @@ export function eventToIcal(e, options) {
   // make subject safe for iCalendar
   subj = subj.replace(/,/g, '\\,');
 
+  if (options.appendHebrewToSubject) {
+    const hebrew = e.renderBrief('he');
+    if (hebrew) {
+      subj += ` / ${hebrew}`;
+    }
+  }
+
   const category = mask & flags.USER_EVENT ? 'Personal' : 'Holiday';
   const arr = [
     'BEGIN:VEVENT',

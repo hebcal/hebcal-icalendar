@@ -144,3 +144,29 @@ test('eventsToIcalendar', async (t) => {
   const ical = await icalendar.eventsToIcalendar(events, options);
   t.is(ical.startsWith('BEGIN:VCALENDAR\r\nVERSION:2.0\r\n'), true);
 });
+
+test('appendHebrewToSubject', (t) => {
+  const options = {
+    start: new Date(2020, 4, 23),
+    end: new Date(2020, 4, 30),
+    sedrot: true,
+    candlelighting: true,
+    location: Location.lookup('Gibraltar'),
+    appendHebrewToSubject: true,
+  };
+  const events = HebrewCalendar.calendar(options);
+  const icals = events.map((ev) => icalendar.eventToIcal(ev, options));
+  const descrip = icals.map((i) => i.split('\r\n').find((s) => s.startsWith('SUMMARY')));
+  const expected = [
+    'SUMMARY:Parashat Bamidbar / פרשת בְּמִדְבַּר',
+    'SUMMARY:Havdalah / הַבדָלָה',
+    'SUMMARY:Rosh Chodesh Sivan / רֹאשׁ חודש סִיוָן',
+    'SUMMARY:Erev Shavuot / עֶרֶב שָׁבוּעוֹת',
+    'SUMMARY:Candle lighting / הדלקת נרות',
+    'SUMMARY:Shavuot I / שָׁבוּעוֹת יוֹם א׳',
+    'SUMMARY:Candle lighting / הדלקת נרות',
+    'SUMMARY:Shavuot II / שָׁבוּעוֹת יוֹם ב׳',
+    'SUMMARY:Havdalah / הַבדָלָה',
+  ];
+  t.deepEqual(descrip, expected);
+});
