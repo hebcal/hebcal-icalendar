@@ -156,7 +156,7 @@ test('appendHebrewToSubject', (t) => {
   };
   const events = HebrewCalendar.calendar(options);
   const icals = events.map((ev) => icalendar.eventToIcal(ev, options));
-  const descrip = icals.map((i) => i.split('\r\n').find((s) => s.startsWith('SUMMARY')));
+  const summary = icals.map((i) => i.split('\r\n').find((s) => s.startsWith('SUMMARY')));
   const expected = [
     'SUMMARY:Parashat Bamidbar / פרשת בְּמִדְבַּר',
     'SUMMARY:Havdalah / הַבדָלָה',
@@ -168,5 +168,5 @@ test('appendHebrewToSubject', (t) => {
     'SUMMARY:Shavuot II / שָׁבוּעוֹת יוֹם ב׳',
     'SUMMARY:Havdalah / הַבדָלָה',
   ];
-  t.deepEqual(descrip, expected);
+  t.deepEqual(summary, expected);
 });
