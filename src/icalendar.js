@@ -28,17 +28,6 @@ function formatYYYYMMDD(d) {
 }
 
 /**
- * @private
- * @param {number|string} hour
- * @param {number|string} min
- * @param {number|string} sec
- * @return {string}
- */
-function formatTime(hour, min, sec) {
-  return pad2(hour) + pad2(min) + pad2(sec);
-}
-
-/**
  * Returns UTC string for iCalendar
  * @private
  * @param {Date} dt
@@ -153,10 +142,12 @@ export function eventToIcal(e, options) {
   let transp = 'TRANSPARENT'; let busyStatus = 'FREE';
   if (timed) {
     let [hour, minute] = attrs.eventTimeStr.split(':');
-    if (Number(hour) < 12) {
-      hour = 12 + Number(hour);
+    hour = +hour;
+    minute = +minute;
+    if (hour < 12) {
+      hour += 12;
     }
-    startDate += 'T' + formatTime(hour, minute, 0);
+    startDate += 'T' + pad2(hour) + pad2(minute) + '00';
     endDate = startDate;
     dtargs = `;TZID=${options.location.tzid}`;
     // replace "Candle lighting: 15:34" with shorter title
