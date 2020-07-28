@@ -8,25 +8,50 @@ test('ical-sedra', (t) => {
   const events = HebrewCalendar.calendar(options);
   const tzav = icalendar.eventToIcal(events[0], options);
   let lines = tzav.split('\r\n');
-  t.is(lines.length, 13);
-  t.is(lines[0], 'BEGIN:VEVENT');
-  t.is(lines[7], 'TRANSP:TRANSPARENT');
-  let expectedUrl = 'https://www.hebcal.com/sedrot/tzav?utm_source=js&utm_medium=icalendar';
-  t.is(lines[10], `DESCRIPTION:Torah: Leviticus 6:1-8:36\\nHaftarah: Malachi 3:4 - 3:24 | Shabbat HaGadol\\n\\n${expectedUrl}`);
-  t.is(lines[11], `URL:${expectedUrl}`);
-  t.is(lines[12], 'END:VEVENT');
+  lines[1] = 'DTSTAMP:X';
+  let expected = [
+    'BEGIN:VEVENT',
+    'DTSTAMP:X',
+    'CATEGORIES:Holiday',
+    'CLASS:PUBLIC',
+    'SUMMARY:Parashat Tzav',
+    'DTSTART;VALUE=DATE:19930403',
+    'DTEND;VALUE=DATE:19930404',
+    'TRANSP:TRANSPARENT',
+    'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
+    'UID:hebcal-19930403-58f80aa7d21720fc609c3755ac43fad0',
+    'DESCRIPTION:Torah: Leviticus 6:1-8:36\\nHaftarah: Malachi 3:4 - 3:24 | Shab',
+    ' bat HaGadol\\n\\nhttps://www.hebcal.com/sedrot/tzav?utm_source=js&utm_medium',
+    ' =icalendar',
+    'URL:https://www.hebcal.com/sedrot/tzav?utm_source=js&utm_medium=icalendar',
+    'END:VEVENT',
+  ];
+  t.deepEqual(lines, expected);
 
   const options2 = {year: 1993, month: 6, sedrot: true, noHolidays: true};
   const events2 = HebrewCalendar.calendar(options2);
   const korach = icalendar.eventToIcal(events2[2], options);
   lines = korach.split('\r\n');
-  t.is(lines.length, 13);
-  t.is(lines[0], 'BEGIN:VEVENT');
-  t.is(lines[7], 'TRANSP:TRANSPARENT');
-  expectedUrl = 'https://www.hebcal.com/sedrot/korach?utm_source=js&utm_medium=icalendar';
-  t.is(lines[10], `DESCRIPTION:Torah: Numbers 16:1-18:32\\nMaftir: Numbers 28:9 - 28:15 | Shabbat Rosh Chodesh\\nHaftarah: Isaiah 66:1 - 66:24 | Shabbat Rosh Chodesh\\n\\n${expectedUrl}`);
-  t.is(lines[11], `URL:${expectedUrl}`);
-  t.is(lines[12], 'END:VEVENT');
+  lines[1] = 'DTSTAMP:X';
+  expected = [
+    'BEGIN:VEVENT',
+    'DTSTAMP:X',
+    'CATEGORIES:Holiday',
+    'CLASS:PUBLIC',
+    'SUMMARY:Parashat Korach',
+    'DTSTART;VALUE=DATE:19930619',
+    'DTEND;VALUE=DATE:19930620',
+    'TRANSP:TRANSPARENT',
+    'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
+    'UID:hebcal-19930619-9b2c5e5ae7df4d2407ce268cd816063a',
+    'DESCRIPTION:Torah: Numbers 16:1-18:32\\nMaftir: Numbers 28:9 - 28:15 | Shab',
+    ' bat Rosh Chodesh\\nHaftarah: Isaiah 66:1 - 66:24 | Shabbat Rosh Chodesh\\n\\n',
+    ' https://www.hebcal.com/sedrot/korach?utm_source=js&utm_medium=icalendar',
+    'URL:https://www.hebcal.com/sedrot/korach?utm_source=js&utm_medium=icalenda',
+    ' r',
+    'END:VEVENT',
+  ];
+  t.deepEqual(lines, expected);
 });
 
 test('ical-transp-opaque', (t) => {
@@ -41,36 +66,58 @@ test('ical-transp-opaque', (t) => {
   const memo = 'Passover, the Feast of Unleavened Bread';
   events[0].getAttrs().memo = memo;
   let lines = icalendar.eventToIcal(events[0], options).split('\r\n');
-  t.is(lines.length, 13);
-  t.is(lines[4], 'SUMMARY:Erev Pesach');
-  t.is(lines[7], 'TRANSP:TRANSPARENT');
-  const dtstart = lines[5];
-  t.is(dtstart.startsWith('DTSTART'), true);
-  t.is(dtstart.indexOf('VALUE=DATE'), 8);
-  t.is(dtstart.substring(dtstart.indexOf(':') + 1), '19930405');
-  const dtend = lines[6];
-  t.is(dtend.startsWith('DTEND'), true);
-  t.is(dtend.substring(dtend.indexOf(':') + 1), '19930406');
-  const expectedUrl = 'https://www.hebcal.com/holidays/pesach?utm_source=js&utm_medium=icalendar';
-  t.is(lines[10], `DESCRIPTION:Passover\\, the Feast of Unleavened Bread\\n\\n${expectedUrl}`);
+  lines[1] = 'DTSTAMP:X';
+  let expected = [
+    'BEGIN:VEVENT',
+    'DTSTAMP:X',
+    'CATEGORIES:Holiday',
+    'CLASS:PUBLIC',
+    'SUMMARY:Erev Pesach',
+    'DTSTART;VALUE=DATE:19930405',
+    'DTEND;VALUE=DATE:19930406',
+    'TRANSP:TRANSPARENT',
+    'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
+    'UID:hebcal-19930405-6fa29675cbcb1ccb27f62fd980f5e78f',
+    'DESCRIPTION:Passover\\, the Feast of Unleavened Bread\\n\\nhttps://www.hebcal',
+    ' .com/holidays/pesach?utm_source=js&utm_medium=icalendar',
+    'URL:https://www.hebcal.com/holidays/pesach?utm_source=js&utm_medium=icalen',
+    ' dar',
+    'END:VEVENT',
+  ];
+  t.deepEqual(lines, expected);
 
-  events[1].getAttrs().memo = memo;
   lines = icalendar.eventToIcal(events[1], options).split('\r\n');
   t.is(lines[4], 'SUMMARY:Pesach I');
   t.is(lines[7], 'TRANSP:OPAQUE');
-  t.is(lines[10], `DESCRIPTION:Passover\\, the Feast of Unleavened Bread\\nTorah: Exodus 12:21-12:51\\nHaftarah: Joshua 5:2 - 6:1\\n\\n${expectedUrl}`);
 
   events[2].getAttrs().memo = memo;
   lines = icalendar.eventToIcal(events[2], options).split('\r\n');
   t.is(lines[4], 'SUMMARY:Pesach II');
   t.is(lines[7], 'TRANSP:OPAQUE');
-  t.is(lines[10], `DESCRIPTION:Passover\\, the Feast of Unleavened Bread\\nTorah: Leviticus 22:26-23:44\\nHaftarah: II Kings 23:1 - 23:9\\; 23:21 - 23:25\\n\\n${expectedUrl}`);
+  lines[1] = 'DTSTAMP:X';
+  expected = [
+    'BEGIN:VEVENT',
+    'DTSTAMP:X',
+    'CATEGORIES:Holiday',
+    'CLASS:PUBLIC',
+    'SUMMARY:Pesach II',
+    'DTSTART;VALUE=DATE:19930407',
+    'DTEND;VALUE=DATE:19930408',
+    'TRANSP:OPAQUE',
+    'X-MICROSOFT-CDO-BUSYSTATUS:OOF',
+    'UID:hebcal-19930407-a12a5eb5a4d96cc7ee7b51960527dfa3',
+    'DESCRIPTION:Passover\\, the Feast of Unleavened Bread\\nTorah: Leviticus 22:',
+    ' 26-23:44\\nHaftarah: II Kings 23:1 - 23:9\\; 23:21 - 23:25\\n\\nhttps://www.he',
+    ' bcal.com/holidays/pesach?utm_source=js&utm_medium=icalendar',
+    'URL:https://www.hebcal.com/holidays/pesach?utm_source=js&utm_medium=icalen',
+    ' dar',
+    'END:VEVENT',
+  ];
+  t.deepEqual(lines, expected);
 
-  events[3].getAttrs().memo = memo;
   lines = icalendar.eventToIcal(events[3], options).split('\r\n');
   t.is(lines[4], 'SUMMARY:Pesach III (CH\'\'M)');
   t.is(lines[7], 'TRANSP:TRANSPARENT');
-  t.is(lines[10], `DESCRIPTION:Passover\\, the Feast of Unleavened Bread\\nTorah: Exodus 13:1-28:25\\n\\n${expectedUrl}`);
 });
 
 test('ical-candles', (t) => {
@@ -118,9 +165,26 @@ test('ical-dafyomi', (t) => {
   t.is(ev.render(), 'דף יומי: נדרים 14');
   const ical = icalendar.eventToIcal(ev, options);
   const lines = ical.split('\r\n');
-  t.is(lines.length, 14);
-  t.is(lines[4], 'SUMMARY:נדרים 14');
-  t.is(lines[11], 'LOCATION:דף יומי');
+  lines[1] = 'DTSTAMP:X';
+  const expected = [
+    'BEGIN:VEVENT',
+    'DTSTAMP:X',
+    'CATEGORIES:Holiday',
+    'CLASS:PUBLIC',
+    'SUMMARY:נדרים 14',
+    'DTSTART;VALUE=DATE:19930301',
+    'DTEND;VALUE=DATE:19930302',
+    'TRANSP:TRANSPARENT',
+    'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
+    'UID:hebcal-19930301-eb88cd2cc7b514690d416285f89cc65a',
+    'DESCRIPTION:https://www.sefaria.org/Nedarim.14a?lang=bi&utm_source=hebcal.',
+    ' com&utm_medium=icalendar',
+    'LOCATION:דף יומי',
+    'URL:https://www.sefaria.org/Nedarim.14a?lang=bi&utm_source=hebcal.com&utm_',
+    ' medium=icalendar',
+    'END:VEVENT',
+  ];
+  t.deepEqual(lines, expected);
 });
 
 test('ical-omer', (t) => {

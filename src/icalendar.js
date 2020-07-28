@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import {flags} from '@hebcal/core';
+import {flags, Locale} from '@hebcal/core';
 import md5 from 'md5';
 import leyning from '@hebcal/leyning';
 import {pad2, getCalendarTitle, makeAnchor, getHolidayDescription} from '@hebcal/rest-api';
@@ -230,7 +230,10 @@ export function eventToIcal(e, options) {
 
   arr.push('END:VEVENT');
 
-  return arr.join('\r\n');
+  // fold lines to 75 characters
+  return arr.map((line) => {
+    return line.match(/(.{1,74})/g).join('\r\n ');
+  }).join('\r\n');
 }
 
 /**
@@ -243,7 +246,7 @@ export function eventToIcal(e, options) {
 export function eventsToIcalendarStream(readable, events, options) {
   if (!events.length) throw new RangeError('Events can not be empty');
   if (!options) throw new TypeError('Invalid options object');
-  const uclang = (options.locale || 'en').toUpperCase();
+  const uclang = Locale.getLocaleName().toUpperCase();
   const title = getCalendarTitle(events, options);
   const caldesc = options.yahrzeit ?
     'Yahrzeits + Anniversaries from www.hebcal.com' :
@@ -251,7 +254,7 @@ export function eventsToIcalendarStream(readable, events, options) {
   [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    `PRODID:-//hebcal.com/NONSGML Hebcal Calendar v7.0//${uclang}`,
+    `PRODID:-//hebcal.com/NONSGML Hebcal Calendar v7.1//${uclang}`,
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     'X-LOTUS-CHARSET:UTF-8',
