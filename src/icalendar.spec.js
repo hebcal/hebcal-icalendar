@@ -23,7 +23,6 @@ test('ical-sedra', (t) => {
     'DESCRIPTION:Torah: Leviticus 6:1-8:36\\nHaftarah: Malachi 3:4 - 3:24 | Shab',
     ' bat HaGadol\\n\\nhttps://www.hebcal.com/sedrot/tzav?utm_source=js&utm_medium',
     ' =icalendar',
-    'URL:https://www.hebcal.com/sedrot/tzav?utm_source=js&utm_medium=icalendar',
     'END:VEVENT',
   ];
   t.deepEqual(lines, expected);
@@ -47,8 +46,6 @@ test('ical-sedra', (t) => {
     'DESCRIPTION:Torah: Numbers 16:1-18:32\\nMaftir: Numbers 28:9 - 28:15 | Shab',
     ' bat Rosh Chodesh\\nHaftarah: Isaiah 66:1 - 66:24 | Shabbat Rosh Chodesh\\n\\n',
     ' https://www.hebcal.com/sedrot/korach?utm_source=js&utm_medium=icalendar',
-    'URL:https://www.hebcal.com/sedrot/korach?utm_source=js&utm_medium=icalenda',
-    ' r',
     'END:VEVENT',
   ];
   t.deepEqual(lines, expected);
@@ -80,8 +77,6 @@ test('ical-transp-opaque', (t) => {
     'UID:hebcal-19930405-6fa29675cbcb1ccb27f62fd980f5e78f',
     'DESCRIPTION:Passover\\, the Feast of Unleavened Bread\\n\\nhttps://www.hebcal',
     ' .com/holidays/pesach?utm_source=js&utm_medium=icalendar',
-    'URL:https://www.hebcal.com/holidays/pesach?utm_source=js&utm_medium=icalen',
-    ' dar',
     'END:VEVENT',
   ];
   t.deepEqual(lines, expected);
@@ -109,8 +104,6 @@ test('ical-transp-opaque', (t) => {
     'DESCRIPTION:Passover\\, the Feast of Unleavened Bread\\nTorah: Leviticus 22:',
     ' 26-23:44\\nHaftarah: II Kings 23:1 - 23:9\\; 23:21 - 23:25\\n\\nhttps://www.he',
     ' bcal.com/holidays/pesach?utm_source=js&utm_medium=icalendar',
-    'URL:https://www.hebcal.com/holidays/pesach?utm_source=js&utm_medium=icalen',
-    ' dar',
     'END:VEVENT',
   ];
   t.deepEqual(lines, expected);
@@ -180,8 +173,6 @@ test('ical-dafyomi', (t) => {
     'DESCRIPTION:https://www.sefaria.org/Nedarim.14a?lang=bi&utm_source=hebcal.',
     ' com&utm_medium=icalendar',
     'LOCATION:דף יומי',
-    'URL:https://www.sefaria.org/Nedarim.14a?lang=bi&utm_source=hebcal.com&utm_',
-    ' medium=icalendar',
     'END:VEVENT',
   ];
   t.deepEqual(lines, expected);

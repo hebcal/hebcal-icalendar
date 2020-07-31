@@ -94,48 +94,6 @@ export function eventToIcal(e, options) {
     }
   }
 
-  // create memo (holiday descr, Torah, etc)
-  const url = appendTrackingToUrl(e.url());
-  let memo;
-  if (mask & flags.PARSHA_HASHAVUA) {
-    const reading = leyning.getLeyningForParshaHaShavua(e, options.il);
-    memo = `Torah: ${reading.summary}`;
-    if (reading.reason) {
-      for (const num of ['7', '8', 'M']) {
-        if (reading.reason[num]) {
-          const aname = Number(num) ? `${num}th aliyah` : 'Maftir';
-          memo += `\\n${aname}: ` +
-                        leyning.formatAliyahWithBook(reading.fullkriyah[num]) +
-                        ' | ' +
-                        reading.reason[num];
-        }
-      }
-    }
-    if (reading.haftara) {
-      memo += '\\nHaftarah: ' + reading.haftara;
-      if (reading.reason && reading.reason.haftara) {
-        memo += ' | ' + reading.reason.haftara;
-      }
-    }
-    if (reading.sephardic) {
-      memo += '\\nHaftarah for Sephardim: ' + reading.sephardic;
-    }
-    memo += '\\n\\n' + url;
-  } else if (!timed) {
-    memo = attrs.memo || getHolidayDescription(e);
-    const holidayLeyning = leyning.getLeyningForHoliday(e, options.il);
-    if (holidayLeyning && holidayLeyning.summary) {
-      memo += `\\nTorah: ${holidayLeyning.summary}`;
-    }
-    if (holidayLeyning && holidayLeyning.haftara) {
-      memo += '\\nHaftarah: ' + holidayLeyning.haftara;
-    }
-    if (url) {
-      if (memo.length) memo += '\\n\\n';
-      memo += url;
-    }
-  }
-
   const date = formatYYYYMMDD(e.getDate().greg());
   let startDate = date;
   let dtargs; let endDate;
@@ -201,19 +159,18 @@ export function eventToIcal(e, options) {
     `UID:${uid}`,
   ];
 
+  // create memo (holiday descr, Torah, etc)
+  const memo = timed ? '' : createMemo(e, options.il);
   addOptional(arr, 'DESCRIPTION', memo);
   addOptional(arr, 'LOCATION', location);
   if (timed && options.location) {
     arr.push('GEO:' + options.location.latitude + ';' + options.location.longitude);
   }
-  if (url) {
-    arr.push(`URL:${url}`); // don't munge [;,]
-  }
 
   let alarm;
-  if (e.getFlags() & flags.OMER_COUNT) {
+  if (mask & flags.OMER_COUNT) {
     alarm = '3H'; // 9pm Omer alarm evening before
-  } else if (e.getFlags() & flags.USER_EVENT) {
+  } else if (mask & flags.USER_EVENT) {
     alarm = '12H'; // noon the day before
   } else if (timed && desc.startsWith('Candle lighting')) {
     alarm = '10M'; // ten minutes
@@ -234,6 +191,58 @@ export function eventToIcal(e, options) {
   return arr.map((line) => {
     return line.match(/(.{1,74})/g).join('\r\n ');
   }).join('\r\n');
+}
+
+/**
+ * @private
+ * @param {Event} e
+ * @param {boolean} il
+ * @return {string}
+ */
+function createMemo(e, il) {
+  const url = appendTrackingToUrl(e.url());
+  if (e.getFlags() & flags.PARSHA_HASHAVUA) {
+    const reading = leyning.getLeyningForParshaHaShavua(e, il);
+    let memo = `Torah: ${reading.summary}`;
+    if (reading.reason) {
+      for (const num of ['7', 'M']) {
+        if (reading.reason[num]) {
+          const aname = Number(num) ? `${num}th aliyah` : 'Maftir';
+          memo += `\\n${aname}: ` +
+            leyning.formatAliyahWithBook(reading.fullkriyah[num]) +
+            ' | ' +
+            reading.reason[num];
+        }
+      }
+    }
+    if (reading.haftara) {
+      memo += '\\nHaftarah: ' + reading.haftara;
+      if (reading.reason && reading.reason.haftara) {
+        memo += ' | ' + reading.reason.haftara;
+      }
+    }
+    if (reading.sephardic) {
+      memo += '\\nHaftarah for Sephardim: ' + reading.sephardic;
+    }
+    memo += '\\n\\n' + url;
+    return memo;
+  } else {
+    let memo = e.getAttrs().memo || getHolidayDescription(e);
+    const reading = leyning.getLeyningForHoliday(e, il);
+    if (reading && reading.summary) {
+      memo += `\\nTorah: ${reading.summary}`;
+    }
+    if (reading && reading.haftara) {
+      memo += '\\nHaftarah: ' + reading.haftara;
+    }
+    if (url) {
+      if (memo.length) {
+        memo += '\\n\\n';
+      }
+      memo += url;
+    }
+    return memo;
+  }
 }
 
 /**
