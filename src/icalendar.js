@@ -80,6 +80,7 @@ export function eventToIcal(e, options) {
   const desc = e.getDesc(); // original untranslated
   const mask = e.getFlags();
   const timed = Boolean(e.eventTime);
+  const candles = (desc === 'Havdalah' || desc === 'Candle lighting');
   let location;
   if (timed && options.location.name) {
     const comma = options.location.name.indexOf(',');
@@ -108,9 +109,11 @@ export function eventToIcal(e, options) {
     endDate = startDate;
     dtargs = `;TZID=${options.location.tzid}`;
     // replace "Candle lighting: 15:34" with shorter title
-    const colon = subj.indexOf(': ');
-    if (colon != -1) {
-      subj = subj.substring(0, colon);
+    if (candles) {
+      const colon = subj.indexOf(': ');
+      if (colon != -1) {
+        subj = subj.substring(0, colon);
+      }
     }
   } else {
     endDate = formatYYYYMMDD(e.getDate().next().greg());
@@ -159,7 +162,7 @@ export function eventToIcal(e, options) {
   ];
 
   // create memo (holiday descr, Torah, etc)
-  const memo = (desc === 'Havdalah' || desc === 'Candle lighting') ? '' : createMemo(e, options.il);
+  const memo = candles ? '' : createMemo(e, options.il);
   addOptional(arr, 'DESCRIPTION', memo);
   addOptional(arr, 'LOCATION', location);
   if (timed && options.location) {
