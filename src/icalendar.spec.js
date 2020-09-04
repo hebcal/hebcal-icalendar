@@ -61,7 +61,7 @@ test('ical-transp-opaque', (t) => {
   };
   const events = HebrewCalendar.calendar(options);
   const memo = 'Passover, the Feast of Unleavened Bread';
-  events[0].getAttrs().memo = memo;
+  events[0].memo = memo;
   let lines = icalendar.eventToIcal(events[0], options).split('\r\n');
   lines[1] = 'DTSTAMP:X';
   let expected = [
@@ -85,7 +85,7 @@ test('ical-transp-opaque', (t) => {
   t.is(lines[4], 'SUMMARY:Pesach I');
   t.is(lines[7], 'TRANSP:OPAQUE');
 
-  events[2].getAttrs().memo = memo;
+  events[2].memo = memo;
   lines = icalendar.eventToIcal(events[2], options).split('\r\n');
   t.is(lines[4], 'SUMMARY:Pesach II');
   t.is(lines[7], 'TRANSP:OPAQUE');
@@ -131,10 +131,10 @@ test('ical-candles', (t) => {
   const dtstart = lines[5];
   t.is(dtstart.startsWith('DTSTART'), true);
   t.is(dtstart.indexOf('TZID='), 8);
-  t.is(dtstart.substring(dtstart.indexOf(':') + 1), '19930305T172900');
+  t.is(dtstart.substring(dtstart.indexOf(':') + 1), '19930305T172700');
   const dtend = lines[6];
   t.is(dtend.startsWith('DTEND'), true);
-  t.is(dtend.substring(dtend.indexOf(':') + 1), '19930305T172900');
+  t.is(dtend.substring(dtend.indexOf(':') + 1), '19930305T172700');
   t.is(lines[15], 'TRIGGER;RELATED=START:-PT10M');
   t.is(lines[10], 'LOCATION:Chicago');
 
@@ -224,4 +224,36 @@ test('appendHebrewToSubject', (t) => {
     'SUMMARY:Havdalah / הַבדָלָה',
   ];
   t.deepEqual(summary, expected);
+});
+
+test('chanukah-candles', (t) => {
+  const options = {
+    start: new Date(2020, 11, 10),
+    end: new Date(2020, 11, 10),
+    location: Location.lookup('Boston'),
+    candlelighting: true,
+  };
+  const events = HebrewCalendar.calendar(options);
+  const ical = icalendar.eventToIcal(events[0], options);
+  const lines = ical.split('\r\n');
+  lines[1] = 'DTSTAMP:X';
+  const expected = [
+    'BEGIN:VEVENT',
+    'DTSTAMP:X',
+    'CATEGORIES:Holiday',
+    'CLASS:PUBLIC',
+    'SUMMARY:Chanukah',
+    'DTSTART;TZID=America/New_York:20201210T165800',
+    'DTEND;TZID=America/New_York:20201210T165800',
+    'TRANSP:TRANSPARENT',
+    'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
+    'UID:hebcal-20201210-9dc346c05e0a2c643e5e6b764a0f3b90-boston',
+    'DESCRIPTION:Hanukkah\\, the Jewish festival of rededication. Also known as ',
+    ' the Festival of Lights\\n\\nhttps://www.hebcal.com/holidays/chanukah?utm_sou',
+    ' rce=js&utm_medium=icalendar',
+    'LOCATION:Boston',
+    'GEO:42.35843;-71.05977',
+    'END:VEVENT',
+  ];
+  t.deepEqual(lines, expected);
 });

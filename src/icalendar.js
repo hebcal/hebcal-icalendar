@@ -78,9 +78,8 @@ export function eventToIcal(e, options) {
   const dtstamp = options.dtstamp || makeDtstamp(new Date());
   let subj = e.render();
   const desc = e.getDesc(); // original untranslated
-  const attrs = e.getAttrs();
   const mask = e.getFlags();
-  const timed = Boolean(attrs.eventTime);
+  const timed = Boolean(e.eventTime);
   let location;
   if (timed && options.location.name) {
     const comma = options.location.name.indexOf(',');
@@ -99,7 +98,7 @@ export function eventToIcal(e, options) {
   let dtargs; let endDate;
   let transp = 'TRANSPARENT'; let busyStatus = 'FREE';
   if (timed) {
-    let [hour, minute] = attrs.eventTimeStr.split(':');
+    let [hour, minute] = e.eventTimeStr.split(':');
     hour = +hour;
     minute = +minute;
     if (hour < 12) {
@@ -160,7 +159,7 @@ export function eventToIcal(e, options) {
   ];
 
   // create memo (holiday descr, Torah, etc)
-  const memo = timed ? '' : createMemo(e, options.il);
+  const memo = (desc === 'Havdalah' || desc === 'Candle lighting') ? '' : createMemo(e, options.il);
   addOptional(arr, 'DESCRIPTION', memo);
   addOptional(arr, 'LOCATION', location);
   if (timed && options.location) {
@@ -227,7 +226,7 @@ function createMemo(e, il) {
     memo += '\\n\\n' + url;
     return memo;
   } else {
-    let memo = e.getAttrs().memo || getHolidayDescription(e);
+    let memo = e.memo || getHolidayDescription(e);
     const reading = leyning.getLeyningForHoliday(e, il);
     if (reading && reading.summary) {
       memo += `\\nTorah: ${reading.summary}`;

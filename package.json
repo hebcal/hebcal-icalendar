@@ -1,6 +1,6 @@
 {
   "name": "@hebcal/icalendar",
-  "version": "2.1.4",
+  "version": "2.2.0",
   "author": "Michael J. Radwin (https://github.com/mjradwin)",
   "keywords": [
     "ical",
@@ -23,10 +23,10 @@
     "url": "https://github.com/hebcal/hebcal-icalendar/issues"
   },
   "dependencies": {
-    "@hebcal/core": "^2.2.4",
-    "@hebcal/leyning": "^2.2.0",
-    "@hebcal/rest-api": "^2.3.3",
-    "md5": "^2.2.1"
+    "@hebcal/core": "^2.4.0",
+    "@hebcal/leyning": "^2.3.0",
+    "@hebcal/rest-api": "^2.4.0",
+    "md5": "^2.3.0"
   },
   "scripts": {
     "build": "rollup -c",
@@ -56,18 +56,18 @@
   },
   "devDependencies": {
     "@ava/babel": "^1.0.1",
-    "@babel/core": "^7.11.0",
-    "@babel/polyfill": "^7.10.4",
-    "@babel/preset-env": "^7.11.0",
-    "@babel/register": "^7.10.5",
-    "@rollup/plugin-babel": "^5.1.0",
-    "@rollup/plugin-commonjs": "^14.0.0",
-    "@rollup/plugin-node-resolve": "^8.4.0",
-    "ava": "^3.11.0",
-    "eslint": "^7.5.0",
+    "@babel/core": "^7.11.6",
+    "@babel/polyfill": "^7.11.5",
+    "@babel/preset-env": "^7.11.5",
+    "@babel/register": "^7.11.5",
+    "@rollup/plugin-babel": "^5.2.0",
+    "@rollup/plugin-commonjs": "^15.0.0",
+    "@rollup/plugin-node-resolve": "^9.0.0",
+    "ava": "^3.12.1",
+    "eslint": "^7.8.1",
     "eslint-config-google": "^0.14.0",
     "jsdoc": "^3.6.5",
     "jsdoc-to-markdown": "^6.0.1",
-    "rollup": "^2.23.0"
+    "rollup": "^2.26.9"
   }
 }
