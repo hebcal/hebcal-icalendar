@@ -55,13 +55,15 @@ function addOptional(arr, key, val) {
 /**
  * @private
  * @param {string} url
+ * @param {boolean} il
  * @return {string}
  */
-function appendTrackingToUrl(url) {
+function appendTrackingToUrl(url, il) {
   if (!url) {
     return url;
   } else if (url.startsWith('https://www.hebcal.com')) {
-    return url + '?utm_source=js&utm_medium=icalendar';
+    const suffix = il ? 'i=on&' : '';
+    return `${url}?${suffix}utm_source=js&utm_medium=icalendar`;
   } else {
     const sep = url.indexOf('?') == -1 ? '?' : '&';
     return url + sep + 'utm_source=hebcal.com&utm_medium=icalendar';
@@ -202,7 +204,7 @@ export function eventToIcal(e, options) {
  * @return {string}
  */
 function createMemo(e, il) {
-  const url = appendTrackingToUrl(e.url());
+  const url = appendTrackingToUrl(e.url(), il);
   if (e.getFlags() & flags.PARSHA_HASHAVUA) {
     const reading = leyning.getLeyningForParshaHaShavua(e, il);
     let memo = `Torah: ${reading.summary}`;

@@ -21,8 +21,8 @@ test('ical-sedra', (t) => {
     'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
     'UID:hebcal-19930403-58f80aa7d21720fc609c3755ac43fad0',
     'DESCRIPTION:Torah: Leviticus 6:1-8:36\\nHaftarah: Malachi 3:4 - 3:24 | Shab',
-    ' bat HaGadol\\n\\nhttps://www.hebcal.com/sedrot/tzav?utm_source=js&utm_medium',
-    ' =icalendar',
+    ' bat HaGadol\\n\\nhttps://www.hebcal.com/sedrot/tzav-19930403?utm_source=js&u',
+    ' tm_medium=icalendar',
     'END:VEVENT',
   ];
   t.deepEqual(lines, expected);
@@ -45,7 +45,8 @@ test('ical-sedra', (t) => {
     'UID:hebcal-19930619-9b2c5e5ae7df4d2407ce268cd816063a',
     'DESCRIPTION:Torah: Numbers 16:1-18:32\\nMaftir: Numbers 28:9 - 28:15 | Shab',
     ' bat Rosh Chodesh\\nHaftarah: Isaiah 66:1 - 66:24 | Shabbat Rosh Chodesh\\n\\n',
-    ' https://www.hebcal.com/sedrot/korach?utm_source=js&utm_medium=icalendar',
+    ' https://www.hebcal.com/sedrot/korach-19930619?utm_source=js&utm_medium=ica',
+    ' lendar',
     'END:VEVENT',
   ];
   t.deepEqual(lines, expected);
@@ -76,7 +77,7 @@ test('ical-transp-opaque', (t) => {
     'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
     'UID:hebcal-19930405-6fa29675cbcb1ccb27f62fd980f5e78f',
     'DESCRIPTION:Passover\\, the Feast of Unleavened Bread\\n\\nhttps://www.hebcal',
-    ' .com/holidays/pesach?utm_source=js&utm_medium=icalendar',
+    ' .com/holidays/pesach-1993?utm_source=js&utm_medium=icalendar',
     'END:VEVENT',
   ];
   t.deepEqual(lines, expected);
@@ -103,7 +104,7 @@ test('ical-transp-opaque', (t) => {
     'UID:hebcal-19930407-a12a5eb5a4d96cc7ee7b51960527dfa3',
     'DESCRIPTION:Passover\\, the Feast of Unleavened Bread\\nTorah: Leviticus 22:',
     ' 26-23:44\\nHaftarah: II Kings 23:1 - 23:9\\; 23:21 - 23:25\\n\\nhttps://www.he',
-    ' bcal.com/holidays/pesach?utm_source=js&utm_medium=icalendar',
+    ' bcal.com/holidays/pesach-1993?utm_source=js&utm_medium=icalendar',
     'END:VEVENT',
   ];
   t.deepEqual(lines, expected);
@@ -249,10 +250,39 @@ test('chanukah-candles', (t) => {
     'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
     'UID:hebcal-20201210-bdae7298ae4a99dede01a740670ebcf8-boston',
     'DESCRIPTION:Hanukkah\\, the Jewish festival of rededication. Also known as ',
-    ' the Festival of Lights\\n\\nhttps://www.hebcal.com/holidays/chanukah?utm_sou',
-    ' rce=js&utm_medium=icalendar',
+    ' the Festival of Lights\\n\\nhttps://www.hebcal.com/holidays/chanukah-2020?ut',
+    ' m_source=js&utm_medium=icalendar',
     'LOCATION:Boston',
     'GEO:42.35843;-71.05977',
+    'END:VEVENT',
+  ];
+  t.deepEqual(lines, expected);
+});
+
+test('ical-il-url', (t) => {
+  const options = {
+    start: new Date(2021, 8, 28),
+    end: new Date(2021, 8, 28),
+    il: true,
+  };
+  const events = HebrewCalendar.calendar(options);
+  const ical = icalendar.eventToIcal(events[0], options);
+  const lines = ical.split('\r\n');
+  lines[1] = 'DTSTAMP:X';
+  const expected = [
+    'BEGIN:VEVENT',
+    'DTSTAMP:X',
+    'CATEGORIES:Holiday',
+    'CLASS:PUBLIC',
+    'SUMMARY:Shmini Atzeret',
+    'DTSTART;VALUE=DATE:20210928',
+    'DTEND;VALUE=DATE:20210929',
+    'TRANSP:OPAQUE',
+    'X-MICROSOFT-CDO-BUSYSTATUS:OOF',
+    'UID:hebcal-20210928-6da05ddf411dec94bb214fbf867a32ab',
+    'DESCRIPTION:Eighth Day of Assembly\\nTorah: Deuteronomy 33:1-2:3\\nHaftarah:',
+    '  Joshua 1:1 - 1:18\\n\\nhttps://www.hebcal.com/holidays/shmini-atzeret-2021?',
+    ' i=on&utm_source=js&utm_medium=icalendar',
     'END:VEVENT',
   ];
   t.deepEqual(lines, expected);
