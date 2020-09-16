@@ -204,7 +204,7 @@ export function eventToIcal(e, options) {
  */
 function createMemo(e, il) {
   const url = appendTrackingToUrl(e.url(), il);
-  const torahMemo = makeTorahMemoText(e, il);
+  const torahMemo = makeTorahMemoText(e, il).replace(/\n/g, '\\n');
   if (e.getFlags() & flags.PARSHA_HASHAVUA) {
     return torahMemo + '\\n\\n' + url;
   } else {
