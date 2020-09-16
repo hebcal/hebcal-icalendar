@@ -1,8 +1,7 @@
 /* eslint-disable max-len */
 import {flags, Locale} from '@hebcal/core';
 import md5 from 'md5';
-import leyning from '@hebcal/leyning';
-import {pad2, getCalendarTitle, makeAnchor, getHolidayDescription} from '@hebcal/rest-api';
+import {pad2, getCalendarTitle, makeAnchor, getHolidayDescription, makeTorahMemoText} from '@hebcal/rest-api';
 import fs from 'fs';
 import {Readable} from 'stream';
 
@@ -205,39 +204,13 @@ export function eventToIcal(e, options) {
  */
 function createMemo(e, il) {
   const url = appendTrackingToUrl(e.url(), il);
+  const torahMemo = makeTorahMemoText(e, il);
   if (e.getFlags() & flags.PARSHA_HASHAVUA) {
-    const reading = leyning.getLeyningForParshaHaShavua(e, il);
-    let memo = `Torah: ${reading.summary}`;
-    if (reading.reason) {
-      for (const num of ['7', 'M']) {
-        if (reading.reason[num]) {
-          const aname = Number(num) ? `${num}th aliyah` : 'Maftir';
-          memo += `\\n${aname}: ` +
-            leyning.formatAliyahWithBook(reading.fullkriyah[num]) +
-            ' | ' +
-            reading.reason[num];
-        }
-      }
-    }
-    if (reading.haftara) {
-      memo += '\\nHaftarah: ' + reading.haftara;
-      if (reading.reason && reading.reason.haftara) {
-        memo += ' | ' + reading.reason.haftara;
-      }
-    }
-    if (reading.sephardic) {
-      memo += '\\nHaftarah for Sephardim: ' + reading.sephardic;
-    }
-    memo += '\\n\\n' + url;
-    return memo;
+    return torahMemo + '\\n\\n' + url;
   } else {
     let memo = e.memo || getHolidayDescription(e);
-    const reading = leyning.getLeyningForHoliday(e, il);
-    if (reading && reading.summary) {
-      memo += `\\nTorah: ${reading.summary}`;
-    }
-    if (reading && reading.haftara) {
-      memo += '\\nHaftarah: ' + reading.haftara;
+    if (torahMemo) {
+      memo += '\\n' + torahMemo;
     }
     if (url) {
       if (memo.length) {
