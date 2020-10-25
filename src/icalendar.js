@@ -265,6 +265,9 @@ export function eventsToIcalendarStream(readable, events, options) {
     readable.push(line);
     readable.push('\r\n');
   });
+  if (options.relcalid) {
+    readable.push(`X-WR-RELCALID:${options.relcalid}\r\n`);
+  }
   const location = options.location;
   if (location && location.tzid) {
     const tzid = location.tzid;

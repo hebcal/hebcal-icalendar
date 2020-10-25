@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import test from 'ava';
-import {HebrewCalendar, Location, HDate, Event, flags} from '@hebcal/core';
+import {HebrewCalendar, Location, HDate, Event, flags, HebrewDateEvent} from '@hebcal/core';
 import * as icalendar from './icalendar';
 
 test('ical-sedra', (t) => {
@@ -143,7 +143,7 @@ test('ical-candles', (t) => {
     'DESCRIPTION:REMINDER',
     'TRIGGER;RELATED=START:-PT10M',
     'END:VALARM',
-    'END:VEVENT'
+    'END:VEVENT',
   ];
   t.deepEqual(lines, expected);
 
@@ -318,6 +318,41 @@ test('userEvent', (t) => {
     'TRIGGER;RELATED=START:-PT12H',
     'END:VALARM',
     'END:VEVENT',
+  ];
+  t.deepEqual(lines, expected);
+});
+
+test('relcalid', async (t) => {
+  const event = new HebrewDateEvent(new HDate(new Date(2021, 1, 13)));
+  const relcalid = '01enedk40bytfd4enm1673bdqh';
+  const ical = await icalendar.eventsToIcalendar([event], {relcalid});
+  const lines = ical.split('\r\n');
+  lines[2] = 'PRODID:X';
+  lines[11] = 'DTSTAMP:X';
+  const expected = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:X',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'X-LOTUS-CHARSET:UTF-8',
+    'X-PUBLISHED-TTL:PT7D',
+    'X-WR-CALNAME:Hebcal Diaspora February 2021',
+    'X-WR-CALDESC:Jewish Holidays from www.hebcal.com',
+    `X-WR-RELCALID:${relcalid}`,
+    'BEGIN:VEVENT',
+    'DTSTAMP:X',
+    'CATEGORIES:Holiday',
+    'SUMMARY:1st of Adar\\, 5781',
+    'DTSTART;VALUE=DATE:20210213',
+    'DTEND;VALUE=DATE:20210214',
+    'TRANSP:TRANSPARENT',
+    'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
+    'UID:hebcal-20210213-544ebefff60374db469c47d31d033731',
+    'CLASS:PUBLIC',
+    'END:VEVENT',
+    'END:VCALENDAR',
+    '',
   ];
   t.deepEqual(lines, expected);
 });
