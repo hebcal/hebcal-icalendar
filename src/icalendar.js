@@ -158,13 +158,12 @@ export function eventToIcal(e, options) {
     }
   }
 
-  const category = mask & flags.USER_EVENT ? 'Personal' : 'Holiday';
-  const visibility = options.yahrzeit ? 'PRIVATE' : 'PUBLIC';
+  const isUserEvent = Boolean(mask & flags.USER_EVENT);
+  const category = isUserEvent ? 'Personal' : 'Holiday';
   const arr = [
     'BEGIN:VEVENT',
     `DTSTAMP:${dtstamp}`,
     `CATEGORIES:${category}`,
-    `CLASS:${visibility}`,
     `SUMMARY:${subj}`,
     `DTSTART${dtargs}:${startDate}`,
     `DTEND${dtargs}:${endDate}`,
@@ -172,6 +171,10 @@ export function eventToIcal(e, options) {
     `X-MICROSOFT-CDO-BUSYSTATUS:${busyStatus}`,
     `UID:${uid}`,
   ];
+
+  if (!isUserEvent) {
+    arr.push('CLASS:PUBLIC');
+  }
 
   // create memo (holiday descr, Torah, etc)
   const memo = candles ? '' : createMemo(e, options.il);
@@ -184,7 +187,7 @@ export function eventToIcal(e, options) {
   let alarm;
   if (mask & flags.OMER_COUNT) {
     alarm = '3H'; // 9pm Omer alarm evening before
-  } else if (mask & flags.USER_EVENT) {
+  } else if (isUserEvent) {
     alarm = '12H'; // noon the day before
   } else if (timed && desc.startsWith('Candle lighting')) {
     alarm = '10M'; // ten minutes
