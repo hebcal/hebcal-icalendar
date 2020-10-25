@@ -47,9 +47,18 @@ function makeDtstamp(dt) {
  */
 function addOptional(arr, key, val) {
   if (val) {
-    const str = val.replace(/,/g, '\\,').replace(/;/g, '\\;');
+    const str = icalEscapeStr(val);
     arr.push(key + ':' + str);
   }
+}
+
+/**
+ * @private
+ * @param {string} str
+ * @return {string}
+ */
+function icalEscapeStr(str) {
+  return str.replace(/,/g, '\\,').replace(/;/g, '\\;');
 }
 
 /**
@@ -235,7 +244,7 @@ export function eventsToIcalendarStream(readable, events, options) {
   if (!events.length) throw new RangeError('Events can not be empty');
   if (!options) throw new TypeError('Invalid options object');
   const uclang = Locale.getLocaleName().toUpperCase();
-  const title = options.title || getCalendarTitle(events, options);
+  const title = options.title ? icalEscapeStr(options.title) : getCalendarTitle(events, options);
   const caldesc = options.yahrzeit ?
     'Yahrzeits + Anniversaries from www.hebcal.com' :
     'Jewish Holidays from www.hebcal.com';
