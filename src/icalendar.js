@@ -4,6 +4,7 @@ import md5 from 'md5';
 import {pad2, getCalendarTitle, makeAnchor, getHolidayDescription, makeTorahMemoText} from '@hebcal/rest-api';
 import fs from 'fs';
 import {Readable} from 'stream';
+import {version} from '../package.json';
 
 const VTIMEZONE = {
   'US/Eastern': 'BEGIN:VTIMEZONE\r\nTZID:US/Eastern\r\nBEGIN:STANDARD\r\nDTSTART:19701101T020000\r\nRRULE:FREQ=YEARLY;BYMONTH=11;BYDAY=1SU\r\nTZOFFSETTO:-0500\r\nTZOFFSETFROM:-0400\r\nTZNAME:EST\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:19700308T020000\r\nRRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=2SU\r\nTZOFFSETTO:-0400\r\nTZOFFSETFROM:-0500\r\nTZNAME:EDT\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE',
@@ -149,11 +150,12 @@ export function eventToIcal(e, options) {
   }
 
   const category = mask & flags.USER_EVENT ? 'Personal' : 'Holiday';
+  const visibility = options.yahrzeit ? 'PRIVATE' : 'PUBLIC';
   const arr = [
     'BEGIN:VEVENT',
     `DTSTAMP:${dtstamp}`,
     `CATEGORIES:${category}`,
-    'CLASS:PUBLIC',
+    `CLASS:${visibility}`,
     `SUMMARY:${subj}`,
     `DTSTART${dtargs}:${startDate}`,
     `DTEND${dtargs}:${endDate}`,
@@ -233,14 +235,14 @@ export function eventsToIcalendarStream(readable, events, options) {
   if (!events.length) throw new RangeError('Events can not be empty');
   if (!options) throw new TypeError('Invalid options object');
   const uclang = Locale.getLocaleName().toUpperCase();
-  const title = getCalendarTitle(events, options);
+  const title = options.title || getCalendarTitle(events, options);
   const caldesc = options.yahrzeit ?
     'Yahrzeits + Anniversaries from www.hebcal.com' :
     'Jewish Holidays from www.hebcal.com';
   [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    `PRODID:-//hebcal.com/NONSGML Hebcal Calendar v7.1//${uclang}`,
+    `PRODID:-//hebcal.com/NONSGML Hebcal Calendar v1${version}//${uclang}`,
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     'X-LOTUS-CHARSET:UTF-8',
