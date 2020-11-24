@@ -356,3 +356,21 @@ test('relcalid', async (t) => {
   ];
   t.deepEqual(lines, expected);
 });
+
+test('fastStartEnd', (t) => {
+  const options = {
+    start: new Date(2021, 5, 27),
+    end: new Date(2021, 5, 27),
+    location: Location.lookup('Providence'),
+    candlelighting: true,
+  };
+  const events = HebrewCalendar.calendar(options);
+  const icals = events.map((ev) => icalendar.eventToIcal(ev, options));
+  const summary = icals.map((i) => i.split('\r\n').find((s) => s.startsWith('SUMMARY')));
+  const expected = [
+    'SUMMARY:Fast begins',
+    'SUMMARY:Tzom Tammuz',
+    'SUMMARY:Fast ends',
+  ];
+  t.deepEqual(summary, expected);
+});

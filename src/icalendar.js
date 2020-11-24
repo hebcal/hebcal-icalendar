@@ -1,7 +1,8 @@
 /* eslint-disable max-len */
 import {flags, Locale} from '@hebcal/core';
 import md5 from 'md5';
-import {pad2, getCalendarTitle, makeAnchor, getHolidayDescription, makeTorahMemoText} from '@hebcal/rest-api';
+import {pad2, getCalendarTitle, renderTitleWithoutTime, makeAnchor,
+  getHolidayDescription, makeTorahMemoText} from '@hebcal/rest-api';
 import fs from 'fs';
 import {Readable} from 'stream';
 import {version} from '../package.json';
@@ -87,10 +88,10 @@ function appendTrackingToUrl(url, il) {
  */
 export function eventToIcal(e, options) {
   const dtstamp = options.dtstamp || makeDtstamp(new Date());
-  let subj = e.render();
+  const timed = Boolean(e.eventTime);
+  let subj = timed ? renderTitleWithoutTime(e) : e.render();
   const desc = e.getDesc(); // original untranslated
   const mask = e.getFlags();
-  const timed = Boolean(e.eventTime);
   const candles = (desc === 'Havdalah' || desc === 'Candle lighting');
   let location;
   if (timed && options.location.name) {
@@ -119,13 +120,6 @@ export function eventToIcal(e, options) {
     startDate += 'T' + pad2(hour) + pad2(minute) + '00';
     endDate = startDate;
     dtargs = `;TZID=${options.location.tzid}`;
-    // replace "Candle lighting: 15:34" with shorter title
-    if (candles) {
-      const colon = subj.indexOf(': ');
-      if (colon != -1) {
-        subj = subj.substring(0, colon);
-      }
-    }
   } else {
     endDate = formatYYYYMMDD(e.getDate().next().greg());
     // for all-day untimed, use DTEND;VALUE=DATE intsead of DURATION:P1D.
