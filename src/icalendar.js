@@ -114,9 +114,6 @@ export function eventToIcal(e, options) {
     let [hour, minute] = e.eventTimeStr.split(':');
     hour = +hour;
     minute = +minute;
-    if (hour < 12) {
-      hour += 12;
-    }
     startDate += 'T' + pad2(hour) + pad2(minute) + '00';
     endDate = startDate;
     dtargs = `;TZID=${options.location.tzid}`;

@@ -373,4 +373,11 @@ test('fastStartEnd', (t) => {
     'SUMMARY:Fast ends',
   ];
   t.deepEqual(summary, expected);
+  const dtstart = icals.map((i) => i.split('\r\n').find((s) => s.startsWith('DTSTART')));
+  const expected2 = [
+    'DTSTART;TZID=America/New_York:20210627T031900',
+    'DTSTART;VALUE=DATE:20210627',
+    'DTSTART;TZID=America/New_York:20210627T210600',
+  ];
+  t.deepEqual(dtstart, expected2);
 });
