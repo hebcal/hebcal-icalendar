@@ -1,10 +1,10 @@
 /* eslint-disable max-len */
 import {flags, Locale} from '@hebcal/core';
-import md5 from 'md5';
+import fnv from 'fnv-plus';
 import {pad2, getCalendarTitle, renderTitleWithoutTime, makeAnchor,
   getHolidayDescription, makeTorahMemoText} from '@hebcal/rest-api';
 import fs from 'fs';
-import {Readable} from 'stream';
+import {Writable} from 'stream';
 import {version} from '../package.json';
 
 const VTIMEZONE = {
@@ -129,7 +129,7 @@ export function eventToIcal(e, options) {
     }
   }
 
-  const digest = md5(subj);
+  const digest = fnv.fast1a52hex(desc);
   let uid = `hebcal-${date}-${digest}`;
   if (timed && options.location) {
     if (options.location.geoid) {
@@ -196,8 +196,9 @@ export function eventToIcal(e, options) {
   arr.push('END:VEVENT');
 
   // fold lines to 75 characters
+  const char74re = /(.{1,74})/g;
   return arr.map((line) => {
-    return line.match(/(.{1,74})/g).join('\r\n ');
+    return line.length <= 74 ? line : line.match(char74re).join('\r\n ');
   }).join('\r\n');
 }
 
@@ -229,12 +230,11 @@ function createMemo(e, il) {
 
 /**
  * Generates an RFC 2445 iCalendar stream from an array of events
- * @param {stream.Readable} readable
+ * @param {NodeJS.WritableStream} stream
  * @param {Event[]} events
  * @param {HebcalOptions} options
- * @return {stream.Readable}
  */
-export function eventsToIcalendarStream(readable, events, options) {
+export function eventsToIcalendarStream(stream, events, options) {
   if (!events.length) throw new RangeError('Events can not be empty');
   if (!options) throw new TypeError('Invalid options object');
   const uclang = Locale.getLocaleName().toUpperCase();
@@ -253,27 +253,27 @@ export function eventsToIcalendarStream(readable, events, options) {
     `X-WR-CALNAME:${title}`,
     `X-WR-CALDESC:${caldesc}`,
   ].forEach((line) => {
-    readable.push(line);
-    readable.push('\r\n');
+    stream.write(line);
+    stream.write('\r\n');
   });
   if (options.relcalid) {
-    readable.push(`X-WR-RELCALID:${options.relcalid}\r\n`);
+    stream.write(`X-WR-RELCALID:${options.relcalid}\r\n`);
   }
   const location = options.location;
   if (location && location.tzid) {
     const tzid = location.tzid;
-    readable.push(`X-WR-TIMEZONE;VALUE=TEXT:${tzid}\r\n`);
+    stream.write(`X-WR-TIMEZONE;VALUE=TEXT:${tzid}\r\n`);
     if (VTIMEZONE[tzid]) {
-      readable.push(VTIMEZONE[tzid]);
-      readable.push('\r\n');
+      stream.write(VTIMEZONE[tzid]);
+      stream.write('\r\n');
     } else {
       try {
         const vtimezoneIcs = `./zoneinfo/${tzid}.ics`;
         const lines = fs.readFileSync(vtimezoneIcs, 'utf-8').split('\r\n');
         // ignore first 3 and last 1 lines
         const str = lines.slice(3, lines.length - 2).join('\r\n');
-        readable.push(str);
-        readable.push('\r\n');
+        stream.write(str);
+        stream.write('\r\n');
         VTIMEZONE[tzid] = str; // cache for later
       } catch (error) {
         // ignore failure when no timezone definition to read
@@ -283,25 +283,11 @@ export function eventsToIcalendarStream(readable, events, options) {
 
   options.dtstamp = makeDtstamp(new Date());
   events.forEach((e) => {
-    readable.push(eventToIcal(e, options));
-    readable.push('\r\n');
+    stream.write(eventToIcal(e, options));
+    stream.write('\r\n');
   });
-  readable.push('END:VCALENDAR\r\n');
-  readable.push(null); // indicates end of the stream
-  return readable;
-}
-
-/**
- * @private
- * @param {stream.Readable} readable
- * @return {string}
- */
-async function readableToString(readable) {
-  let result = '';
-  for await (const chunk of readable) {
-    result += chunk;
-  }
-  return result;
+  stream.write('END:VCALENDAR\r\n');
+  stream.end();
 }
 
 /**
@@ -311,10 +297,12 @@ async function readableToString(readable) {
  * @return {string} multi-line result, delimited by \r\n
  */
 export async function eventsToIcalendar(events, options) {
-  const readStream = new Readable();
-  eventsToIcalendarStream(readStream, events, options);
-  readStream.on('error', (err) => {
-    throw err;
-  });
-  return readableToString(readStream);
+  const writable = new Writable();
+  const chunks = [];
+  writable._write = function(chunk, encoding, next) {
+    chunks.push(chunk);
+    next();
+  };
+  eventsToIcalendarStream(writable, events, options);
+  return Buffer.concat(chunks).toString('utf8');
 }

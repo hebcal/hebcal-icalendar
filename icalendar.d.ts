@@ -1,6 +1,5 @@
 /// <reference types="node"/>
 import {HebrewCalendar, Event} from '@hebcal/core';
-import stream from 'stream';
 declare module '@hebcal/icalendar' {
 /**
  * @returns multi-line result, delimited by \r\n
@@ -14,5 +13,5 @@ export function eventsToIcalendar(events: Event[], options: HebrewCalendar.Optio
 /**
  * Generates an RFC 2445 iCalendar stream from an array of events
  */
-export function eventsToIcalendarStream(readable: stream.Readable, events: Event[], options: HebrewCalendar.Options): string;
+export function eventsToIcalendarStream(stream: NodeJS.WritableStream, events: Event[], options: HebrewCalendar.Options): string;
 }

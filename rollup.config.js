@@ -19,6 +19,6 @@ export default [
       resolve(),
       commonjs(),
     ],
-    external: ['@hebcal/core', '@hebcal/leyning', 'md5', 'fs', 'stream'],
+    external: ['@hebcal/core', '@hebcal/leyning', 'fs', 'stream'],
   },
 ];
