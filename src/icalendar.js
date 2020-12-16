@@ -71,12 +71,12 @@ function appendTrackingToUrl(url, il) {
 }
 
 /**
- * Transforms a single Event into a VEVENT string
+ * @private
  * @param {Event} e
- * @param {HebcalOptions} options
- * @return {string} multi-line result, delimited by \r\n
+ * @param {HebrewCalendar.Options} options
+ * @return {string[]}
  */
-export function eventToIcal(e, options) {
+function eventToIcal0(e, options) {
   const dtstamp = options.dtstamp || makeDtstamp(new Date());
   const timed = Boolean(e.eventTime);
   let subj = timed ? renderTitleWithoutTime(e) : e.render();
@@ -184,12 +184,34 @@ export function eventToIcal(e, options) {
   }
 
   arr.push('END:VEVENT');
+  return arr;
+}
 
+const char74re = /(.{1,74})/g;
+
+/**
+ * @private
+ * @param {Event} ev
+ * @param {HebrewCalendar.Options} options
+ * @return {string[]}
+ */
+function eventToIcal1(ev, options) {
+  const lines = eventToIcal0(ev, options);
   // fold lines to 75 characters
-  const char74re = /(.{1,74})/g;
-  return arr.map((line) => {
+  return lines.map((line) => {
     return line.length <= 74 ? line : line.match(char74re).join('\r\n ');
-  }).join('\r\n');
+  });
+}
+
+/**
+ * Transforms a single Event into a VEVENT string
+ * @param {Event} ev
+ * @param {HebrewCalendar.Options} options
+ * @return {string} multi-line result, delimited by \r\n
+ */
+export function eventToIcal(ev, options) {
+  const lines = eventToIcal1(ev, options);
+  return lines.join('\r\n');
 }
 
 /**
@@ -222,7 +244,7 @@ function createMemo(e, il) {
  * Generates an RFC 2445 iCalendar stream from an array of events
  * @param {NodeJS.WritableStream} stream
  * @param {Event[]} events
- * @param {HebcalOptions} options
+ * @param {HebrewCalendar.Options} options
  */
 export function eventsToIcalendarStream(stream, events, options) {
   if (!events.length) throw new RangeError('Events can not be empty');
@@ -272,9 +294,12 @@ export function eventsToIcalendarStream(stream, events, options) {
   }
 
   options.dtstamp = makeDtstamp(new Date());
-  events.forEach((e) => {
-    stream.write(eventToIcal(e, options));
-    stream.write('\r\n');
+  events.forEach((ev) => {
+    const lines = eventToIcal1(ev, options);
+    lines.forEach((line) => {
+      stream.write(line);
+      stream.write('\r\n');
+    });
   });
   stream.write('END:VCALENDAR\r\n');
   stream.end();
@@ -283,7 +308,7 @@ export function eventsToIcalendarStream(stream, events, options) {
 /**
  * Renders an array of events as a full RFC 2445 iCalendar string
  * @param {Event[]} events
- * @param {HebcalOptions} options
+ * @param {HebrewCalendar.Options} options
  * @return {string} multi-line result, delimited by \r\n
  */
 export async function eventsToIcalendar(events, options) {
