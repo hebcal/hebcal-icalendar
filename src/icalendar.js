@@ -3,7 +3,6 @@ import {murmur3} from 'murmurhash-js';
 import {pad2, getCalendarTitle, renderTitleWithoutTime, makeAnchor,
   getHolidayDescription, makeTorahMemoText} from '@hebcal/rest-api';
 import {promises as fs} from 'fs';
-import {Readable} from 'stream';
 import {version} from '../package.json';
 
 const VTIMEZONE = {};
@@ -258,14 +257,15 @@ function createMemo(e, il) {
 }
 
 /**
- * Generates an RFC 2445 iCalendar stream from an array of events
- * @param {NodeJS.ReadableStream} stream
+ * Generates an RFC 2445 iCalendar string from an array of events
  * @param {Event[]} events
  * @param {HebrewCalendar.Options} options
+ * @return {string}
  */
-export async function eventsToIcalendarStream(stream, events, options) {
+export async function eventsToIcalendar(events, options) {
   if (!events.length) throw new RangeError('Events can not be empty');
   if (!options) throw new TypeError('Invalid options object');
+  const stream = [];
   const uclang = Locale.getLocaleName().toUpperCase();
   const title = options.title ? icalEscapeStr(options.title) : getCalendarTitle(events, options);
   const caldesc = options.yahrzeit ?
@@ -297,9 +297,10 @@ export async function eventsToIcalendarStream(stream, events, options) {
       stream.push(VTIMEZONE[tzid]);
       stream.push('\r\n');
     } else {
+      const vtimezoneFilename = `./zoneinfo/${tzid}.ics`;
       try {
-        const vtimezoneIcs = `./zoneinfo/${tzid}.ics`;
-        const lines = await fs.readFile(vtimezoneIcs, 'utf-8').split('\r\n');
+        const vtimezoneIcs = await fs.readFile(vtimezoneFilename, 'utf-8');
+        const lines = vtimezoneIcs.split('\r\n');
         // ignore first 3 and last 1 lines
         const str = lines.slice(3, lines.length - 2).join('\r\n');
         stream.push(str);
@@ -321,33 +322,5 @@ export async function eventsToIcalendarStream(stream, events, options) {
     }
   }
   stream.push('END:VCALENDAR\r\n');
-  stream.push(null);
-}
-
-/**
- * @private
- * @param {stream.Readable} readable
- * @return {string}
- */
-async function readableToString(readable) {
-  let result = '';
-  for await (const chunk of readable) {
-    result += chunk;
-  }
-  return result;
-}
-
-/**
- * Renders an array of events as a full RFC 2445 iCalendar string
- * @param {Event[]} events
- * @param {HebrewCalendar.Options} options
- * @return {string} multi-line result, delimited by \r\n
- */
-export async function eventsToIcalendar(events, options) {
-  const readStream = new Readable();
-  await eventsToIcalendarStream(readStream, events, options);
-  readStream.on('error', (err) => {
-    throw err;
-  });
-  return readableToString(readStream);
+  return stream.join('');
 }

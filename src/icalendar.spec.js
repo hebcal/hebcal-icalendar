@@ -212,7 +212,51 @@ test('eventsToIcalendar', async (t) => {
   };
   const events = HebrewCalendar.calendar(options);
   const ical = await eventsToIcalendar(events, options);
-  t.is(ical.startsWith('BEGIN:VCALENDAR\r\nVERSION:2.0\r\n'), true);
+  const lines = ical.split('\r\n').slice(0, 12);
+  lines[2] = 'PRODID:X';
+  const expected = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:X',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'X-LOTUS-CHARSET:UTF-8',
+    'X-PUBLISHED-TTL:PT7D',
+    'X-WR-CALNAME:Hebcal Hawaii February 2020',
+    'X-WR-CALDESC:Jewish Holidays from www.hebcal.com',
+    'X-WR-TIMEZONE;VALUE=TEXT:Pacific/Honolulu',
+    'BEGIN:VTIMEZONE',
+    'TZID:Pacific/Honolulu',
+  ];
+  t.deepEqual(lines, expected);
+});
+
+test('eventsToIcalendar-no-vtimezone', async (t) => {
+  const options = {
+    year: 2020,
+    month: 2,
+    sedrot: true,
+    candlelighting: true,
+    location: Location.lookup('Boston'),
+  };
+  const events = HebrewCalendar.calendar(options);
+  const ical = await eventsToIcalendar(events, options);
+  const lines = ical.split('\r\n').slice(0, 11);
+  lines[2] = 'PRODID:X';
+  const expected = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:X',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'X-LOTUS-CHARSET:UTF-8',
+    'X-PUBLISHED-TTL:PT7D',
+    'X-WR-CALNAME:Hebcal Boston February 2020',
+    'X-WR-CALDESC:Jewish Holidays from www.hebcal.com',
+    'X-WR-TIMEZONE;VALUE=TEXT:America/New_York',
+    'BEGIN:VEVENT',
+  ];
+  t.deepEqual(lines, expected);
 });
 
 test('appendHebrewToSubject', (t) => {
