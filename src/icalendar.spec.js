@@ -1,13 +1,13 @@
 /* eslint-disable max-len */
 import test from 'ava';
 import {HebrewCalendar, Location, HDate, Event, flags, HebrewDateEvent} from '@hebcal/core';
-import * as icalendar from './icalendar';
+import {IcalEvent, eventsToIcalendar} from './icalendar';
 
 test('ical-sedra', (t) => {
   const options = {year: 1993, month: 4, sedrot: true, noHolidays: true};
   const events = HebrewCalendar.calendar(options);
-  const tzav = icalendar.eventToIcal(events[0], options);
-  let lines = tzav.split('\r\n');
+  const tzav = new IcalEvent(events[0], options);
+  let lines = tzav.toString().split('\r\n');
   lines[1] = 'DTSTAMP:X';
   lines[8] = 'UID:X';
   let expected = [
@@ -30,8 +30,8 @@ test('ical-sedra', (t) => {
 
   const options2 = {year: 1993, month: 6, sedrot: true, noHolidays: true};
   const events2 = HebrewCalendar.calendar(options2);
-  const korach = icalendar.eventToIcal(events2[2], options);
-  lines = korach.split('\r\n');
+  const korach = new IcalEvent(events2[2], options);
+  lines = korach.toString().split('\r\n');
   lines[1] = 'DTSTAMP:X';
   lines[8] = 'UID:X';
   expected = [
@@ -65,7 +65,7 @@ test('ical-transp-opaque', (t) => {
   const events = HebrewCalendar.calendar(options);
   const memo = 'Passover, the Feast of Unleavened Bread';
   events[0].memo = memo;
-  let lines = icalendar.eventToIcal(events[0], options).split('\r\n');
+  let lines = new IcalEvent(events[0], options).toString().split('\r\n');
   lines[1] = 'DTSTAMP:X';
   lines[8] = 'UID:X';
   let expected = [
@@ -85,12 +85,12 @@ test('ical-transp-opaque', (t) => {
   ];
   t.deepEqual(lines, expected);
 
-  lines = icalendar.eventToIcal(events[1], options).split('\r\n');
+  lines = new IcalEvent(events[1], options).toString().split('\r\n');
   t.is(lines[3], 'SUMMARY:Pesach I');
   t.is(lines[6], 'TRANSP:OPAQUE');
 
   events[2].memo = memo;
-  lines = icalendar.eventToIcal(events[2], options).split('\r\n');
+  lines = new IcalEvent(events[2], options).toString().split('\r\n');
   lines[1] = 'DTSTAMP:X';
   lines[8] = 'UID:X';
   expected = [
@@ -112,7 +112,7 @@ test('ical-transp-opaque', (t) => {
   ];
   t.deepEqual(lines, expected);
 
-  lines = icalendar.eventToIcal(events[3], options).split('\r\n');
+  lines = new IcalEvent(events[3], options).toString().split('\r\n');
   t.is(lines[3], 'SUMMARY:Pesach III (CH\'\'M)');
   t.is(lines[6], 'TRANSP:TRANSPARENT');
 });
@@ -126,8 +126,8 @@ test('ical-candles', (t) => {
     noHolidays: true,
   };
   const events = HebrewCalendar.calendar(options);
-  const ical = icalendar.eventToIcal(events[0], options);
-  let lines = ical.split('\r\n');
+  const ical = new IcalEvent(events[0], options);
+  let lines = ical.toString().split('\r\n');
   lines[1] = 'DTSTAMP:X';
   lines[8] = 'UID:X';
   const expected = [
@@ -152,8 +152,8 @@ test('ical-candles', (t) => {
   ];
   t.deepEqual(lines, expected);
 
-  const havdalah = icalendar.eventToIcal(events[1], options);
-  lines = havdalah.split('\r\n');
+  const havdalah = new IcalEvent(events[1], options);
+  lines = havdalah.toString().split('\r\n');
   t.is(lines.length, 13);
   t.is(lines[0], 'BEGIN:VEVENT');
   t.is(lines[3], 'SUMMARY:Havdalah');
@@ -170,8 +170,8 @@ test('ical-dafyomi', (t) => {
   };
   const ev = HebrewCalendar.calendar(options)[0];
   t.is(ev.render(), 'דף יומי: נדרים 14');
-  const ical = icalendar.eventToIcal(ev, options);
-  const lines = ical.split('\r\n');
+  const ical = new IcalEvent(ev, options);
+  const lines = ical.toString().split('\r\n');
   lines[1] = 'DTSTAMP:X';
   lines[8] = 'UID:X';
   const expected = [
@@ -196,8 +196,8 @@ test('ical-dafyomi', (t) => {
 test('ical-omer', (t) => {
   const options = {year: 1993, noHolidays: true, omer: true};
   const ev = HebrewCalendar.calendar(options)[0];
-  const ical = icalendar.eventToIcal(ev, options);
-  const lines = ical.split('\r\n');
+  const ical = new IcalEvent(ev, options);
+  const lines = ical.toString().split('\r\n');
   t.is(lines.length, 16);
   t.is(lines[3], 'SUMMARY:1st day of the Omer');
 });
@@ -211,7 +211,7 @@ test('eventsToIcalendar', async (t) => {
     location: Location.lookup('Hawaii'),
   };
   const events = HebrewCalendar.calendar(options);
-  const ical = await icalendar.eventsToIcalendar(events, options);
+  const ical = await eventsToIcalendar(events, options);
   t.is(ical.startsWith('BEGIN:VCALENDAR\r\nVERSION:2.0\r\n'), true);
 });
 
@@ -225,8 +225,8 @@ test('appendHebrewToSubject', (t) => {
     appendHebrewToSubject: true,
   };
   const events = HebrewCalendar.calendar(options);
-  const icals = events.map((ev) => icalendar.eventToIcal(ev, options));
-  const summary = icals.map((i) => i.split('\r\n').find((s) => s.startsWith('SUMMARY')));
+  const icals = events.map((ev) => new IcalEvent(ev, options));
+  const summary = icals.map((i) => i.toString().split('\r\n').find((s) => s.startsWith('SUMMARY')));
   const expected = [
     'SUMMARY:Parashat Bamidbar / פרשת בְּמִדְבַּר',
     'SUMMARY:Havdalah / הַבדָלָה',
@@ -249,8 +249,8 @@ test('chanukah-candles', (t) => {
     candlelighting: true,
   };
   const events = HebrewCalendar.calendar(options);
-  const ical = icalendar.eventToIcal(events[0], options);
-  const lines = ical.split('\r\n');
+  const ical = new IcalEvent(events[0], options);
+  const lines = ical.toString().split('\r\n');
   lines[1] = 'DTSTAMP:X';
   lines[8] = 'UID:X';
   const expected = [
@@ -281,8 +281,8 @@ test('ical-il-url', (t) => {
     il: true,
   };
   const events = HebrewCalendar.calendar(options);
-  const ical = icalendar.eventToIcal(events[0], options);
-  const lines = ical.split('\r\n');
+  const ical = new IcalEvent(events[0], options);
+  const lines = ical.toString().split('\r\n');
   lines[1] = 'DTSTAMP:X';
   lines[8] = 'UID:X';
   const expected = [
@@ -307,8 +307,8 @@ test('ical-il-url', (t) => {
 test('userEvent', (t) => {
   const hd = new HDate(new Date(2021, 1, 13));
   const userEvent = new Event(hd, 'User Event', flags.USER_EVENT);
-  const ical = icalendar.eventToIcal(userEvent, {yahrzeit: true});
-  const lines = ical.split('\r\n');
+  const ical = new IcalEvent(userEvent, {yahrzeit: true});
+  const lines = ical.toString().split('\r\n');
   lines[1] = 'DTSTAMP:X';
   lines[8] = 'UID:X';
   const expected = [
@@ -334,7 +334,7 @@ test('userEvent', (t) => {
 test('relcalid', async (t) => {
   const event = new HebrewDateEvent(new HDate(new Date(2021, 1, 13)));
   const relcalid = '01enedk40bytfd4enm1673bdqh';
-  const ical = await icalendar.eventsToIcalendar([event], {relcalid});
+  const ical = await eventsToIcalendar([event], {relcalid});
   const lines = ical.split('\r\n');
   lines[2] = 'PRODID:X';
   lines[11] = 'DTSTAMP:X';
@@ -375,15 +375,15 @@ test('fastStartEnd', (t) => {
     candlelighting: true,
   };
   const events = HebrewCalendar.calendar(options);
-  const icals = events.map((ev) => icalendar.eventToIcal(ev, options));
-  const summary = icals.map((i) => i.split('\r\n').find((s) => s.startsWith('SUMMARY')));
+  const icals = events.map((ev) => new IcalEvent(ev, options));
+  const summary = icals.map((i) => i.toString().split('\r\n').find((s) => s.startsWith('SUMMARY')));
   const expected = [
     'SUMMARY:Fast begins',
     'SUMMARY:Tzom Tammuz',
     'SUMMARY:Fast ends',
   ];
   t.deepEqual(summary, expected);
-  const dtstart = icals.map((i) => i.split('\r\n').find((s) => s.startsWith('DTSTART')));
+  const dtstart = icals.map((i) => i.toString().split('\r\n').find((s) => s.startsWith('DTSTART')));
   const expected2 = [
     'DTSTART;TZID=America/New_York:20210627T031900',
     'DTSTART;VALUE=DATE:20210627',
