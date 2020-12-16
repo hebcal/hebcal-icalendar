@@ -2,7 +2,7 @@ import {flags, Locale} from '@hebcal/core';
 import {murmur3} from 'murmurhash-js';
 import {pad2, getCalendarTitle, renderTitleWithoutTime, makeAnchor,
   getHolidayDescription, makeTorahMemoText} from '@hebcal/rest-api';
-import fs from 'fs';
+import {promises as fs} from 'fs';
 import {Readable} from 'stream';
 import {version} from '../package.json';
 
@@ -199,29 +199,15 @@ export class IcalEvent {
    * @return {string}
    */
   toString() {
-    return this.getFoldedLines().join('\r\n');
-  }
-
-  /**
-   * @return {NodeJS.ReadableStream}
-   */
-  toStream() {
-    const readable = new Readable();
-    const lines = this.getFoldedLines();
-    for (const line of lines) {
-      readable.push(line);
-      readable.push('\r\n');
-    }
-    readable.push(null);
-    return readable;
+    return this.getLines().join('\r\n');
   }
 
   /**
    * fold lines to 75 characters
    * @return {string[]}
    */
-  getFoldedLines() {
-    return this.getLines().map((line) => {
+  getLines() {
+    return this.getLongLines().map((line) => {
       return line.length <= 74 ? line : line.match(char74re).join('\r\n ');
     });
   }
@@ -229,7 +215,7 @@ export class IcalEvent {
   /**
    * @return {string[]}
    */
-  getLines() {
+  getLongLines() {
     return this.lines;
   }
 }
@@ -277,7 +263,7 @@ function createMemo(e, il) {
  * @param {Event[]} events
  * @param {HebrewCalendar.Options} options
  */
-export function eventsToIcalendarStream(stream, events, options) {
+export async function eventsToIcalendarStream(stream, events, options) {
   if (!events.length) throw new RangeError('Events can not be empty');
   if (!options) throw new TypeError('Invalid options object');
   const uclang = Locale.getLocaleName().toUpperCase();
@@ -285,7 +271,7 @@ export function eventsToIcalendarStream(stream, events, options) {
   const caldesc = options.yahrzeit ?
     'Yahrzeits + Anniversaries from www.hebcal.com' :
     'Jewish Holidays from www.hebcal.com';
-  [
+  const preamble = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
     `PRODID:-//hebcal.com/NONSGML Hebcal Calendar v1${version}//${uclang}`,
@@ -295,10 +281,11 @@ export function eventsToIcalendarStream(stream, events, options) {
     'X-PUBLISHED-TTL:PT7D',
     `X-WR-CALNAME:${title}`,
     `X-WR-CALDESC:${caldesc}`,
-  ].forEach((line) => {
+  ];
+  for (const line of preamble) {
     stream.push(line);
     stream.push('\r\n');
-  });
+  }
   if (options.relcalid) {
     stream.push(`X-WR-RELCALID:${options.relcalid}\r\n`);
   }
@@ -312,7 +299,7 @@ export function eventsToIcalendarStream(stream, events, options) {
     } else {
       try {
         const vtimezoneIcs = `./zoneinfo/${tzid}.ics`;
-        const lines = fs.readFileSync(vtimezoneIcs, 'utf-8').split('\r\n');
+        const lines = await fs.readFile(vtimezoneIcs, 'utf-8').split('\r\n');
         // ignore first 3 and last 1 lines
         const str = lines.slice(3, lines.length - 2).join('\r\n');
         stream.push(str);
@@ -325,14 +312,14 @@ export function eventsToIcalendarStream(stream, events, options) {
   }
 
   options.dtstamp = makeDtstamp(new Date());
-  events.forEach((ev) => {
+  for (const ev of events) {
     const ical = new IcalEvent(ev, options);
-    const lines = ical.getFoldedLines();
-    lines.forEach((line) => {
+    const lines = ical.getLines();
+    for (const line of lines) {
       stream.push(line);
       stream.push('\r\n');
-    });
-  });
+    }
+  }
   stream.push('END:VCALENDAR\r\n');
   stream.push(null);
 }
@@ -358,7 +345,7 @@ async function readableToString(readable) {
  */
 export async function eventsToIcalendar(events, options) {
   const readStream = new Readable();
-  eventsToIcalendarStream(readStream, events, options);
+  await eventsToIcalendarStream(readStream, events, options);
   readStream.on('error', (err) => {
     throw err;
   });
