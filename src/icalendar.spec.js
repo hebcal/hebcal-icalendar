@@ -145,8 +145,8 @@ test('ical-candles', (t) => {
     'GEO:41.85003;-87.65005',
     'BEGIN:VALARM',
     'ACTION:DISPLAY',
-    'DESCRIPTION:REMINDER',
-    'TRIGGER;RELATED=START:-PT10M',
+    'DESCRIPTION:This is an event reminder',
+    'TRIGGER:-P0DT0H10M0S',
     'END:VALARM',
     'END:VEVENT',
   ];
@@ -367,8 +367,8 @@ test('userEvent', (t) => {
     'UID:X',
     'BEGIN:VALARM',
     'ACTION:DISPLAY',
-    'DESCRIPTION:REMINDER',
-    'TRIGGER;RELATED=START:-PT12H',
+    'DESCRIPTION:This is an event reminder',
+    'TRIGGER:-P0DT12H0M0S',
     'END:VALARM',
     'END:VEVENT',
   ];

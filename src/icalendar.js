@@ -171,18 +171,18 @@ export class IcalEvent {
 
     let alarm;
     if (mask & flags.OMER_COUNT) {
-      alarm = '3H'; // 9pm Omer alarm evening before
+      alarm = '0DT3H30M0S'; // 8:30pm Omer alarm evening before
     } else if (isUserEvent) {
-      alarm = '12H'; // noon the day before
+      alarm = '0DT12H0M0S'; // noon the day before
     } else if (timed && desc.startsWith('Candle lighting')) {
-      alarm = '10M'; // ten minutes
+      alarm = '0DT0H10M0S'; // ten minutes
     }
     if (alarm) {
       arr.push(
           'BEGIN:VALARM',
           'ACTION:DISPLAY',
-          'DESCRIPTION:REMINDER',
-          `TRIGGER;RELATED=START:-PT${alarm}`,
+          'DESCRIPTION:This is an event reminder',
+          `TRIGGER:-P${alarm}`,
           'END:VALARM',
       );
     }
