@@ -419,19 +419,26 @@ test('fastStartEnd', (t) => {
     candlelighting: true,
   };
   const events = HebrewCalendar.calendar(options);
-  const icals = events.map((ev) => new IcalEvent(ev, options));
-  const summary = icals.map((i) => i.toString().split('\r\n').find((s) => s.startsWith('SUMMARY')));
+  const icals = events.map((ev) => new IcalEvent(ev, options)).map((i) => i.toString());
+  const actual = icals.map((s) => s.split('\r\n').filter((s) => {
+    return s.startsWith('SUMMARY') || s.startsWith('DTSTART') || s.startsWith('DESCRIPTION');
+  }));
   const expected = [
-    'SUMMARY:Fast begins',
-    'SUMMARY:Tzom Tammuz',
-    'SUMMARY:Fast ends',
+    [
+      'SUMMARY:Fast begins',
+      'DTSTART;TZID=America/New_York:20210627T031900',
+      'DESCRIPTION:Tzom Tammuz',
+    ],
+    [
+      'SUMMARY:Tzom Tammuz',
+      'DTSTART;VALUE=DATE:20210627',
+      'DESCRIPTION:Fast commemorating breaching of the walls of Jerusalem before ',
+    ],
+    [
+      'SUMMARY:Fast ends',
+      'DTSTART;TZID=America/New_York:20210627T210600',
+      'DESCRIPTION:Tzom Tammuz',
+    ],
   ];
-  t.deepEqual(summary, expected);
-  const dtstart = icals.map((i) => i.toString().split('\r\n').find((s) => s.startsWith('DTSTART')));
-  const expected2 = [
-    'DTSTART;TZID=America/New_York:20210627T031900',
-    'DTSTART;VALUE=DATE:20210627',
-    'DTSTART;TZID=America/New_York:20210627T210600',
-  ];
-  t.deepEqual(dtstart, expected2);
+  t.deepEqual(actual, expected);
 });

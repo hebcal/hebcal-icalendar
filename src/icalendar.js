@@ -1,6 +1,6 @@
 import {flags, Locale} from '@hebcal/core';
 import {murmur3} from 'murmurhash-js';
-import {pad2, getCalendarTitle, renderTitleWithoutTime, makeAnchor,
+import {pad2, pad4, getCalendarTitle, makeAnchor,
   getHolidayDescription, makeTorahMemoText} from '@hebcal/rest-api';
 import {promises as fs} from 'fs';
 import {version} from '../package.json';
@@ -13,7 +13,7 @@ const VTIMEZONE = {};
  * @return {string}
  */
 function formatYYYYMMDD(d) {
-  return String(d.getFullYear()).padStart(4, '0') +
+  return pad4(d.getFullYear()) +
         pad2(d.getMonth() + 1) + pad2(d.getDate());
 }
 
@@ -83,7 +83,7 @@ export class IcalEvent {
   constructor(ev, options) {
     const dtstamp = options.dtstamp || makeDtstamp(new Date());
     const timed = Boolean(ev.eventTime);
-    let subj = timed ? renderTitleWithoutTime(ev) : ev.render();
+    let subj = timed || (ev.getFlags() & flags.DAF_YOMI) ? ev.renderBrief() : ev.render();
     const desc = ev.getDesc(); // original untranslated
     const mask = ev.getFlags();
     let location;
@@ -92,11 +92,7 @@ export class IcalEvent {
       location = (comma == -1) ? options.location.name : options.location.name.substring(0, comma);
     }
     if (mask & flags.DAF_YOMI) {
-      const colon = subj.indexOf(': ');
-      if (colon != -1) {
-        location = subj.substring(0, colon);
-        subj = subj.substring(colon + 2);
-      }
+      location = Locale.gettext('Daf Yomi');
     }
 
     const date = formatYYYYMMDD(ev.getDate().greg());
@@ -243,6 +239,9 @@ function createMemo(e, il) {
     return torahMemo + '\\n\\n' + url;
   } else {
     let memo = e.memo || getHolidayDescription(e);
+    if (!memo && typeof e.linkedEvent !== 'undefined') {
+      memo = e.linkedEvent.render();
+    }
     if (torahMemo) {
       memo += '\\n' + torahMemo;
     }
