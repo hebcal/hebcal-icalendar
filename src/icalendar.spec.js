@@ -13,7 +13,7 @@ test('ical-sedra', (t) => {
   let expected = [
     'BEGIN:VEVENT',
     'DTSTAMP:X',
-    'CATEGORIES:Holiday',
+    'CATEGORIES:Parsha',
     'SUMMARY:Parashat Tzav',
     'DTSTART;VALUE=DATE:19930403',
     'DTEND;VALUE=DATE:19930404',
@@ -37,7 +37,7 @@ test('ical-sedra', (t) => {
   expected = [
     'BEGIN:VEVENT',
     'DTSTAMP:X',
-    'CATEGORIES:Holiday',
+    'CATEGORIES:Parsha',
     'SUMMARY:Parashat Korach',
     'DTSTART;VALUE=DATE:19930619',
     'DTEND;VALUE=DATE:19930620',
@@ -177,7 +177,7 @@ test('ical-dafyomi', (t) => {
   const expected = [
     'BEGIN:VEVENT',
     'DTSTAMP:X',
-    'CATEGORIES:Holiday',
+    'CATEGORIES:Daf Yomi',
     'SUMMARY:נדרים 14',
     'DTSTART;VALUE=DATE:19930301',
     'DTEND;VALUE=DATE:19930302',
@@ -198,8 +198,8 @@ test('ical-omer', (t) => {
   const ev = HebrewCalendar.calendar(options)[0];
   const ical = new IcalEvent(ev, options);
   const lines = ical.toString().split('\r\n');
-  t.is(lines.length, 16);
-  t.is(lines[3], 'SUMMARY:1st day of the Omer');
+  t.is(lines.length, 15);
+  t.is(lines[2], 'SUMMARY:1st day of the Omer');
 });
 
 test('eventsToIcalendar', async (t) => {
@@ -382,7 +382,7 @@ test('relcalid', async (t) => {
   const lines = ical.split('\r\n');
   lines[2] = 'PRODID:X';
   lines[11] = 'DTSTAMP:X';
-  lines[18] = 'UID:X';
+  lines[17] = 'UID:X';
   const expected = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
@@ -396,7 +396,6 @@ test('relcalid', async (t) => {
     `X-WR-RELCALID:${relcalid}`,
     'BEGIN:VEVENT',
     'DTSTAMP:X',
-    'CATEGORIES:Holiday',
     'SUMMARY:1st of Adar\\, 5781',
     'DTSTART;VALUE=DATE:20210213',
     'DTEND;VALUE=DATE:20210214',

@@ -1,11 +1,25 @@
 import {flags, Locale} from '@hebcal/core';
 import {murmur3} from 'murmurhash-js';
-import {pad2, pad4, getCalendarTitle, makeAnchor,
+import {pad2, pad4, getCalendarTitle, makeAnchor, getEventCategories,
   getHolidayDescription, makeTorahMemoText} from '@hebcal/rest-api';
 import {promises as fs} from 'fs';
 import {version} from '../package.json';
 
 const VTIMEZONE = {};
+const CATEGORY = {
+  candles: 'Holiday',
+  dafyomi: 'Daf Yomi',
+  havdalah: 'Holiday',
+  hebdate: null,
+  holiday: 'Holiday',
+  mevarchim: null,
+  molad: null,
+  omer: null,
+  parashat: 'Parsha',
+  roshchodesh: 'Holiday',
+  user: 'Personal',
+  zmanim: null,
+};
 
 /**
  * @private
@@ -139,18 +153,19 @@ export class IcalEvent {
     }
 
     const isUserEvent = Boolean(mask & flags.USER_EVENT);
-    const category = isUserEvent ? 'Personal' : 'Holiday';
+    const category = CATEGORY[getEventCategories(ev)[0]];
+    const categoryLine = category ? `CATEGORIES:${category}` : [];
     const arr = [
       'BEGIN:VEVENT',
       `DTSTAMP:${dtstamp}`,
-      `CATEGORIES:${category}`,
+    ].concat(categoryLine).concat([
       `SUMMARY:${subj}`,
       `DTSTART${dtargs}:${startDate}`,
       `DTEND${dtargs}:${endDate}`,
       `TRANSP:${transp}`,
       `X-MICROSOFT-CDO-BUSYSTATUS:${busyStatus}`,
       `UID:${uid}`,
-    ];
+    ]);
 
     if (!isUserEvent) {
       arr.push('CLASS:PUBLIC');
