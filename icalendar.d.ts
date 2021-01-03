@@ -26,5 +26,6 @@ export class IcalEvent {
   static formatYYYYMMDD(dt: Date): string;
   static makeDtstamp(dt: Date): string;
   static version(): string;
+  static fold(line: string): string;
 }
 }

@@ -189,9 +189,7 @@ export class IcalEvent {
    * @return {string[]}
    */
   getLines() {
-    return this.getLongLines().map((line) => {
-      return line.length <= 74 ? line : line.match(char74re).join('\r\n ');
-    });
+    return this.getLongLines().map(IcalEvent.fold);
   }
 
   /**
@@ -199,6 +197,15 @@ export class IcalEvent {
    */
   getLongLines() {
     return this.lines;
+  }
+
+  /**
+   * fold line to 75 characters
+   * @param {string} line
+   * @return {string}
+   */
+  static fold(line) {
+    return line.length <= 74 ? line : line.match(char74re).join('\r\n ');
   }
 
   /**
