@@ -23,46 +23,15 @@ const CATEGORY = {
 
 /**
  * @private
- * @param {Date} d
- * @return {string}
- */
-function formatYYYYMMDD(d) {
-  return pad4(d.getFullYear()) +
-        pad2(d.getMonth() + 1) + pad2(d.getDate());
-}
-
-/**
- * Returns UTC string for iCalendar
- * @private
- * @param {Date} dt
- * @return {string}
- */
-function makeDtstamp(dt) {
-  const s = dt.toISOString();
-  return s.slice(0, 4) + s.slice(5, 7) + s.slice(8, 13) +
-            s.slice(14, 16) + s.slice(17, 19) + 'Z';
-}
-
-/**
- * @private
  * @param {string[]} arr
  * @param {string} key
  * @param {string} val
  */
 function addOptional(arr, key, val) {
   if (val) {
-    const str = icalEscapeStr(val);
+    const str = IcalEvent.escape(val);
     arr.push(key + ':' + str);
   }
-}
-
-/**
- * @private
- * @param {string} str
- * @return {string}
- */
-function icalEscapeStr(str) {
-  return str.replace(/,/g, '\\,').replace(/;/g, '\\;');
 }
 
 /**
@@ -94,14 +63,14 @@ export class IcalEvent {
    * @param {Event} ev
    * @param {HebrewCalendar.Options} options
    */
-  constructor(ev, options) {
-    const dtstamp = options.dtstamp || makeDtstamp(new Date());
+  constructor(ev, options={}) {
+    const dtstamp = options.dtstamp || IcalEvent.makeDtstamp(new Date());
     const timed = Boolean(ev.eventTime);
     let subj = timed || (ev.getFlags() & flags.DAF_YOMI) ? ev.renderBrief() : ev.render();
     const desc = ev.getDesc(); // original untranslated
     const mask = ev.getFlags();
     let location;
-    if (timed && options.location.name) {
+    if (timed && options.location && options.location.name) {
       const comma = options.location.name.indexOf(',');
       location = (comma == -1) ? options.location.name : options.location.name.substring(0, comma);
     }
@@ -109,9 +78,10 @@ export class IcalEvent {
       location = Locale.gettext('Daf Yomi');
     }
 
-    const date = formatYYYYMMDD(ev.getDate().greg());
+    const date = IcalEvent.formatYYYYMMDD(ev.getDate().greg());
     let startDate = date;
-    let dtargs; let endDate;
+    let dtargs = '';
+    let endDate;
     let transp = 'TRANSPARENT'; let busyStatus = 'FREE';
     if (timed) {
       let [hour, minute] = ev.eventTimeStr.split(':');
@@ -119,9 +89,11 @@ export class IcalEvent {
       minute = +minute;
       startDate += 'T' + pad2(hour) + pad2(minute) + '00';
       endDate = startDate;
-      dtargs = `;TZID=${options.location.tzid}`;
+      if (options.location && options.location.tzid) {
+        dtargs = `;TZID=${options.location.tzid}`;
+      }
     } else {
-      endDate = formatYYYYMMDD(ev.getDate().next().greg());
+      endDate = IcalEvent.formatYYYYMMDD(ev.getDate().next().greg());
       // for all-day untimed, use DTEND;VALUE=DATE intsead of DURATION:P1D.
       // It's more compatible with everthing except ancient versions of
       // Lotus Notes circa 2004
@@ -143,7 +115,7 @@ export class IcalEvent {
     }
 
     // make subject safe for iCalendar
-    subj = subj.replace(/,/g, '\\,');
+    subj = IcalEvent.escape(subj);
 
     if (options.appendHebrewToSubject) {
       const hebrew = ev.renderBrief('he');
@@ -228,6 +200,45 @@ export class IcalEvent {
   getLongLines() {
     return this.lines;
   }
+
+  /**
+   * @param {string} str
+   * @return {string}
+   */
+  static escape(str) {
+    if (str.indexOf(',') !== -1) {
+      str = str.replace(/,/g, '\\,');
+    }
+    if (str.indexOf(';') !== -1) {
+      str = str.replace(/;/g, '\\;');
+    }
+    return str;
+  }
+
+  /**
+   * @param {Date} dt
+   * @return {string}
+   */
+  static formatYYYYMMDD(dt) {
+    return pad4(dt.getFullYear()) +
+          pad2(dt.getMonth() + 1) + pad2(dt.getDate());
+  }
+
+  /**
+   * Returns UTC string for iCalendar
+   * @param {Date} dt
+   * @return {string}
+   */
+  static makeDtstamp(dt) {
+    const s = dt.toISOString();
+    return s.slice(0, 4) + s.slice(5, 7) + s.slice(8, 13) +
+              s.slice(14, 16) + s.slice(17, 19) + 'Z';
+  }
+
+  /** @return {string} */
+  static version() {
+    return version;
+  }
 }
 
 /**
@@ -281,7 +292,7 @@ export async function eventsToIcalendar(events, options) {
   if (!options) throw new TypeError('Invalid options object');
   const stream = [];
   const uclang = Locale.getLocaleName().toUpperCase();
-  const title = options.title ? icalEscapeStr(options.title) : getCalendarTitle(events, options);
+  const title = options.title ? IcalEvent.escape(options.title) : getCalendarTitle(events, options);
   const caldesc = options.yahrzeit ?
     'Yahrzeits + Anniversaries from www.hebcal.com' :
     'Jewish Holidays from www.hebcal.com';
@@ -326,7 +337,7 @@ export async function eventsToIcalendar(events, options) {
     }
   }
 
-  options.dtstamp = makeDtstamp(new Date());
+  options.dtstamp = IcalEvent.makeDtstamp(new Date());
   for (const ev of events) {
     const ical = new IcalEvent(ev, options);
     const lines = ical.getLines();

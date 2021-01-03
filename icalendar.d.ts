@@ -22,5 +22,9 @@ export class IcalEvent {
   toString(): string;
   getLines(): string[];
   getLongLines(): string[];
+  static escape(str: string): string;
+  static formatYYYYMMDD(dt: Date): string;
+  static makeDtstamp(dt: Date): string;
+  static version(): string;
 }
 }
