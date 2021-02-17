@@ -425,7 +425,7 @@ test('fastStartEnd', (t) => {
   const expected = [
     [
       'SUMMARY:Fast begins',
-      'DTSTART;TZID=America/New_York:20210627T031900',
+      'DTSTART;TZID=America/New_York:20210627T032000',
       'DESCRIPTION:Tzom Tammuz',
     ],
     [
@@ -435,7 +435,7 @@ test('fastStartEnd', (t) => {
     ],
     [
       'SUMMARY:Fast ends',
-      'DTSTART;TZID=America/New_York:20210627T210600',
+      'DTSTART;TZID=America/New_York:20210627T210700',
       'DESCRIPTION:Tzom Tammuz',
     ],
   ];
