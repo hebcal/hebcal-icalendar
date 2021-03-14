@@ -104,13 +104,16 @@ export class IcalEvent {
       }
     }
 
-    const digest = murmur3(desc).toString(16);
-    let uid = `hebcal-${date}-${digest}`;
-    if (timed && options.location) {
-      if (options.location.geoid) {
-        uid += `-${options.location.geoid}`;
-      } else if (options.location.name) {
-        uid += '-' + makeAnchor(options.location.name);
+    let uid = ev.uid;
+    if (!uid) {
+      const digest = murmur3(desc).toString(16);
+      uid = `hebcal-${date}-${digest}`;
+      if (timed && options.location) {
+        if (options.location.geoid) {
+          uid += `-${options.location.geoid}`;
+        } else if (options.location.name) {
+          uid += '-' + makeAnchor(options.location.name);
+        }
       }
     }
 

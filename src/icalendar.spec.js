@@ -351,10 +351,10 @@ test('ical-il-url', (t) => {
 test('userEvent', (t) => {
   const hd = new HDate(new Date(2021, 1, 13));
   const userEvent = new Event(hd, 'User Event', flags.USER_EVENT);
+  userEvent.uid = 'foo-bar-baaz';
   const ical = new IcalEvent(userEvent, {yahrzeit: true});
   const lines = ical.toString().split('\r\n');
   lines[1] = 'DTSTAMP:X';
-  lines[8] = 'UID:X';
   const expected = [
     'BEGIN:VEVENT',
     'DTSTAMP:X',
@@ -364,7 +364,7 @@ test('userEvent', (t) => {
     'DTEND;VALUE=DATE:20210214',
     'TRANSP:TRANSPARENT',
     'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
-    'UID:X',
+    'UID:foo-bar-baaz',
     'BEGIN:VALARM',
     'ACTION:DISPLAY',
     'DESCRIPTION:This is an event reminder',
