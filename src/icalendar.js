@@ -306,6 +306,7 @@ export async function eventsToIcalendar(events, options) {
   const caldesc = options.yahrzeit ?
     'Yahrzeits + Anniversaries from www.hebcal.com' :
     'Jewish Holidays from www.hebcal.com';
+  const publishedTTL = options.publishedTTL || 'PT7D';
   const preamble = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
@@ -313,7 +314,7 @@ export async function eventsToIcalendar(events, options) {
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     'X-LOTUS-CHARSET:UTF-8',
-    'X-PUBLISHED-TTL:PT7D',
+    `X-PUBLISHED-TTL:${publishedTTL}`,
     `X-WR-CALNAME:${title}`,
     `X-WR-CALDESC:${caldesc}`,
   ];

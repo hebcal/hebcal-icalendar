@@ -441,3 +441,10 @@ test('fastStartEnd', (t) => {
   ];
   t.deepEqual(actual, expected);
 });
+
+test('publishedTTL', async (t) => {
+  const event = new HebrewDateEvent(new HDate(new Date(2021, 1, 13)));
+  const ical = await eventsToIcalendar([event], {publishedTTL: 'PT2D'});
+  const lines = ical.split('\r\n');
+  t.is(lines[6], 'X-PUBLISHED-TTL:PT2D');
+});
