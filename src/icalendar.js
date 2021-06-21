@@ -1,7 +1,7 @@
 import {flags, Locale} from '@hebcal/core';
 import {murmur3} from 'murmurhash-js';
 import {pad2, pad4, getCalendarTitle, makeAnchor, getEventCategories,
-  getHolidayDescription, makeTorahMemoText} from '@hebcal/rest-api';
+  getHolidayDescription, makeTorahMemoText, appendIsraelAndTracking} from '@hebcal/rest-api';
 import {promises as fs} from 'fs';
 import {version} from '../package.json';
 
@@ -41,15 +41,7 @@ function addOptional(arr, key, val) {
  * @return {string}
  */
 function appendTrackingToUrl(url, il) {
-  if (!url) {
-    return url;
-  } else if (url.startsWith('https://www.hebcal.com')) {
-    const suffix = il ? 'i=on&' : '';
-    return `${url}?${suffix}utm_source=js&utm_medium=icalendar`;
-  } else {
-    const sep = url.indexOf('?') == -1 ? '?' : '&';
-    return url + sep + 'utm_source=hebcal.com&utm_medium=icalendar';
-  }
+  return url ? appendIsraelAndTracking(url, il, 'js', 'icalendar') : url;
 }
 
 const char74re = /(.{1,74})/g;
@@ -147,8 +139,7 @@ export class IcalEvent {
     }
 
     // create memo (holiday descr, Torah, etc)
-    const candles = (desc === 'Havdalah' || desc === 'Candle lighting');
-    const memo = candles ? '' : createMemo(ev, options.il);
+    const memo = createMemo(ev, options.il);
     addOptional(arr, 'DESCRIPTION', memo);
     addOptional(arr, 'LOCATION', location);
     if (timed && options.location) {
@@ -269,6 +260,11 @@ export function eventToIcal(ev, options) {
  * @return {string}
  */
 function createMemo(e, il) {
+  const desc = e.getDesc();
+  const candles = (desc === 'Havdalah' || desc === 'Candle lighting');
+  if (candles) {
+    return e.memo || '';
+  }
   const url = appendTrackingToUrl(e.url(), il);
   const torahMemo = makeTorahMemoText(e, il).replace(/\n/g, '\\n');
   if (e.getFlags() & flags.PARSHA_HASHAVUA) {
