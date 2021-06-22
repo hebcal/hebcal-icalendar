@@ -137,8 +137,9 @@ export class IcalEvent {
    * @return {string[]}
    */
   getLongLines() {
+    if (this.lines) return this.lines;
     const categoryLine = this.category ? `CATEGORIES:${this.category}` : [];
-    const arr = [
+    const arr = this.lines = [
       'BEGIN:VEVENT',
       `DTSTAMP:${this.dtstamp}`,
     ].concat(categoryLine).concat([
@@ -178,8 +179,7 @@ export class IcalEvent {
 
     arr.push('END:VEVENT');
 
-    this.lines = arr;
-    return this.lines;
+    return arr;
   }
 
   /**
