@@ -56,49 +56,49 @@ export class IcalEvent {
    * @param {HebrewCalendar.Options} options
    */
   constructor(ev, options={}) {
-    const dtstamp = options.dtstamp || IcalEvent.makeDtstamp(new Date());
-    const timed = Boolean(ev.eventTime);
+    this.ev = ev;
+    this.options = options;
+    this.dtstamp = options.dtstamp || IcalEvent.makeDtstamp(new Date());
+    const timed = this.timed = Boolean(ev.eventTime);
     let subj = timed || (ev.getFlags() & flags.DAF_YOMI) ? ev.renderBrief() : ev.render();
-    const desc = ev.getDesc(); // original untranslated
-    const mask = ev.getFlags();
-    let location;
     if (timed && options.location && options.location.name) {
       const comma = options.location.name.indexOf(',');
-      location = (comma == -1) ? options.location.name : options.location.name.substring(0, comma);
+      this.locationName = (comma == -1) ? options.location.name : options.location.name.substring(0, comma);
     }
+    const mask = ev.getFlags();
     if (mask & flags.DAF_YOMI) {
-      location = Locale.gettext('Daf Yomi');
+      this.locationName = Locale.gettext('Daf Yomi');
     }
 
     const date = IcalEvent.formatYYYYMMDD(ev.getDate().greg());
-    let startDate = date;
-    let dtargs = '';
-    let endDate;
-    let transp = 'TRANSPARENT'; let busyStatus = 'FREE';
+    this.startDate = date;
+    this.dtargs = '';
+    this.transp = 'TRANSPARENT';
+    this.busyStatus = 'FREE';
     if (timed) {
       let [hour, minute] = ev.eventTimeStr.split(':');
       hour = +hour;
       minute = +minute;
-      startDate += 'T' + pad2(hour) + pad2(minute) + '00';
-      endDate = startDate;
+      this.startDate += 'T' + pad2(hour) + pad2(minute) + '00';
+      this.endDate = this.startDate;
       if (options.location && options.location.tzid) {
-        dtargs = `;TZID=${options.location.tzid}`;
+        this.dtargs = `;TZID=${options.location.tzid}`;
       }
     } else {
-      endDate = IcalEvent.formatYYYYMMDD(ev.getDate().next().greg());
+      this.endDate = IcalEvent.formatYYYYMMDD(ev.getDate().next().greg());
       // for all-day untimed, use DTEND;VALUE=DATE intsead of DURATION:P1D.
       // It's more compatible with everthing except ancient versions of
       // Lotus Notes circa 2004
-      dtargs = ';VALUE=DATE';
+      this.dtargs = ';VALUE=DATE';
       if (mask & flags.CHAG) {
-        transp = 'OPAQUE';
-        busyStatus = 'OOF';
+        this.transp = 'OPAQUE';
+        this.busyStatus = 'OOF';
       }
     }
 
     let uid = ev.uid;
     if (!uid) {
-      const digest = murmur3(desc).toString(16);
+      const digest = murmur3(ev.getDesc()).toString(16);
       uid = `hebcal-${date}-${digest}`;
       if (timed && options.location) {
         if (options.location.geoid) {
@@ -108,6 +108,7 @@ export class IcalEvent {
         }
       }
     }
+    this.uid = uid;
 
     // make subject safe for iCalendar
     subj = IcalEvent.escape(subj);
@@ -118,48 +119,59 @@ export class IcalEvent {
         subj += ` / ${hebrew}`;
       }
     }
+    this.subj = subj;
 
     const isUserEvent = Boolean(mask & flags.USER_EVENT);
-    const category = CATEGORY[getEventCategories(ev)[0]];
-    const categoryLine = category ? `CATEGORIES:${category}` : [];
+    if (mask & flags.OMER_COUNT) {
+      this.alarm = '0DT3H30M0S'; // 8:30pm Omer alarm evening before
+    } else if (isUserEvent) {
+      this.alarm = '0DT12H0M0S'; // noon the day before
+    } else if (timed && ev.getDesc().startsWith('Candle lighting')) {
+      this.alarm = '0DT0H10M0S'; // ten minutes
+    }
+
+    this.category = CATEGORY[getEventCategories(ev)[0]];
+  }
+
+  /**
+   * @return {string[]}
+   */
+  getLongLines() {
+    const categoryLine = this.category ? `CATEGORIES:${this.category}` : [];
     const arr = [
       'BEGIN:VEVENT',
-      `DTSTAMP:${dtstamp}`,
+      `DTSTAMP:${this.dtstamp}`,
     ].concat(categoryLine).concat([
-      `SUMMARY:${subj}`,
-      `DTSTART${dtargs}:${startDate}`,
-      `DTEND${dtargs}:${endDate}`,
-      `TRANSP:${transp}`,
-      `X-MICROSOFT-CDO-BUSYSTATUS:${busyStatus}`,
-      `UID:${uid}`,
+      `SUMMARY:${this.subj}`,
+      `DTSTART${this.dtargs}:${this.startDate}`,
+      `DTEND${this.dtargs}:${this.endDate}`,
+      `TRANSP:${this.transp}`,
+      `X-MICROSOFT-CDO-BUSYSTATUS:${this.busyStatus}`,
+      `UID:${this.uid}`,
     ]);
 
+    const ev = this.ev;
+    const mask = ev.getFlags();
+    const isUserEvent = Boolean(mask & flags.USER_EVENT);
     if (!isUserEvent) {
       arr.push('CLASS:PUBLIC');
     }
 
+    const options = this.options;
     // create memo (holiday descr, Torah, etc)
     const memo = createMemo(ev, options.il);
     addOptional(arr, 'DESCRIPTION', memo);
-    addOptional(arr, 'LOCATION', location);
-    if (timed && options.location) {
+    addOptional(arr, 'LOCATION', this.locationName);
+    if (this.timed && options.location) {
       arr.push('GEO:' + options.location.latitude + ';' + options.location.longitude);
     }
 
-    let alarm;
-    if (mask & flags.OMER_COUNT) {
-      alarm = '0DT3H30M0S'; // 8:30pm Omer alarm evening before
-    } else if (isUserEvent) {
-      alarm = '0DT12H0M0S'; // noon the day before
-    } else if (timed && desc.startsWith('Candle lighting')) {
-      alarm = '0DT0H10M0S'; // ten minutes
-    }
-    if (alarm) {
+    if (this.alarm) {
       arr.push(
           'BEGIN:VALARM',
           'ACTION:DISPLAY',
           'DESCRIPTION:This is an event reminder',
-          `TRIGGER:-P${alarm}`,
+          `TRIGGER:-P${this.alarm}`,
           'END:VALARM',
       );
     }
@@ -167,8 +179,7 @@ export class IcalEvent {
     arr.push('END:VEVENT');
 
     this.lines = arr;
-    this.options = options;
-    this.ev = ev;
+    return this.lines;
   }
 
   /**
@@ -184,13 +195,6 @@ export class IcalEvent {
    */
   getLines() {
     return this.getLongLines().map(IcalEvent.fold);
-  }
-
-  /**
-   * @return {string[]}
-   */
-  getLongLines() {
-    return this.lines;
   }
 
   /**
