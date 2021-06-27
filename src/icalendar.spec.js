@@ -3,13 +3,27 @@ import test from 'ava';
 import {HebrewCalendar, Location, HDate, Event, flags, HebrewDateEvent} from '@hebcal/core';
 import {IcalEvent, eventsToIcalendar} from './icalendar';
 
+/**
+ * @private
+ * @param {string[]} lines
+ * @param {string} propName
+ * @return {string}
+ */
+function findLine(lines, propName) {
+  const line = lines.find((line) => line.startsWith(propName));
+  if (line) {
+    return line.substring(line.indexOf(':') + 1);
+  }
+  return null;
+}
+
 test('ical-sedra', (t) => {
   const options = {year: 1993, month: 4, sedrot: true, noHolidays: true};
   const events = HebrewCalendar.calendar(options);
   const tzav = new IcalEvent(events[0], options);
   let lines = tzav.toString().split('\r\n');
   lines[1] = 'DTSTAMP:X';
-  lines[8] = 'UID:X';
+  lines[6] = 'UID:X';
   let expected = [
     'BEGIN:VEVENT',
     'DTSTAMP:X',
@@ -17,9 +31,10 @@ test('ical-sedra', (t) => {
     'SUMMARY:Parashat Tzav',
     'DTSTART;VALUE=DATE:19930403',
     'DTEND;VALUE=DATE:19930404',
+    'UID:X',
     'TRANSP:TRANSPARENT',
     'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
-    'UID:X',
+    'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
     'CLASS:PUBLIC',
     'DESCRIPTION:Torah: Leviticus 6:1-8:36\\nHaftarah: Malachi 3:4 - 3:24 | Shab',
     ' bat HaGadol\\n\\nhttps://www.hebcal.com/sedrot/tzav-19930403?utm_source=js&u',
@@ -33,7 +48,7 @@ test('ical-sedra', (t) => {
   const korach = new IcalEvent(events2[2], options);
   lines = korach.toString().split('\r\n');
   lines[1] = 'DTSTAMP:X';
-  lines[8] = 'UID:X';
+  lines[6] = 'UID:X';
   expected = [
     'BEGIN:VEVENT',
     'DTSTAMP:X',
@@ -41,9 +56,10 @@ test('ical-sedra', (t) => {
     'SUMMARY:Parashat Korach',
     'DTSTART;VALUE=DATE:19930619',
     'DTEND;VALUE=DATE:19930620',
+    'UID:X',
     'TRANSP:TRANSPARENT',
     'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
-    'UID:X',
+    'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
     'CLASS:PUBLIC',
     'DESCRIPTION:Torah: Numbers 16:1-18:32\\nMaftir: Numbers 28:9 - 28:15 | Shab',
     ' bat Rosh Chodesh\\nHaftarah: Isaiah 66:1 - 66:24 | Shabbat Rosh Chodesh\\n\\n',
@@ -67,7 +83,7 @@ test('ical-transp-opaque', (t) => {
   events[0].memo = memo;
   let lines = new IcalEvent(events[0], options).toString().split('\r\n');
   lines[1] = 'DTSTAMP:X';
-  lines[8] = 'UID:X';
+  lines[6] = 'UID:X';
   let expected = [
     'BEGIN:VEVENT',
     'DTSTAMP:X',
@@ -75,9 +91,10 @@ test('ical-transp-opaque', (t) => {
     'SUMMARY:Erev Pesach',
     'DTSTART;VALUE=DATE:19930405',
     'DTEND;VALUE=DATE:19930406',
+    'UID:X',
     'TRANSP:TRANSPARENT',
     'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
-    'UID:X',
+    'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
     'CLASS:PUBLIC',
     'DESCRIPTION:Passover\\, the Feast of Unleavened Bread\\n\\nhttps://www.hebcal',
     ' .com/holidays/pesach-1993?utm_source=js&utm_medium=icalendar',
@@ -86,13 +103,13 @@ test('ical-transp-opaque', (t) => {
   t.deepEqual(lines, expected);
 
   lines = new IcalEvent(events[1], options).toString().split('\r\n');
-  t.is(lines[3], 'SUMMARY:Pesach I');
-  t.is(lines[6], 'TRANSP:OPAQUE');
+  t.is(findLine(lines, 'SUMMARY'), 'Pesach I');
+  t.is(findLine(lines, 'TRANSP'), 'OPAQUE');
 
   events[2].memo = memo;
   lines = new IcalEvent(events[2], options).toString().split('\r\n');
   lines[1] = 'DTSTAMP:X';
-  lines[8] = 'UID:X';
+  lines[6] = 'UID:X';
   expected = [
     'BEGIN:VEVENT',
     'DTSTAMP:X',
@@ -100,9 +117,10 @@ test('ical-transp-opaque', (t) => {
     'SUMMARY:Pesach II',
     'DTSTART;VALUE=DATE:19930407',
     'DTEND;VALUE=DATE:19930408',
+    'UID:X',
     'TRANSP:OPAQUE',
     'X-MICROSOFT-CDO-BUSYSTATUS:OOF',
-    'UID:X',
+    'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
     'CLASS:PUBLIC',
     'DESCRIPTION:Passover\\, the Feast of Unleavened Bread\\nTorah: Leviticus 22:',
     ' 26-23:44\\; Numbers 28:16-28:25\\nHaftarah: II Kings 23:1 - 23:9\\; 23:21 - 2',
@@ -113,8 +131,8 @@ test('ical-transp-opaque', (t) => {
   t.deepEqual(lines, expected);
 
   lines = new IcalEvent(events[3], options).toString().split('\r\n');
-  t.is(lines[3], 'SUMMARY:Pesach III (CH\'\'M)');
-  t.is(lines[6], 'TRANSP:TRANSPARENT');
+  t.is(findLine(lines, 'SUMMARY'), 'Pesach III (CH\'\'M)');
+  t.is(findLine(lines, 'TRANSP'), 'TRANSPARENT');
 });
 
 test('ical-candles', (t) => {
@@ -129,7 +147,7 @@ test('ical-candles', (t) => {
   const ical = new IcalEvent(events[0], options);
   let lines = ical.toString().split('\r\n');
   lines[1] = 'DTSTAMP:X';
-  lines[8] = 'UID:X';
+  lines[6] = 'UID:X';
   const expected = [
     'BEGIN:VEVENT',
     'DTSTAMP:X',
@@ -137,9 +155,9 @@ test('ical-candles', (t) => {
     'SUMMARY:Candle lighting',
     'DTSTART;TZID=America/Chicago:19930305T172700',
     'DTEND;TZID=America/Chicago:19930305T172700',
+    'UID:X',
     'TRANSP:TRANSPARENT',
     'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
-    'UID:X',
     'CLASS:PUBLIC',
     'LOCATION:Chicago',
     'GEO:41.85003;-87.65005',
@@ -156,8 +174,8 @@ test('ical-candles', (t) => {
   lines = havdalah.toString().split('\r\n');
   t.is(lines.length, 13);
   t.is(lines[0], 'BEGIN:VEVENT');
-  t.is(lines[3], 'SUMMARY:Havdalah');
-  t.is(lines[10], 'LOCATION:Chicago');
+  t.is(findLine(lines, 'SUMMARY'), 'Havdalah');
+  t.is(findLine(lines, 'LOCATION'), 'Chicago');
 });
 
 test('ical-dafyomi', (t) => {
@@ -173,7 +191,7 @@ test('ical-dafyomi', (t) => {
   const ical = new IcalEvent(ev, options);
   const lines = ical.toString().split('\r\n');
   lines[1] = 'DTSTAMP:X';
-  lines[8] = 'UID:X';
+  lines[6] = 'UID:X';
   const expected = [
     'BEGIN:VEVENT',
     'DTSTAMP:X',
@@ -181,9 +199,10 @@ test('ical-dafyomi', (t) => {
     'SUMMARY:נדרים 14',
     'DTSTART;VALUE=DATE:19930301',
     'DTEND;VALUE=DATE:19930302',
+    'UID:X',
     'TRANSP:TRANSPARENT',
     'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
-    'UID:X',
+    'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
     'CLASS:PUBLIC',
     'DESCRIPTION:https://www.sefaria.org/Nedarim.14a?lang=bi&utm_source=hebcal.',
     ' com&utm_medium=icalendar',
@@ -198,8 +217,8 @@ test('ical-omer', (t) => {
   const ev = HebrewCalendar.calendar(options)[0];
   const ical = new IcalEvent(ev, options);
   const lines = ical.toString().split('\r\n');
-  t.is(lines.length, 15);
-  t.is(lines[2], 'SUMMARY:1st day of the Omer');
+  t.is(lines.length, 16);
+  t.is(findLine(lines, 'SUMMARY'), '1st day of the Omer');
 });
 
 test('eventsToIcalendar', async (t) => {
@@ -296,7 +315,7 @@ test('chanukah-candles', (t) => {
   const ical = new IcalEvent(events[0], options);
   const lines = ical.toString().split('\r\n');
   lines[1] = 'DTSTAMP:X';
-  lines[8] = 'UID:X';
+  lines[6] = 'UID:X';
   const expected = [
     'BEGIN:VEVENT',
     'DTSTAMP:X',
@@ -304,9 +323,9 @@ test('chanukah-candles', (t) => {
     'SUMMARY:Chanukah: 1 Candle',
     'DTSTART;TZID=America/New_York:20201210T164300',
     'DTEND;TZID=America/New_York:20201210T164300',
+    'UID:X',
     'TRANSP:TRANSPARENT',
     'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
-    'UID:X',
     'CLASS:PUBLIC',
     'DESCRIPTION:Hanukkah\\, the Jewish festival of rededication. Also known as ',
     ' the Festival of Lights\\n\\nhttps://www.hebcal.com/holidays/chanukah-2020?ut',
@@ -328,7 +347,7 @@ test('ical-il-url', (t) => {
   const ical = new IcalEvent(events[0], options);
   const lines = ical.toString().split('\r\n');
   lines[1] = 'DTSTAMP:X';
-  lines[8] = 'UID:X';
+  lines[6] = 'UID:X';
   const expected = [
     'BEGIN:VEVENT',
     'DTSTAMP:X',
@@ -336,9 +355,10 @@ test('ical-il-url', (t) => {
     'SUMMARY:Shmini Atzeret',
     'DTSTART;VALUE=DATE:20210928',
     'DTEND;VALUE=DATE:20210929',
+    'UID:X',
     'TRANSP:OPAQUE',
     'X-MICROSOFT-CDO-BUSYSTATUS:OOF',
-    'UID:X',
+    'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
     'CLASS:PUBLIC',
     'DESCRIPTION:Eighth Day of Assembly\\nTorah: Deuteronomy 33:1-34:12\\; Number',
     ' s 29:35-30:1\\nHaftarah: Joshua 1:1 - 1:18\\n\\nhttps://www.hebcal.com/holida',
@@ -362,9 +382,10 @@ test('userEvent', (t) => {
     'SUMMARY:User Event',
     'DTSTART;VALUE=DATE:20210213',
     'DTEND;VALUE=DATE:20210214',
+    'UID:foo-bar-baaz',
     'TRANSP:TRANSPARENT',
     'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
-    'UID:foo-bar-baaz',
+    'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
     'BEGIN:VALARM',
     'ACTION:DISPLAY',
     'DESCRIPTION:This is an event reminder',
@@ -382,7 +403,7 @@ test('relcalid', async (t) => {
   const lines = ical.split('\r\n');
   lines[2] = 'PRODID:X';
   lines[11] = 'DTSTAMP:X';
-  lines[17] = 'UID:X';
+  lines[15] = 'UID:X';
   const expected = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
@@ -399,9 +420,10 @@ test('relcalid', async (t) => {
     'SUMMARY:1st of Adar\\, 5781',
     'DTSTART;VALUE=DATE:20210213',
     'DTEND;VALUE=DATE:20210214',
+    'UID:X',
     'TRANSP:TRANSPARENT',
     'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
-    'UID:X',
+    'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
     'CLASS:PUBLIC',
     'END:VEVENT',
     'END:VCALENDAR',

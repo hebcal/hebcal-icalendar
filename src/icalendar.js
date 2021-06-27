@@ -146,10 +146,14 @@ export class IcalEvent {
       `SUMMARY:${this.subj}`,
       `DTSTART${this.dtargs}:${this.startDate}`,
       `DTEND${this.dtargs}:${this.endDate}`,
+      `UID:${this.uid}`,
       `TRANSP:${this.transp}`,
       `X-MICROSOFT-CDO-BUSYSTATUS:${this.busyStatus}`,
-      `UID:${this.uid}`,
     ]);
+
+    if (!this.timed) {
+      arr.push('X-MICROSOFT-CDO-ALLDAYEVENT:TRUE');
+    }
 
     const ev = this.ev;
     const mask = ev.getFlags();
