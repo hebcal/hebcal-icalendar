@@ -24,8 +24,8 @@
     "url": "https://github.com/hebcal/hebcal-icalendar/issues"
   },
   "dependencies": {
-    "@hebcal/core": "^3.18.0",
-    "@hebcal/rest-api": "^3.6.0"
+    "@hebcal/core": "^3.19.0",
+    "@hebcal/rest-api": "^3.7.0"
   },
   "scripts": {
     "build": "rollup -c",
@@ -69,6 +69,6 @@
     "jsdoc": "^3.6.7",
     "jsdoc-to-markdown": "^6.0.1",
     "murmurhash-js": "^1.0.0",
-    "rollup": "^2.52.2"
+    "rollup": "^2.52.3"
   }
 }
