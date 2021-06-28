@@ -1,6 +1,7 @@
 /* eslint-disable max-len */
 import test from 'ava';
-import {HebrewCalendar, Location, HDate, Event, flags, HebrewDateEvent} from '@hebcal/core';
+import {HebrewCalendar, Location, HDate, Event, flags,
+  HebrewDateEvent, OmerEvent} from '@hebcal/core';
 import {IcalEvent, eventsToIcalendar} from './icalendar';
 
 /**
@@ -89,7 +90,7 @@ test('ical-transp-opaque', (t) => {
     'BEGIN:VEVENT',
     'DTSTAMP:X',
     'CATEGORIES:Holiday',
-    'SUMMARY:Erev Pesach',
+    'SUMMARY:✡️ Erev Pesach',
     'DTSTART;VALUE=DATE:19930405',
     'DTEND;VALUE=DATE:19930406',
     'UID:X',
@@ -176,7 +177,7 @@ test('ical-candles', (t) => {
   lines = havdalah.toString().split('\r\n');
   t.is(lines.length, 13);
   t.is(lines[0], 'BEGIN:VEVENT');
-  t.is(findLine(lines, 'SUMMARY'), 'Havdalah');
+  t.is(findLine(lines, 'SUMMARY'), '🌃 Havdalah');
   t.is(findLine(lines, 'LOCATION'), 'Chicago');
 });
 
@@ -295,14 +296,14 @@ test('appendHebrewToSubject', (t) => {
   const summary = icals.map((i) => i.toString().split('\r\n').find((s) => s.startsWith('SUMMARY')));
   const expected = [
     'SUMMARY:Parashat Bamidbar / פרשת בְּמִדְבַּר',
-    'SUMMARY:Havdalah / הַבדָלָה',
+    'SUMMARY:🌃 Havdalah / הַבדָלָה',
     'SUMMARY:🌑 Rosh Chodesh Sivan / רֹאשׁ חוֹדֶשׁ סִיוָן',
-    'SUMMARY:Erev Shavuot / עֶרֶב שָׁבוּעוֹת',
+    'SUMMARY:⛰️🌸 Erev Shavuot / עֶרֶב שָׁבוּעוֹת',
     'SUMMARY:🕯️ Candle lighting / הַדלָקָת נֵרוֹת',
     'SUMMARY:⛰️🌸 Shavuot I / שָׁבוּעוֹת יוֹם א׳',
     'SUMMARY:🕯️ Candle lighting / הַדלָקָת נֵרוֹת',
     'SUMMARY:⛰️🌸 Shavuot II / שָׁבוּעוֹת יוֹם ב׳',
-    'SUMMARY:Havdalah / הַבדָלָה',
+    'SUMMARY:🌃 Havdalah / הַבדָלָה',
   ];
   t.deepEqual(summary, expected);
 });
@@ -324,7 +325,7 @@ test('chanukah-candles', (t) => {
     'BEGIN:VEVENT',
     'DTSTAMP:X',
     'CATEGORIES:Holiday',
-    'SUMMARY:🕎 Chanukah: 1 Candle',
+    'SUMMARY:🕎1️⃣ Chanukah: 1 Candle',
     'DTSTART;TZID=America/New_York:20201210T164300',
     'DTEND;TZID=America/New_York:20201210T164300',
     'UID:X',
@@ -475,4 +476,11 @@ test('publishedTTL', async (t) => {
   const ical = await eventsToIcalendar([event], {publishedTTL: 'PT2D'});
   const lines = ical.split('\r\n');
   t.is(lines[6], 'X-PUBLISHED-TTL:PT2D');
+});
+
+test('OmerEvent', (t) => {
+  const ev = new OmerEvent(new HDate(22, 'Iyyar', 5781), 37);
+  const icalEvent = new IcalEvent(ev, {emoji: true});
+  const lines = icalEvent.toString().split('\r\n');
+  t.is(findLine(lines, 'SUMMARY'), '3️⃣7️⃣ 37th day of the Omer');
 });

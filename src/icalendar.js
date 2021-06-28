@@ -24,6 +24,7 @@ const CATEGORY = {
 
 const KEYCAP_DIGITS = ['0️⃣', '1️⃣', '2️⃣', '3️⃣', '4️⃣',
   '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣'];
+const EMOJI_IGNORE = flags.USER_EVENT | flags.DAF_YOMI | flags.HEBREW_DATE | flags.MOLAD;
 
 /**
  * @private
@@ -149,22 +150,34 @@ export class IcalEvent {
    * @return {string}
    */
   static getEmojiPrefix(ev) {
+    const mask = ev.getFlags();
+    if (mask & EMOJI_IGNORE) {
+      return null;
+    }
+
     const desc = ev.getDesc();
     const timed = Boolean(ev.eventTime);
-    const isCandleLighting = timed && desc.startsWith('Candle lighting');
-    const mask = ev.getFlags();
-    const isUserEvent = Boolean(mask & flags.USER_EVENT);
-    const isOmerCount = Boolean(mask & flags.OMER_COUNT);
+    const isCandleLighting = timed && desc === 'Candle lighting';
+    const isHavdalah = timed && desc === 'Havdalah';
 
     if (isCandleLighting) {
       return '🕯️';
-    } else if (isOmerCount) {
+    } else if (isHavdalah) {
+      return '🌃';
+    } else if (mask & flags.ROSH_CHODESH) {
+      return '🌑';
+    } else if (mask & flags.SPECIAL_SHABBAT) {
+      return '🕍';
+    } else if (mask & flags.OMER_COUNT) {
       const num = ev.omer;
       const ones = num % 10;
       const tens = Math.floor(num / 10);
       const prefix = KEYCAP_DIGITS[tens] + KEYCAP_DIGITS[ones];
       return prefix;
-    } else if (!isUserEvent && !desc.startsWith('Erev ')) {
+    } else if (mask & flags.CHANUKAH_CANDLES) {
+      const chanukahDay = ev.chanukahDay || 0;
+      return '🕎' + KEYCAP_DIGITS[chanukahDay + 1];
+    } else {
       const holidayName = ev.basename();
       const holidayEmoji = emoji[holidayName];
       if (holidayEmoji) {
