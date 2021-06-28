@@ -4,6 +4,7 @@ import {pad2, pad4, getCalendarTitle, makeAnchor, getEventCategories,
   getHolidayDescription, makeTorahMemoText, appendIsraelAndTracking} from '@hebcal/rest-api';
 import {promises as fs} from 'fs';
 import {version} from '../package.json';
+import emoji from './holiday-emoji.json';
 
 const VTIMEZONE = {};
 const CATEGORY = {
@@ -20,6 +21,9 @@ const CATEGORY = {
   user: 'Personal',
   zmanim: null,
 };
+
+const KEYCAP_DIGITS = ['0️⃣', '1️⃣', '2️⃣', '3️⃣', '4️⃣',
+  '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣'];
 
 /**
  * @private
@@ -110,6 +114,13 @@ export class IcalEvent {
     }
     this.uid = uid;
 
+    if (options.emoji) {
+      const prefix = IcalEvent.getEmojiPrefix(ev);
+      if (prefix) {
+        subj = prefix + ' ' + subj;
+      }
+    }
+
     // make subject safe for iCalendar
     subj = IcalEvent.escape(subj);
 
@@ -131,6 +142,36 @@ export class IcalEvent {
     }
 
     this.category = CATEGORY[getEventCategories(ev)[0]];
+  }
+
+  /**
+   * @param {Event} ev
+   * @return {string}
+   */
+  static getEmojiPrefix(ev) {
+    const desc = ev.getDesc();
+    const timed = Boolean(ev.eventTime);
+    const isCandleLighting = timed && desc.startsWith('Candle lighting');
+    const mask = ev.getFlags();
+    const isUserEvent = Boolean(mask & flags.USER_EVENT);
+    const isOmerCount = Boolean(mask & flags.OMER_COUNT);
+
+    if (isCandleLighting) {
+      return '🕯️';
+    } else if (isOmerCount) {
+      const num = ev.omer;
+      const ones = num % 10;
+      const tens = Math.floor(num / 10);
+      const prefix = KEYCAP_DIGITS[tens] + KEYCAP_DIGITS[ones];
+      return prefix;
+    } else if (!isUserEvent && !desc.startsWith('Erev ')) {
+      const holidayName = ev.basename();
+      const holidayEmoji = emoji[holidayName];
+      if (holidayEmoji) {
+        return holidayEmoji;
+      }
+    }
+    return null;
   }
 
   /**

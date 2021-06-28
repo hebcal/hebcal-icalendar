@@ -77,6 +77,7 @@ test('ical-transp-opaque', (t) => {
     noMinorFast: true,
     noRoshChodesh: true,
     noSpecialShabbat: true,
+    emoji: true,
   };
   const events = HebrewCalendar.calendar(options);
   const memo = 'Passover, the Feast of Unleavened Bread';
@@ -103,7 +104,7 @@ test('ical-transp-opaque', (t) => {
   t.deepEqual(lines, expected);
 
   lines = new IcalEvent(events[1], options).toString().split('\r\n');
-  t.is(findLine(lines, 'SUMMARY'), 'Pesach I');
+  t.is(findLine(lines, 'SUMMARY'), '✡️ Pesach I');
   t.is(findLine(lines, 'TRANSP'), 'OPAQUE');
 
   events[2].memo = memo;
@@ -114,7 +115,7 @@ test('ical-transp-opaque', (t) => {
     'BEGIN:VEVENT',
     'DTSTAMP:X',
     'CATEGORIES:Holiday',
-    'SUMMARY:Pesach II',
+    'SUMMARY:✡️ Pesach II',
     'DTSTART;VALUE=DATE:19930407',
     'DTEND;VALUE=DATE:19930408',
     'UID:X',
@@ -131,7 +132,7 @@ test('ical-transp-opaque', (t) => {
   t.deepEqual(lines, expected);
 
   lines = new IcalEvent(events[3], options).toString().split('\r\n');
-  t.is(findLine(lines, 'SUMMARY'), 'Pesach III (CH\'\'M)');
+  t.is(findLine(lines, 'SUMMARY'), '✡️ Pesach III (CH\'\'M)');
   t.is(findLine(lines, 'TRANSP'), 'TRANSPARENT');
 });
 
@@ -142,6 +143,7 @@ test('ical-candles', (t) => {
     location: new Location(41.85003, -87.65005, false, 'America/Chicago', 'Chicago', 'US', 4887398),
     candlelighting: true,
     noHolidays: true,
+    emoji: true,
   };
   const events = HebrewCalendar.calendar(options);
   const ical = new IcalEvent(events[0], options);
@@ -152,7 +154,7 @@ test('ical-candles', (t) => {
     'BEGIN:VEVENT',
     'DTSTAMP:X',
     'CATEGORIES:Holiday',
-    'SUMMARY:Candle lighting',
+    'SUMMARY:🕯️ Candle lighting',
     'DTSTART;TZID=America/Chicago:19930305T172700',
     'DTEND;TZID=America/Chicago:19930305T172700',
     'UID:X',
@@ -213,12 +215,12 @@ test('ical-dafyomi', (t) => {
 });
 
 test('ical-omer', (t) => {
-  const options = {year: 1993, noHolidays: true, omer: true};
+  const options = {year: 1993, noHolidays: true, omer: true, emoji: true};
   const ev = HebrewCalendar.calendar(options)[0];
   const ical = new IcalEvent(ev, options);
   const lines = ical.toString().split('\r\n');
   t.is(lines.length, 16);
-  t.is(findLine(lines, 'SUMMARY'), '1st day of the Omer');
+  t.is(findLine(lines, 'SUMMARY'), '0️⃣1️⃣ 1st day of the Omer');
 });
 
 test('eventsToIcalendar', async (t) => {
@@ -286,6 +288,7 @@ test('appendHebrewToSubject', (t) => {
     candlelighting: true,
     location: Location.lookup('Gibraltar'),
     appendHebrewToSubject: true,
+    emoji: true,
   };
   const events = HebrewCalendar.calendar(options);
   const icals = events.map((ev) => new IcalEvent(ev, options));
@@ -293,12 +296,12 @@ test('appendHebrewToSubject', (t) => {
   const expected = [
     'SUMMARY:Parashat Bamidbar / פרשת בְּמִדְבַּר',
     'SUMMARY:Havdalah / הַבדָלָה',
-    'SUMMARY:Rosh Chodesh Sivan / רֹאשׁ חוֹדֶשׁ סִיוָן',
+    'SUMMARY:🌑 Rosh Chodesh Sivan / רֹאשׁ חוֹדֶשׁ סִיוָן',
     'SUMMARY:Erev Shavuot / עֶרֶב שָׁבוּעוֹת',
-    'SUMMARY:Candle lighting / הַדלָקָת נֵרוֹת',
-    'SUMMARY:Shavuot I / שָׁבוּעוֹת יוֹם א׳',
-    'SUMMARY:Candle lighting / הַדלָקָת נֵרוֹת',
-    'SUMMARY:Shavuot II / שָׁבוּעוֹת יוֹם ב׳',
+    'SUMMARY:🕯️ Candle lighting / הַדלָקָת נֵרוֹת',
+    'SUMMARY:⛰️🌸 Shavuot I / שָׁבוּעוֹת יוֹם א׳',
+    'SUMMARY:🕯️ Candle lighting / הַדלָקָת נֵרוֹת',
+    'SUMMARY:⛰️🌸 Shavuot II / שָׁבוּעוֹת יוֹם ב׳',
     'SUMMARY:Havdalah / הַבדָלָה',
   ];
   t.deepEqual(summary, expected);
@@ -310,6 +313,7 @@ test('chanukah-candles', (t) => {
     end: new Date(2020, 11, 10),
     location: Location.lookup('Boston'),
     candlelighting: true,
+    emoji: true,
   };
   const events = HebrewCalendar.calendar(options);
   const ical = new IcalEvent(events[0], options);
@@ -320,7 +324,7 @@ test('chanukah-candles', (t) => {
     'BEGIN:VEVENT',
     'DTSTAMP:X',
     'CATEGORIES:Holiday',
-    'SUMMARY:Chanukah: 1 Candle',
+    'SUMMARY:🕎 Chanukah: 1 Candle',
     'DTSTART;TZID=America/New_York:20201210T164300',
     'DTEND;TZID=America/New_York:20201210T164300',
     'UID:X',
@@ -342,6 +346,7 @@ test('ical-il-url', (t) => {
     start: new Date(2021, 8, 28),
     end: new Date(2021, 8, 28),
     il: true,
+    emoji: true,
   };
   const events = HebrewCalendar.calendar(options);
   const ical = new IcalEvent(events[0], options);
@@ -352,7 +357,7 @@ test('ical-il-url', (t) => {
     'BEGIN:VEVENT',
     'DTSTAMP:X',
     'CATEGORIES:Holiday',
-    'SUMMARY:Shmini Atzeret',
+    'SUMMARY:✡️ Shmini Atzeret',
     'DTSTART;VALUE=DATE:20210928',
     'DTEND;VALUE=DATE:20210929',
     'UID:X',
@@ -438,6 +443,7 @@ test('fastStartEnd', (t) => {
     end: new Date(2021, 5, 27),
     location: Location.lookup('Providence'),
     candlelighting: true,
+    emoji: true,
   };
   const events = HebrewCalendar.calendar(options);
   const icals = events.map((ev) => new IcalEvent(ev, options)).map((i) => i.toString());
@@ -451,7 +457,7 @@ test('fastStartEnd', (t) => {
       'DESCRIPTION:Tzom Tammuz',
     ],
     [
-      'SUMMARY:Tzom Tammuz',
+      'SUMMARY:✡️ Tzom Tammuz',
       'DTSTART;VALUE=DATE:20210627',
       'DESCRIPTION:Fast commemorating breaching of the walls of Jerusalem before ',
     ],
