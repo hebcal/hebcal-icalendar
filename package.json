@@ -24,7 +24,7 @@
     "url": "https://github.com/hebcal/hebcal-icalendar/issues"
   },
   "dependencies": {
-    "@hebcal/core": "^3.20.2",
+    "@hebcal/core": "^3.20.3",
     "@hebcal/rest-api": "^3.7.0"
   },
   "scripts": {

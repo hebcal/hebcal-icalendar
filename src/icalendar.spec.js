@@ -297,7 +297,7 @@ test('appendHebrewToSubject', (t) => {
   const expected = [
     'SUMMARY:Parashat Bamidbar / פרשת בְּמִדְבַּר',
     'SUMMARY:🌃 Havdalah / הַבדָלָה',
-    'SUMMARY:🌑 Rosh Chodesh Sivan / רֹאשׁ חוֹדֶשׁ סִיוָן',
+    'SUMMARY:🌒 Rosh Chodesh Sivan / רֹאשׁ חוֹדֶשׁ סִיוָן',
     'SUMMARY:⛰️🌸 Erev Shavuot / עֶרֶב שָׁבוּעוֹת',
     'SUMMARY:🕯️ Candle lighting / הַדלָקָת נֵרוֹת',
     'SUMMARY:⛰️🌸 Shavuot I / שָׁבוּעוֹת יוֹם א׳',
