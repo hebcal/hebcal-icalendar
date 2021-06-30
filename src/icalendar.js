@@ -290,7 +290,7 @@ function createMemo(e, il) {
       memo = e.linkedEvent.render();
     }
     if (torahMemo) {
-      memo += '\\n' + torahMemo;
+      memo += '\\n\\n' + torahMemo;
     }
     if (url) {
       if (memo.length) {

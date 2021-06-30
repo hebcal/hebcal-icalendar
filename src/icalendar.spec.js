@@ -124,10 +124,10 @@ test('ical-transp-opaque', (t) => {
     'X-MICROSOFT-CDO-BUSYSTATUS:OOF',
     'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
     'CLASS:PUBLIC',
-    'DESCRIPTION:Passover\\, the Feast of Unleavened Bread\\nTorah: Leviticus 22:',
-    ' 26-23:44\\; Numbers 28:16-28:25\\nHaftarah: II Kings 23:1 - 23:9\\; 23:21 - 2',
-    ' 3:25\\n\\nhttps://www.hebcal.com/holidays/pesach-1993?utm_source=js&utm_medi',
-    ' um=icalendar',
+    'DESCRIPTION:Passover\\, the Feast of Unleavened Bread\\n\\nTorah: Leviticus 2',
+    ' 2:26-23:44\\; Numbers 28:16-28:25\\nHaftarah: II Kings 23:1 - 23:9\\; 23:21 -',
+    '  23:25\\n\\nhttps://www.hebcal.com/holidays/pesach-1993?utm_source=js&utm_me',
+    ' dium=icalendar',
     'END:VEVENT',
   ];
   t.deepEqual(lines, expected);
@@ -366,9 +366,9 @@ test('ical-il-url', (t) => {
     'X-MICROSOFT-CDO-BUSYSTATUS:OOF',
     'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
     'CLASS:PUBLIC',
-    'DESCRIPTION:Eighth Day of Assembly\\nTorah: Deuteronomy 33:1-34:12\\; Number',
-    ' s 29:35-30:1\\nHaftarah: Joshua 1:1 - 1:18\\n\\nhttps://www.hebcal.com/holida',
-    ' ys/shmini-atzeret-2021?i=on&utm_source=js&utm_medium=icalendar',
+    'DESCRIPTION:Eighth Day of Assembly\\n\\nTorah: Deuteronomy 33:1-34:12\\; Numb',
+    ' ers 29:35-30:1\\nHaftarah: Joshua 1:1 - 1:18\\n\\nhttps://www.hebcal.com/holi',
+    ' days/shmini-atzeret-2021?i=on&utm_source=js&utm_medium=icalendar',
     'END:VEVENT',
   ];
   t.deepEqual(lines, expected);
