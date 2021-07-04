@@ -280,9 +280,13 @@ function createMemo(e, il) {
   if (candles) {
     return e.memo || '';
   }
+  const mask = e.getFlags();
+  if (mask & flags.OMER_COUNT) {
+    return e.getTodayIs('en') + '\\n\\n' + e.memo;
+  }
   const url = appendTrackingToUrl(e.url(), il);
   const torahMemo = makeTorahMemoText(e, il).replace(/\n/g, '\\n');
-  if (e.getFlags() & flags.PARSHA_HASHAVUA) {
+  if (mask & flags.PARSHA_HASHAVUA) {
     return torahMemo + '\\n\\n' + url;
   } else {
     let memo = e.memo || getHolidayDescription(e);

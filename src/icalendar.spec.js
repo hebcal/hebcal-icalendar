@@ -215,15 +215,6 @@ test('ical-dafyomi', (t) => {
   t.deepEqual(lines, expected);
 });
 
-test('ical-omer', (t) => {
-  const options = {year: 1993, noHolidays: true, omer: true, emoji: true};
-  const ev = HebrewCalendar.calendar(options)[0];
-  const ical = new IcalEvent(ev, options);
-  const lines = ical.toString().split('\r\n');
-  t.is(lines.length, 16);
-  t.is(findLine(lines, 'SUMMARY'), '0️⃣1️⃣ 1st day of the Omer');
-});
-
 test('eventsToIcalendar', async (t) => {
   const options = {
     year: 2020,
@@ -482,5 +473,27 @@ test('OmerEvent', (t) => {
   const ev = new OmerEvent(new HDate(22, 'Iyyar', 5781), 37);
   const icalEvent = new IcalEvent(ev, {emoji: true});
   const lines = icalEvent.toString().split('\r\n');
-  t.is(findLine(lines, 'SUMMARY'), '3️⃣7️⃣ 37th day of the Omer');
+  lines[1] = 'DTSTAMP:X';
+  lines[6] = 'UID:X';
+  const expected = [
+    'BEGIN:VEVENT',
+    'DTSTAMP:X',
+    'SUMMARY:3️⃣7️⃣ 37th day of the Omer',
+    'DTSTART;VALUE=DATE:20210504',
+    'DTEND;VALUE=DATE:20210505',
+    'UID:hebcal-20210504-45f4acad',
+    'UID:X',
+    'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
+    'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
+    'CLASS:PUBLIC',
+    'DESCRIPTION:Today is 37 days\\, which is 5 weeks and 2 days of the Omer\\n\\n',
+    ' Might that is in Foundation / גְבוּרָה שֶׁבַּיְּסוֹד',
+    'BEGIN:VALARM',
+    'ACTION:DISPLAY',
+    'DESCRIPTION:This is an event reminder',
+    'TRIGGER:-P0DT3H30M0S',
+    'END:VALARM',
+    'END:VEVENT',
+  ];
+  t.deepEqual(lines, expected);
 });
