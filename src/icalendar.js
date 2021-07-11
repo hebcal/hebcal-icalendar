@@ -340,6 +340,9 @@ export async function eventsToIcalendar(events, options) {
   if (options.relcalid) {
     stream.push(`X-WR-RELCALID:${options.relcalid}\r\n`);
   }
+  if (options.calendarColor) {
+    stream.push(`X-APPLE-CALENDAR-COLOR:${options.calendarColor}\r\n`);
+  }
   const location = options.location;
   if (location && location.tzid) {
     const tzid = location.tzid;

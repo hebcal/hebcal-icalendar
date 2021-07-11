@@ -1,6 +1,6 @@
 {
   "name": "@hebcal/icalendar",
-  "version": "4.10.0",
+  "version": "4.11.0",
   "author": "Michael J. Radwin (https://github.com/mjradwin)",
   "keywords": [
     "ical",
@@ -69,6 +69,6 @@
     "jsdoc": "^3.6.7",
     "jsdoc-to-markdown": "^6.0.1",
     "murmurhash-js": "^1.0.0",
-    "rollup": "^2.52.7"
+    "rollup": "^2.53.0"
   }
 }
