@@ -62,10 +62,9 @@ test('ical-sedra', (t) => {
     'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
     'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
     'CLASS:PUBLIC',
-    'DESCRIPTION:Torah: Numbers 16:1-18:32\\nMaftir: Numbers 28:9 - 28:15 | Shab',
-    ' bat Rosh Chodesh\\nHaftarah: Isaiah 66:1 - 66:24 | Shabbat Rosh Chodesh\\n\\n',
-    ' https://www.hebcal.com/sedrot/korach-19930619?utm_source=js&utm_medium=ica',
-    ' lendar',
+    'DESCRIPTION:Torah: Numbers 16:1-18:32\\, 28:9-15\\nHaftarah: Isaiah 66:1 - 6',
+    ' 6:24 | Shabbat Rosh Chodesh\\n\\nhttps://www.hebcal.com/sedrot/korach-199306',
+    ' 19?utm_source=js&utm_medium=icalendar',
     'END:VEVENT',
   ];
   t.deepEqual(lines, expected);
@@ -125,9 +124,9 @@ test('ical-transp-opaque', (t) => {
     'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
     'CLASS:PUBLIC',
     'DESCRIPTION:Passover\\, the Feast of Unleavened Bread\\n\\nTorah: Leviticus 2',
-    ' 2:26-23:44\\; Numbers 28:16-28:25\\nHaftarah: II Kings 23:1 - 23:9\\; 23:21 -',
-    '  23:25\\n\\nhttps://www.hebcal.com/holidays/pesach-1993?utm_source=js&utm_me',
-    ' dium=icalendar',
+    ' 2:26-23:44\\; Numbers 28:16-25\\nHaftarah: II Kings 23:1 - 23:9\\; 23:21 - 23',
+    ' :25\\n\\nhttps://www.hebcal.com/holidays/pesach-1993?utm_source=js&utm_mediu',
+    ' m=icalendar',
     'END:VEVENT',
   ];
   t.deepEqual(lines, expected);
@@ -177,7 +176,7 @@ test('ical-candles', (t) => {
   lines = havdalah.toString().split('\r\n');
   t.is(lines.length, 13);
   t.is(lines[0], 'BEGIN:VEVENT');
-  t.is(findLine(lines, 'SUMMARY'), '🌃 Havdalah');
+  t.is(findLine(lines, 'SUMMARY'), '✨ Havdalah');
   t.is(findLine(lines, 'LOCATION'), 'Chicago');
 });
 
@@ -287,14 +286,14 @@ test('appendHebrewToSubject', (t) => {
   const summary = icals.map((i) => i.toString().split('\r\n').find((s) => s.startsWith('SUMMARY')));
   const expected = [
     'SUMMARY:Parashat Bamidbar / פרשת בְּמִדְבַּר',
-    'SUMMARY:🌃 Havdalah / הַבדָלָה',
+    'SUMMARY:✨ Havdalah / הַבדָלָה',
     'SUMMARY:🌒 Rosh Chodesh Sivan / רֹאשׁ חוֹדֶשׁ סִיוָן',
     'SUMMARY:⛰️🌸 Erev Shavuot / עֶרֶב שָׁבוּעוֹת',
     'SUMMARY:🕯️ Candle lighting / הַדלָקָת נֵרוֹת',
     'SUMMARY:⛰️🌸 Shavuot I / שָׁבוּעוֹת יוֹם א׳',
     'SUMMARY:🕯️ Candle lighting / הַדלָקָת נֵרוֹת',
     'SUMMARY:⛰️🌸 Shavuot II / שָׁבוּעוֹת יוֹם ב׳',
-    'SUMMARY:🌃 Havdalah / הַבדָלָה',
+    'SUMMARY:✨ Havdalah / הַבדָלָה',
   ];
   t.deepEqual(summary, expected);
 });
@@ -357,9 +356,10 @@ test('ical-il-url', (t) => {
     'X-MICROSOFT-CDO-BUSYSTATUS:OOF',
     'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
     'CLASS:PUBLIC',
-    'DESCRIPTION:Eighth Day of Assembly\\n\\nTorah: Deuteronomy 33:1-34:12\\; Numb',
-    ' ers 29:35-30:1\\nHaftarah: Joshua 1:1 - 1:18\\n\\nhttps://www.hebcal.com/holi',
-    ' days/shmini-atzeret-2021?i=on&utm_source=js&utm_medium=icalendar',
+    'DESCRIPTION:Eighth Day of Assembly\\n\\nTorah: Deuteronomy 33:1-34:12\\; Gene',
+    ' sis 1:1-2:3\\; Numbers 29:35-30:1\\nHaftarah: Joshua 1:1 - 1:18\\n\\nhttps://w',
+    ' ww.hebcal.com/holidays/shmini-atzeret-2021?i=on&utm_source=js&utm_medium=i',
+    ' calendar',
     'END:VEVENT',
   ];
   t.deepEqual(lines, expected);
@@ -493,6 +493,42 @@ test('OmerEvent', (t) => {
     'DESCRIPTION:This is an event reminder',
     'TRIGGER:-P0DT3H30M0S',
     'END:VALARM',
+    'END:VEVENT',
+  ];
+  t.deepEqual(lines, expected);
+});
+
+/** @private */
+class TestEvent extends Event {
+  /** @param {HDate} date */
+  constructor(date) {
+    super(date, 'Test Event', 0);
+  }
+  /** @return {string} */
+  url() {
+    return 'https://www.hebcal.com/foobar';
+  }
+}
+
+test('utm_campaign', (t) => {
+  const ev = new TestEvent(new HDate(22, 'Iyyar', 5781));
+  const icalEvent = new IcalEvent(ev, {utmSource: 'baaz', utmCampaign: 'quux'});
+  const lines = icalEvent.toString().split('\r\n');
+  lines[1] = 'DTSTAMP:X';
+  const expected = [
+    'BEGIN:VEVENT',
+    'DTSTAMP:X',
+    'CATEGORIES:Holiday',
+    'SUMMARY:Test Event',
+    'DTSTART;VALUE=DATE:20210504',
+    'DTEND;VALUE=DATE:20210505',
+    'UID:hebcal-20210504-9f01ca16',
+    'TRANSP:TRANSPARENT',
+    'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
+    'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
+    'CLASS:PUBLIC',
+    'DESCRIPTION:https://www.hebcal.com/foobar?utm_source=baaz&utm_medium=icale',
+    ' ndar&utm_campaign=quux',
     'END:VEVENT',
   ];
   t.deepEqual(lines, expected);

@@ -37,11 +37,18 @@ function addOptional(arr, key, val) {
 /**
  * @private
  * @param {string} url
- * @param {boolean} il
+ * @param {HebrewCalendar.Options} options
  * @return {string}
  */
-function appendTrackingToUrl(url, il) {
-  return url ? appendIsraelAndTracking(url, il, 'js', 'icalendar') : url;
+function appendTrackingToUrl(url, options) {
+  if (!url) {
+    return null;
+  }
+  const utmSource = options.utmSource || 'js';
+  const utmMedium = options.utmMedium || 'icalendar';
+  const utmCampaign = options.utmCampaign;
+  return appendIsraelAndTracking(url,
+      options.il, utmSource, utmMedium, utmCampaign);
 }
 
 const char74re = /(.{1,74})/g;
@@ -171,7 +178,7 @@ export class IcalEvent {
 
     const options = this.options;
     // create memo (holiday descr, Torah, etc)
-    const memo = createMemo(ev, options.il);
+    const memo = createMemo(ev, options);
     addOptional(arr, 'DESCRIPTION', memo);
     addOptional(arr, 'LOCATION', this.locationName);
     if (this.timed && options.location) {
@@ -271,10 +278,10 @@ export function eventToIcal(ev, options) {
 /**
  * @private
  * @param {Event} e
- * @param {boolean} il
+ * @param {HebrewCalendar.Options} options
  * @return {string}
  */
-function createMemo(e, il) {
+function createMemo(e, options) {
   const desc = e.getDesc();
   const candles = (desc === 'Havdalah' || desc === 'Candle lighting');
   if (candles) {
@@ -284,8 +291,8 @@ function createMemo(e, il) {
   if (mask & flags.OMER_COUNT) {
     return e.getTodayIs('en') + '\\n\\n' + e.memo;
   }
-  const url = appendTrackingToUrl(e.url(), il);
-  const torahMemo = makeTorahMemoText(e, il).replace(/\n/g, '\\n');
+  const url = appendTrackingToUrl(e.url(), options);
+  const torahMemo = makeTorahMemoText(e, options.il).replace(/\n/g, '\\n');
   if (mask & flags.PARSHA_HASHAVUA) {
     return torahMemo + '\\n\\n' + url;
   } else {
