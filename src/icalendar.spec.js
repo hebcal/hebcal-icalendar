@@ -223,9 +223,9 @@ test('eventsToIcalendar', async (t) => {
     location: Location.lookup('Hawaii'),
   };
   const events = HebrewCalendar.calendar(options);
+  options.prodid = 'X';
   const ical = await eventsToIcalendar(events, options);
   const lines = ical.split('\r\n').slice(0, 12);
-  lines[2] = 'PRODID:X';
   const expected = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
@@ -252,9 +252,9 @@ test('eventsToIcalendar-no-vtimezone', async (t) => {
     location: Location.lookup('Boston'),
   };
   const events = HebrewCalendar.calendar(options);
+  options.prodid = 'X';
   const ical = await eventsToIcalendar(events, options);
   const lines = ical.split('\r\n').slice(0, 11);
-  lines[2] = 'PRODID:X';
   const expected = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
@@ -396,9 +396,8 @@ test('userEvent', (t) => {
 test('relcalid', async (t) => {
   const event = new HebrewDateEvent(new HDate(new Date(2021, 1, 13)));
   const relcalid = '01enedk40bytfd4enm1673bdqh';
-  const ical = await eventsToIcalendar([event], {relcalid});
+  const ical = await eventsToIcalendar([event], {relcalid, prodid: 'X'});
   const lines = ical.split('\r\n');
-  lines[2] = 'PRODID:X';
   lines[11] = 'DTSTAMP:X';
   lines[15] = 'UID:X';
   const expected = [
@@ -532,4 +531,29 @@ test('utm_campaign', (t) => {
     'END:VEVENT',
   ];
   t.deepEqual(lines, expected);
+});
+
+test('caldesc', async (t) => {
+  const ev = new TestEvent(new HDate(22, 'Iyyar', 5781));
+  const ical = await eventsToIcalendar([ev], {
+    caldesc: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua',
+  });
+  const lines = ical.split('\r\n').slice(8, 10);
+  const expected = [
+    'X-WR-CALDESC:Lorem ipsum dolor sit amet\\, consectetur adipiscing elit\\, se',
+    ' d do eiusmod tempor incididunt ut labore et dolore magna aliqua',
+  ];
+  t.deepEqual(lines, expected);
+
+  const ical2 = await eventsToIcalendar([ev], {
+    caldesc: 'לורם איפסום דולור סיט אמט, קונסקטורר אדיפיסינג אלית להאמית קרהשק סכעיט דז מא, מנכם למטכין נשואי מנורך. קולהע צופעט למרקוח איבן איף, ברומץ כלרשט מיחוצים.',
+  });
+  const lines2 = ical2.split('\r\n').slice(8, 12);
+  const expected2 = [
+    'X-WR-CALDESC:לורם איפסום דולור סיט אמט\\, קונסקט',
+    ' ורר אדיפיסינג אלית להאמית קרהשק סכעיט דז',
+    '  מא\\, מנכם למטכין נשואי מנורך. קולהע צופעט',
+    '  למרקוח איבן איף\\, ברומץ כלרשט מיחוצים.',
+  ];
+  t.deepEqual(lines2, expected2);
 });

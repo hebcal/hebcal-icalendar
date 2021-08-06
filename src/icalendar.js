@@ -51,7 +51,7 @@ function appendTrackingToUrl(url, options) {
       options.il, utmSource, utmMedium, utmCampaign);
 }
 
-const char74re = /(.{1,74})/g;
+const encoder = new TextEncoder();
 
 /**
  * Represents an RFC 2445 iCalendar VEVENT
@@ -221,7 +221,26 @@ export class IcalEvent {
    * @return {string}
    */
   static fold(line) {
-    return line.length <= 74 ? line : line.match(char74re).join('\r\n ');
+    if (encoder.encode(line).length <= 74) {
+      return line;
+    }
+    // iterate unicode character by character, making sure
+    // that adding a new character would keep the line <= 75 octets
+    let result = '';
+    let current = '';
+    for (let i = 0; i < line.length; i++) {
+      const candidate = current + line[i];
+      const len = encoder.encode(candidate).length;
+      if (len < 75) {
+        current = candidate;
+      } else {
+        result += current + '\r\n ';
+        line = line.substring(i);
+        current = '';
+        i = -1;
+      }
+    }
+    return result + current;
   }
 
   /**
@@ -324,15 +343,19 @@ export async function eventsToIcalendar(events, options) {
   if (!options) throw new TypeError('Invalid options object');
   const stream = [];
   const uclang = Locale.getLocaleName().toUpperCase();
-  const title = options.title ? IcalEvent.escape(options.title) : getCalendarTitle(events, options);
-  const caldesc = options.yahrzeit ?
+  const opts = Object.assign({}, options);
+  opts.dtstamp = opts.dtstamp || IcalEvent.makeDtstamp(new Date());
+  const title = opts.title ? IcalEvent.escape(opts.title) : getCalendarTitle(events, opts);
+  const caldesc = opts.caldesc ? IcalEvent.escape(opts.caldesc) :
+    opts.yahrzeit ?
     'Yahrzeits + Anniversaries from www.hebcal.com' :
     'Jewish Holidays from www.hebcal.com';
-  const publishedTTL = options.publishedTTL || 'PT7D';
+  const publishedTTL = opts.publishedTTL || 'PT7D';
+  const prodid = opts.prodid || `-//hebcal.com/NONSGML Hebcal Calendar v1${version}//${uclang}`;
   const preamble = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    `PRODID:-//hebcal.com/NONSGML Hebcal Calendar v1${version}//${uclang}`,
+    `PRODID:${prodid}`,
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     'X-LOTUS-CHARSET:UTF-8',
@@ -340,17 +363,18 @@ export async function eventsToIcalendar(events, options) {
     `X-WR-CALNAME:${title}`,
     `X-WR-CALDESC:${caldesc}`,
   ];
-  for (const line of preamble) {
+  for (const line of preamble.map(IcalEvent.fold)) {
     stream.push(line);
     stream.push('\r\n');
   }
-  if (options.relcalid) {
-    stream.push(`X-WR-RELCALID:${options.relcalid}\r\n`);
+  if (opts.relcalid) {
+    stream.push(IcalEvent.fold(`X-WR-RELCALID:${opts.relcalid}`));
+    stream.push('\r\n');
   }
-  if (options.calendarColor) {
-    stream.push(`X-APPLE-CALENDAR-COLOR:${options.calendarColor}\r\n`);
+  if (opts.calendarColor) {
+    stream.push(`X-APPLE-CALENDAR-COLOR:${opts.calendarColor}\r\n`);
   }
-  const location = options.location;
+  const location = opts.location;
   if (location && location.tzid) {
     const tzid = location.tzid;
     stream.push(`X-WR-TIMEZONE;VALUE=TEXT:${tzid}\r\n`);
@@ -373,9 +397,8 @@ export async function eventsToIcalendar(events, options) {
     }
   }
 
-  options.dtstamp = IcalEvent.makeDtstamp(new Date());
   for (const ev of events) {
-    const ical = new IcalEvent(ev, options);
+    const ical = new IcalEvent(ev, opts);
     const lines = ical.getLines();
     for (const line of lines) {
       stream.push(line);
