@@ -29,7 +29,7 @@
   },
   "scripts": {
     "build": "rollup -c",
-    "prepublish": "npm run build",
+    "prepare": "npm run build",
     "pretest": "npm run build",
     "readme": "npx jsdoc2md dist/index.js",
     "test": "ava"
@@ -41,7 +41,7 @@
     ],
     "require": [
       "@babel/register",
-      "@babel/polyfill"
+      "regenerator-runtime/runtime"
     ],
     "babel": {
       "testOptions": {
@@ -56,7 +56,6 @@
   "devDependencies": {
     "@ava/babel": "^2.0.0",
     "@babel/core": "^7.15.0",
-    "@babel/polyfill": "^7.12.1",
     "@babel/preset-env": "^7.15.0",
     "@babel/register": "^7.14.5",
     "@rollup/plugin-babel": "^5.3.0",
