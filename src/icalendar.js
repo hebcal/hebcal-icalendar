@@ -103,20 +103,6 @@ export class IcalEvent {
       }
     }
 
-    let uid = ev.uid;
-    if (!uid) {
-      const digest = murmur3(ev.getDesc()).toString(16);
-      uid = `hebcal-${date}-${digest}`;
-      if (timed && options.location) {
-        if (options.location.geoid) {
-          uid += `-${options.location.geoid}`;
-        } else if (options.location.name) {
-          uid += '-' + makeAnchor(options.location.name);
-        }
-      }
-    }
-    this.uid = uid;
-
     if (options.emoji) {
       const prefix = ev.getEmoji();
       if (prefix) {
@@ -148,11 +134,30 @@ export class IcalEvent {
   }
 
   /**
+   * @private
+   * @return {string}
+   */
+  getUid() {
+    const options = this.options;
+    const digest = murmur3(this.ev.getDesc()).toString(16);
+    let uid = `hebcal-${this.startDate}-${digest}`;
+    if (this.timed && options.location) {
+      if (options.location.geoid) {
+        uid += `-${options.location.geoid}`;
+      } else if (options.location.name) {
+        uid += '-' + makeAnchor(options.location.name);
+      }
+    }
+    return uid;
+  }
+
+  /**
    * @return {string[]}
    */
   getLongLines() {
     if (this.lines) return this.lines;
     const categoryLine = this.category ? `CATEGORIES:${this.category}` : [];
+    const uid = this.ev.uid || this.getUid();
     const arr = this.lines = [
       'BEGIN:VEVENT',
       `DTSTAMP:${this.dtstamp}`,
@@ -160,7 +165,7 @@ export class IcalEvent {
       `SUMMARY:${this.subj}`,
       `DTSTART${this.dtargs}:${this.startDate}`,
       `DTEND${this.dtargs}:${this.endDate}`,
-      `UID:${this.uid}`,
+      `UID:${uid}`,
       `TRANSP:${this.transp}`,
       `X-MICROSOFT-CDO-BUSYSTATUS:${this.busyStatus}`,
     ]);
