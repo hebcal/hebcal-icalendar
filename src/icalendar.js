@@ -52,6 +52,7 @@ function appendTrackingToUrl(url, options) {
 }
 
 const encoder = new TextEncoder();
+const BRIEF_FLAGS = flags.DAF_YOMI | flags.HEBREW_DATE;
 
 /**
  * Represents an RFC 2445 iCalendar VEVENT
@@ -67,7 +68,8 @@ export class IcalEvent {
     this.options = options;
     this.dtstamp = options.dtstamp || IcalEvent.makeDtstamp(new Date());
     const timed = this.timed = Boolean(ev.eventTime);
-    let subj = timed || (ev.getFlags() & flags.DAF_YOMI) ? ev.renderBrief() : ev.render();
+    const locale = options.locale;
+    let subj = timed || (ev.getFlags() & BRIEF_FLAGS) ? ev.renderBrief(locale) : ev.render(locale);
     if (timed && options.location && options.location.name) {
       const comma = options.location.name.indexOf(',');
       this.locationName = (comma == -1) ? options.location.name : options.location.name.substring(0, comma);
@@ -322,7 +324,7 @@ function createMemo(e, options) {
   } else {
     let memo = e.memo || getHolidayDescription(e);
     if (!memo && typeof e.linkedEvent !== 'undefined') {
-      memo = e.linkedEvent.render();
+      memo = e.linkedEvent.render(options.locale);
     }
     if (torahMemo) {
       memo += '\\n\\n' + torahMemo;
