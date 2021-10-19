@@ -285,14 +285,14 @@ test('appendHebrewToSubject', (t) => {
   const icals = events.map((ev) => new IcalEvent(ev, options));
   const summary = icals.map((i) => i.toString().split('\r\n').find((s) => s.startsWith('SUMMARY')));
   const expected = [
-    'SUMMARY:Parashat Bamidbar / פרשת בְּמִדְבַּר',
+    'SUMMARY:Parashat Bamidbar / פָּרָשַׁת בְּמִדְבַּר',
     'SUMMARY:✨ Havdalah / הַבדָלָה',
     'SUMMARY:🌒 Rosh Chodesh Sivan / רֹאשׁ חוֹדֶשׁ סִיוָן',
     'SUMMARY:⛰️🌸 Erev Shavuot / עֶרֶב שָׁבוּעוֹת',
     'SUMMARY:🕯️ Candle lighting / הַדלָקָת נֵרוֹת',
-    'SUMMARY:⛰️🌸 Shavuot I / שָׁבוּעוֹת יוֹם א׳',
+    'SUMMARY:⛰️🌸 Shavuot I / שָׁבוּעוֹת א׳',
     'SUMMARY:🕯️ Candle lighting / הַדלָקָת נֵרוֹת',
-    'SUMMARY:⛰️🌸 Shavuot II / שָׁבוּעוֹת יוֹם ב׳',
+    'SUMMARY:⛰️🌸 Shavuot II / שָׁבוּעוֹת ב׳',
     'SUMMARY:✨ Havdalah / הַבדָלָה',
   ];
   t.deepEqual(summary, expected);
@@ -486,7 +486,7 @@ test('OmerEvent', (t) => {
     'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
     'CLASS:PUBLIC',
     'DESCRIPTION:Today is 37 days\\, which is 5 weeks and 2 days of the Omer\\n\\n',
-    ' Might that is in Foundation / גְבוּרָה שֶׁבַּיְּסוֹד',
+    ' Might that is in Foundation / גְבוּרָה שֶׁבַּיְּסוֹד',
     'BEGIN:VALARM',
     'ACTION:DISPLAY',
     'DESCRIPTION:This is an event reminder',
@@ -544,6 +544,10 @@ test('caldesc', async (t) => {
     ' d do eiusmod tempor incididunt ut labore et dolore magna aliqua',
   ];
   t.deepEqual(lines, expected);
+  const all = ical.split('\r\n');
+  for (let i = 0; i < all.length; i++) {
+    t.is(all[i].length <= 75, true, `line ${i} is ${all[i].length}: ${all[i]}`);
+  }
 
   const ical2 = await eventsToIcalendar([ev], {
     caldesc: 'לורם איפסום דולור סיט אמט, קונסקטורר אדיפיסינג אלית להאמית קרהשק סכעיט דז מא, מנכם למטכין נשואי מנורך. קולהע צופעט למרקוח איבן איף, ברומץ כלרשט מיחוצים.',
@@ -556,4 +560,8 @@ test('caldesc', async (t) => {
     '  למרקוח איבן איף\\, ברומץ כלרשט מיחוצים.',
   ];
   t.deepEqual(lines2, expected2);
+  const all2 = ical2.split('\r\n');
+  for (let i = 0; i < all2.length; i++) {
+    t.is(all2[i].length <= 75, true, `line ${i} is ${all2[i].length}: ${all2[i]}`);
+  }
 });
