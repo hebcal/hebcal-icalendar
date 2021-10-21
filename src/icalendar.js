@@ -70,15 +70,15 @@ export class IcalEvent {
     const timed = this.timed = Boolean(ev.eventTime);
     const locale = options.locale;
     let subj = timed || (ev.getFlags() & BRIEF_FLAGS) ? ev.renderBrief(locale) : ev.render(locale);
-    if (timed && options.location && options.location.name) {
+    const mask = ev.getFlags();
+    if (ev.locationName) {
+      this.locationName = ev.locationName;
+    } else if (mask & flags.DAF_YOMI) {
+      this.locationName = Locale.gettext('Daf Yomi');
+    } else if (timed && options.location && options.location.name) {
       const comma = options.location.name.indexOf(',');
       this.locationName = (comma == -1) ? options.location.name : options.location.name.substring(0, comma);
     }
-    const mask = ev.getFlags();
-    if (mask & flags.DAF_YOMI) {
-      this.locationName = Locale.gettext('Daf Yomi');
-    }
-
     const date = IcalEvent.formatYYYYMMDD(ev.getDate().greg());
     this.startDate = date;
     this.dtargs = '';
@@ -124,7 +124,9 @@ export class IcalEvent {
     this.subj = subj;
 
     const isUserEvent = Boolean(mask & flags.USER_EVENT);
-    if (mask & flags.OMER_COUNT) {
+    if (ev.alarm) {
+      this.alarm = ev.alarm;
+    } else if (mask & flags.OMER_COUNT) {
       this.alarm = '0DT3H30M0S'; // 8:30pm Omer alarm evening before
     } else if (isUserEvent) {
       this.alarm = '0DT12H0M0S'; // noon the day before
@@ -132,7 +134,7 @@ export class IcalEvent {
       this.alarm = '0DT0H10M0S'; // ten minutes
     }
 
-    this.category = CATEGORY[getEventCategories(ev)[0]];
+    this.category = ev.category || CATEGORY[getEventCategories(ev)[0]];
   }
 
   /**
@@ -348,11 +350,27 @@ function createMemo(e, options) {
 export async function eventsToIcalendar(events, options) {
   if (!events.length) throw new RangeError('Events can not be empty');
   if (!options) throw new TypeError('Invalid options object');
+  const opts = Object.assign({}, options);
+  opts.dtstamp = opts.dtstamp || IcalEvent.makeDtstamp(new Date());
+  if (!opts.title) {
+    opts.title = getCalendarTitle(events, opts);
+  }
+  const icals = events.map((ev) => new IcalEvent(ev, opts));
+  return icalEventsToString(icals, opts);
+}
+
+/**
+ * Generates an RFC 2445 iCalendar string from an array of IcalEvents
+ * @param {IcalEvent[]} icals
+ * @param {HebrewCalendar.Options} options
+ * @return {string}
+ */
+export async function icalEventsToString(icals, options) {
   const stream = [];
   const uclang = Locale.getLocaleName().toUpperCase();
   const opts = Object.assign({}, options);
   opts.dtstamp = opts.dtstamp || IcalEvent.makeDtstamp(new Date());
-  const title = opts.title ? IcalEvent.escape(opts.title) : getCalendarTitle(events, opts);
+  const title = opts.title ? IcalEvent.escape(opts.title) : 'Untitled';
   const caldesc = opts.caldesc ? IcalEvent.escape(opts.caldesc) :
     opts.yahrzeit ?
     'Yahrzeits + Anniversaries from www.hebcal.com' :
@@ -404,8 +422,7 @@ export async function eventsToIcalendar(events, options) {
     }
   }
 
-  for (const ev of events) {
-    const ical = new IcalEvent(ev, opts);
+  for (const ical of icals) {
     const lines = ical.getLines();
     for (const line of lines) {
       stream.push(line);

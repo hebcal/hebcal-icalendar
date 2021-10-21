@@ -10,6 +10,11 @@ export function eventToIcal(e: Event, options: HebrewCalendar.Options): string;
  * @returns multi-line result, delimited by \r\n
  */
 export async function eventsToIcalendar(events: Event[], options: HebrewCalendar.Options): string;
+/**
+ * Generates an RFC 2445 iCalendar string from an array of IcalEvents
+ * @returns multi-line result, delimited by \r\n
+ */
+ export async function icalEventsToString(icals: IcalEvent[], options: HebrewCalendar.Options): string;
 
 /**
  * Represents an RFC 2445 iCalendar VEVENT
