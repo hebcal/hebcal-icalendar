@@ -127,11 +127,11 @@ export class IcalEvent {
     if (ev.alarm) {
       this.alarm = ev.alarm;
     } else if (mask & flags.OMER_COUNT) {
-      this.alarm = '0DT3H30M0S'; // 8:30pm Omer alarm evening before
+      this.alarm = '-P0DT3H30M0S'; // 8:30pm Omer alarm evening before
     } else if (isUserEvent) {
-      this.alarm = '0DT12H0M0S'; // noon the day before
+      this.alarm = '-P0DT12H0M0S'; // noon the day before
     } else if (timed && ev.getDesc().startsWith('Candle lighting')) {
-      this.alarm = '0DT0H10M0S'; // ten minutes
+      this.alarm = '-P0DT0H10M0S'; // ten minutes
     }
 
     this.category = ev.category || CATEGORY[getEventCategories(ev)[0]];
@@ -199,7 +199,7 @@ export class IcalEvent {
           'BEGIN:VALARM',
           'ACTION:DISPLAY',
           'DESCRIPTION:This is an event reminder',
-          `TRIGGER:-P${this.alarm}`,
+          `TRIGGER:${this.alarm}`,
           'END:VALARM',
       );
     }
