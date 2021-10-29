@@ -413,7 +413,7 @@ test('relcalid', async (t) => {
     `X-WR-RELCALID:${relcalid}`,
     'BEGIN:VEVENT',
     'DTSTAMP:X',
-    'SUMMARY:1st of Adar',
+    'SUMMARY:1st of Adar\\, 5781',
     'DTSTART;VALUE=DATE:20210213',
     'DTEND;VALUE=DATE:20210214',
     'UID:X',

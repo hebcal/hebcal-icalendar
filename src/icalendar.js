@@ -1,7 +1,8 @@
 import {flags, Locale} from '@hebcal/core';
 import {murmur3} from 'murmurhash-js';
 import {pad2, pad4, getCalendarTitle, makeAnchor, getEventCategories,
-  getHolidayDescription, makeTorahMemoText, appendIsraelAndTracking} from '@hebcal/rest-api';
+  getHolidayDescription, makeTorahMemoText, appendIsraelAndTracking,
+  shouldRenderBrief} from '@hebcal/rest-api';
 import {promises as fs} from 'fs';
 import {version} from '../package.json';
 
@@ -52,7 +53,6 @@ function appendTrackingToUrl(url, options) {
 }
 
 const encoder = new TextEncoder();
-const BRIEF_FLAGS = flags.DAF_YOMI | flags.HEBREW_DATE;
 
 /**
  * Represents an RFC 2445 iCalendar VEVENT
@@ -69,7 +69,7 @@ export class IcalEvent {
     this.dtstamp = options.dtstamp || IcalEvent.makeDtstamp(new Date());
     const timed = this.timed = Boolean(ev.eventTime);
     const locale = options.locale;
-    let subj = timed || (ev.getFlags() & BRIEF_FLAGS) ? ev.renderBrief(locale) : ev.render(locale);
+    let subj = shouldRenderBrief(ev) ? ev.renderBrief(locale) : ev.render(locale);
     const mask = ev.getFlags();
     if (ev.locationName) {
       this.locationName = ev.locationName;
