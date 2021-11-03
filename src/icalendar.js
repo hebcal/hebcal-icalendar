@@ -303,6 +303,36 @@ export function eventToIcal(ev, options) {
   return ical.toString();
 }
 
+const torahMemoCache = new Map();
+
+const HOLIDAY_IGNORE_MASK = flags.DAF_YOMI | flags.OMER_COUNT |
+  flags.SHABBAT_MEVARCHIM | flags.MOLAD | flags.USER_EVENT |
+  flags.HEBREW_DATE;
+
+/**
+ * @private
+ * @param {Event} ev
+ * @param {boolean} il
+ * @return {string}
+ */
+function makeTorahMemo(ev, il) {
+  if (ev.getFlags() & HOLIDAY_IGNORE_MASK) {
+    return '';
+  }
+  const hd = ev.getDate();
+  const yy = hd.getFullYear();
+  const mm = hd.getMonth();
+  const dd = hd.getDate();
+  const key = [yy, mm, dd, il ? '1' : '0', ev.getDesc()].join('-');
+  let memo = torahMemoCache.get(key);
+  if (typeof memo === 'string') {
+    return memo;
+  }
+  memo = makeTorahMemoText(ev, il).replace(/\n/g, '\\n');
+  torahMemoCache.set(key, memo);
+  return memo;
+}
+
 /**
  * @private
  * @param {Event} e
@@ -320,7 +350,7 @@ function createMemo(e, options) {
     return e.getTodayIs('en') + '\\n\\n' + e.memo;
   }
   const url = appendTrackingToUrl(e.url(), options);
-  const torahMemo = makeTorahMemoText(e, options.il).replace(/\n/g, '\\n');
+  const torahMemo = makeTorahMemo(e, options.il);
   if (mask & flags.PARSHA_HASHAVUA) {
     return torahMemo + '\\n\\n' + url;
   } else {
