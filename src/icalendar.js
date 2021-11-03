@@ -248,15 +248,19 @@ export class IcalEvent {
     // that adding a new character would keep the line <= 75 octets
     let result = '';
     let current = '';
+    let len = 0;
     for (let i = 0; i < line.length; i++) {
-      const candidate = current + line[i];
-      const len = encoder.encode(candidate).length;
-      if (len < 75) {
-        current = candidate;
+      const char = line[i];
+      const octets = char.charCodeAt(0) < 256 ? 1 : encoder.encode(char).length;
+      const newlen = len + octets;
+      if (newlen < 75) {
+        current += char;
+        len = newlen;
       } else {
         result += current + '\r\n ';
         line = line.substring(i);
         current = '';
+        len = 0;
         i = -1;
       }
     }
