@@ -53,6 +53,7 @@ function appendTrackingToUrl(url, options) {
 }
 
 const encoder = new TextEncoder();
+const char74re = /(.{1,74})/g;
 
 /**
  * Represents an RFC 2445 iCalendar VEVENT
@@ -230,6 +231,16 @@ export class IcalEvent {
    * @return {string}
    */
   static fold(line) {
+    let isASCII = true;
+    for (let i = 0; i < line.length; i++) {
+      if (line.charCodeAt(i) > 255) {
+        isASCII = false;
+        break;
+      }
+    }
+    if (isASCII) {
+      return line.length <= 74 ? line : line.match(char74re).join('\r\n ');
+    }
     if (encoder.encode(line).length <= 74) {
       return line;
     }
