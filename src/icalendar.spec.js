@@ -243,6 +243,27 @@ test('eventsToIcalendar', async (t) => {
   t.deepEqual(lines, expected);
 });
 
+test('subscribe-suppress-title-years', async (t) => {
+  const options = {
+    year: 2026,
+    month: 2,
+    sedrot: true,
+    candlelighting: true,
+    location: Location.lookup('Hawaii'),
+  };
+  const events = HebrewCalendar.calendar(options);
+  options.prodid = 'X';
+  options.subscribe = '1';
+  const ical = await eventsToIcalendar(events, options);
+  const lines = ical.split('\r\n');
+  t.is(findLine(lines, 'X-WR-CALNAME'), 'Hebcal Hawaii');
+
+  options.subscribe = false;
+  const ical2 = await eventsToIcalendar(events, options);
+  const lines2 = ical2.split('\r\n');
+  t.is(findLine(lines2, 'X-WR-CALNAME'), 'Hebcal Hawaii February 2026');
+});
+
 test('eventsToIcalendar-no-vtimezone', async (t) => {
   const options = {
     year: 2020,
