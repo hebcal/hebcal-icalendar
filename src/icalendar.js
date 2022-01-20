@@ -10,6 +10,7 @@ const VTIMEZONE = {};
 const CATEGORY = {
   candles: 'Holiday',
   dafyomi: 'Daf Yomi',
+  mishnayomi: 'Mishna Yomi',
   havdalah: 'Holiday',
   hebdate: null,
   holiday: 'Holiday',
@@ -76,6 +77,8 @@ export class IcalEvent {
       this.locationName = ev.locationName;
     } else if (mask & flags.DAF_YOMI) {
       this.locationName = Locale.gettext('Daf Yomi');
+    } else if (mask & flags.MISHNA_YOMI) {
+      this.locationName = Locale.gettext('Mishna Yomi');
     } else if (timed && options.location && options.location.name) {
       const comma = options.location.name.indexOf(',');
       this.locationName = (comma == -1) ? options.location.name : options.location.name.substring(0, comma);
@@ -322,6 +325,7 @@ const torahMemoCache = new Map();
 
 const HOLIDAY_IGNORE_MASK = flags.DAF_YOMI | flags.OMER_COUNT |
   flags.SHABBAT_MEVARCHIM | flags.MOLAD | flags.USER_EVENT |
+  flags.MISHNA_YOMI |
   flags.HEBREW_DATE;
 
 /**
