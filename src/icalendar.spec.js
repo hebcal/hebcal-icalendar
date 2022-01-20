@@ -37,9 +37,9 @@ test('ical-sedra', (t) => {
     'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
     'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
     'CLASS:PUBLIC',
-    'DESCRIPTION:Torah: Leviticus 6:1-8:36\\nHaftarah: Malachi 3:4 - 3:24 | Shab',
-    ' bat HaGadol\\n\\nhttps://www.hebcal.com/sedrot/tzav-19930403?utm_source=js&u',
-    ' tm_medium=icalendar',
+    'DESCRIPTION:Torah: Leviticus 6:1-8:36\\nHaftarah: Malachi 3:4-24 | Shabbat ',
+    ' HaGadol\\n\\nhttps://www.hebcal.com/sedrot/tzav-19930403?utm_source=js&utm_m',
+    ' edium=icalendar',
     'END:VEVENT',
   ];
   t.deepEqual(lines, expected);
@@ -62,9 +62,9 @@ test('ical-sedra', (t) => {
     'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
     'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
     'CLASS:PUBLIC',
-    'DESCRIPTION:Torah: Numbers 16:1-18:32\\, 28:9-15\\nHaftarah: Isaiah 66:1 - 6',
-    ' 6:24 | Shabbat Rosh Chodesh\\n\\nhttps://www.hebcal.com/sedrot/korach-199306',
-    ' 19?utm_source=js&utm_medium=icalendar',
+    'DESCRIPTION:Torah: Numbers 16:1-18:32\\, 28:9-15\\nHaftarah: Isaiah 66:1-24 ',
+    ' | Shabbat Rosh Chodesh\\n\\nhttps://www.hebcal.com/sedrot/korach-19930619?ut',
+    ' m_source=js&utm_medium=icalendar',
     'END:VEVENT',
   ];
   t.deepEqual(lines, expected);
@@ -124,9 +124,9 @@ test('ical-transp-opaque', (t) => {
     'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
     'CLASS:PUBLIC',
     'DESCRIPTION:Passover\\, the Feast of Unleavened Bread\\n\\nTorah: Leviticus 2',
-    ' 2:26-23:44\\; Numbers 28:16-25\\nHaftarah: II Kings 23:1 - 23:9\\; 23:21 - 23',
-    ' :25\\n\\nhttps://www.hebcal.com/holidays/pesach-1993?utm_source=js&utm_mediu',
-    ' m=icalendar',
+    ' 2:26-23:44\\; Numbers 28:16-25\\nHaftarah: II Kings 23:1-9\\, 23:21-25\\n\\nhtt',
+    ' ps://www.hebcal.com/holidays/pesach-1993?utm_source=js&utm_medium=icalenda',
+    ' r',
     'END:VEVENT',
   ];
   t.deepEqual(lines, expected);
@@ -378,9 +378,9 @@ test('ical-il-url', (t) => {
     'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
     'CLASS:PUBLIC',
     'DESCRIPTION:Eighth Day of Assembly\\n\\nTorah: Deuteronomy 33:1-34:12\\; Gene',
-    ' sis 1:1-2:3\\; Numbers 29:35-30:1\\nHaftarah: Joshua 1:1 - 1:18\\n\\nhttps://w',
-    ' ww.hebcal.com/holidays/shmini-atzeret-2021?i=on&utm_source=js&utm_medium=i',
-    ' calendar',
+    ' sis 1:1-2:3\\; Numbers 29:35-30:1\\nHaftarah: Joshua 1:1-18\\n\\nhttps://www.h',
+    ' ebcal.com/holidays/shmini-atzeret-2021?i=on&utm_source=js&utm_medium=icale',
+    ' ndar',
     'END:VEVENT',
   ];
   t.deepEqual(lines, expected);
