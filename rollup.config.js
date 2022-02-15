@@ -22,6 +22,6 @@ export default [
       nodeResolve(),
       commonjs(),
     ],
-    external: ['@hebcal/core', '@hebcal/leyning', 'fs', 'stream', 'murmurhash3'],
+    external: ['@hebcal/core', '@hebcal/rest-api', 'fs', 'stream', 'murmurhash3'],
   },
 ];
