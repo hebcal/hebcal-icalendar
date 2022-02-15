@@ -586,3 +586,10 @@ test('caldesc', async (t) => {
     t.is(all2[i].length <= 75, true, `line ${i} is ${all2[i].length}: ${all2[i]}`);
   }
 });
+
+test('uid', (t) => {
+  const ical1 = new IcalEvent(new Event(new HDate(22, 'Iyyar', 5781), 'Foo Bar'), {});
+  t.is(ical1.getUid(), 'hebcal-20210504-568cd823');
+  const ical2 = new IcalEvent(new Event(new HDate(2, 'Cheshvan', 5782), 'Hello World'), {});
+  t.is(ical2.getUid(), 'hebcal-20211008-197683ce');
+});

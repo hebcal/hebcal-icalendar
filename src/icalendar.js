@@ -1,5 +1,5 @@
 import {flags, Locale} from '@hebcal/core';
-import {murmur3} from 'murmurhash-js';
+import {murmur32HexSync} from 'murmurhash3';
 import {pad2, pad4, getCalendarTitle, makeAnchor, getEventCategories,
   getHolidayDescription, makeTorahMemoText, appendIsraelAndTracking,
   shouldRenderBrief} from '@hebcal/rest-api';
@@ -142,12 +142,11 @@ export class IcalEvent {
   }
 
   /**
-   * @private
    * @return {string}
    */
   getUid() {
     const options = this.options;
-    const digest = murmur3(this.ev.getDesc()).toString(16);
+    const digest = murmur32HexSync(this.ev.getDesc());
     let uid = `hebcal-${this.startDate}-${digest}`;
     if (this.timed && options.location) {
       if (options.location.geoid) {
