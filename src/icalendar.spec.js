@@ -1,6 +1,7 @@
 /* eslint-disable max-len */
 import test from 'ava';
 import {HebrewCalendar, Location, HDate, Event, flags,
+  DafYomiEvent, ParshaEvent,
   HebrewDateEvent, OmerEvent} from '@hebcal/core';
 import {IcalEvent, eventsToIcalendar} from './icalendar';
 
@@ -552,6 +553,20 @@ test('utm_campaign', (t) => {
     'END:VEVENT',
   ];
   t.deepEqual(lines, expected);
+});
+
+test('campaign2', (t) => {
+  const ev1 = new ParshaEvent(new HDate(new Date(2022, 3, 30)), ['Kedoshim'], true);
+  const ical1 = new IcalEvent(ev1, {utmCampaign: 'ical-foo-bar'});
+  const lines1 = ical1.getLongLines();
+  const desc1 = findLine(lines1, 'DESCRIPTION');
+  t.is(desc1, 'Torah: Leviticus 19:1-20:27\\nHaftarah: I Samuel 20:18-42 | Shabbat Machar Chodesh\\nHaftarah for Sephardim: Ezekiel 20:2-20\\n\\nhttps://hebcal.com/s/kedoshim-20220430?i=on&uc=ical-foo-bar');
+
+  const ev2 = new DafYomiEvent(new HDate(new Date(1995, 11, 17)));
+  const ical2 = new IcalEvent(ev2, {utmCampaign: 'ical-foo-bar'});
+  const lines2 = ical2.getLongLines();
+  const desc2 = findLine(lines2, 'DESCRIPTION');
+  t.is(desc2, 'https://www.sefaria.org/Avodah_Zarah.68a?lang=bi&utm_source=hebcal.com&utm_medium=icalendar&utm_campaign=ical-foo-bar');
 });
 
 test('caldesc', async (t) => {
