@@ -49,24 +49,6 @@ function appendTrackingToUrl(url, options) {
   const utmSource = options.utmSource || 'js';
   const utmMedium = options.utmMedium || 'icalendar';
   const utmCampaign = options.utmCampaign;
-  const u = new URL(url);
-  if (utmCampaign && utmCampaign.startsWith('ical-') && u.host === 'www.hebcal.com') {
-    u.host = 'hebcal.com';
-    const path = u.pathname;
-    if (path.startsWith('/holidays/')) {
-      u.pathname = '/h/' + path.substring(10);
-    } else if (path.startsWith('/sedrot/')) {
-      u.pathname = '/s/' + path.substring(8);
-    } else {
-      return appendIsraelAndTracking(url,
-          options.il, utmSource, utmMedium, utmCampaign);
-    }
-    if (options.il) {
-      u.searchParams.set('i', 'on');
-    }
-    u.searchParams.set('uc', utmCampaign);
-    return u.toString();
-  }
   return appendIsraelAndTracking(url,
       options.il, utmSource, utmMedium, utmCampaign);
 }
