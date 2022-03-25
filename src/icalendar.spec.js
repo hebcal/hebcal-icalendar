@@ -89,7 +89,7 @@ test('ical-transp-opaque', (t) => {
     'BEGIN:VEVENT',
     'DTSTAMP:X',
     'CATEGORIES:Holiday',
-    'SUMMARY:✡️ Erev Pesach',
+    'SUMMARY:🫓🍷 Erev Pesach',
     'DTSTART;VALUE=DATE:19930405',
     'DTEND;VALUE=DATE:19930406',
     'UID:X',
@@ -104,7 +104,7 @@ test('ical-transp-opaque', (t) => {
   t.deepEqual(lines, expected);
 
   lines = new IcalEvent(events[1], options).toString().split('\r\n');
-  t.is(findLine(lines, 'SUMMARY'), '✡️ Pesach I');
+  t.is(findLine(lines, 'SUMMARY'), '🫓🍷 Pesach I');
   t.is(findLine(lines, 'TRANSP'), 'OPAQUE');
 
   events[2].memo = memo;
@@ -115,7 +115,7 @@ test('ical-transp-opaque', (t) => {
     'BEGIN:VEVENT',
     'DTSTAMP:X',
     'CATEGORIES:Holiday',
-    'SUMMARY:✡️ Pesach II',
+    'SUMMARY:🫓 Pesach II',
     'DTSTART;VALUE=DATE:19930407',
     'DTEND;VALUE=DATE:19930408',
     'UID:X',
@@ -131,7 +131,7 @@ test('ical-transp-opaque', (t) => {
   t.deepEqual(lines, expected);
 
   lines = new IcalEvent(events[3], options).toString().split('\r\n');
-  t.is(findLine(lines, 'SUMMARY'), '✡️ Pesach III (CH\'\'M)');
+  t.is(findLine(lines, 'SUMMARY'), '🫓 Pesach III (CH\'\'M)');
   t.is(findLine(lines, 'TRANSP'), 'TRANSPARENT');
 });
 
