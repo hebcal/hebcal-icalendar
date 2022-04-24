@@ -496,7 +496,7 @@ test('OmerEvent', (t) => {
   const expected = [
     'BEGIN:VEVENT',
     'DTSTAMP:X',
-    'SUMMARY:3️⃣7️⃣ 37th day of the Omer',
+    'SUMMARY:㊲ 37th day of the Omer',
     'DTSTART;VALUE=DATE:20210504',
     'DTEND;VALUE=DATE:20210505',
     'UID:hebcal-20210504-45f4acad',
@@ -505,7 +505,8 @@ test('OmerEvent', (t) => {
     'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
     'CLASS:PUBLIC',
     'DESCRIPTION:Today is 37 days\\, which is 5 weeks and 2 days of the Omer\\n\\n',
-    ' Might that is in Foundation / גְבוּרָה שֶׁבַּיְּסוֹד',
+    ' Might within Foundation\nגְבוּרָה שֶׁבִּיְּסוֹד\nGevura',
+    ' h shebiYesod',
     'BEGIN:VALARM',
     'ACTION:DISPLAY',
     'DESCRIPTION:This is an event reminder',
