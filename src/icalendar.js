@@ -360,6 +360,9 @@ function makeTorahMemo(ev, il) {
 function createMemo(e, options) {
   const desc = e.getDesc();
   const candles = (desc === 'Havdalah' || desc === 'Candle lighting');
+  if (typeof e.memo === 'string' && e.memo.length && e.memo.indexOf('\n') !== -1) {
+    e.memo = e.memo.replace(/\n/g, '\\n');
+  }
   if (candles) {
     return e.memo || '';
   }
