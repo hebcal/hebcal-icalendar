@@ -496,7 +496,7 @@ test('OmerEvent', (t) => {
   const expected = [
     'BEGIN:VEVENT',
     'DTSTAMP:X',
-    'SUMMARY:㊲ 37th day of the Omer',
+    'SUMMARY:37th day of the Omer ㊲',
     'DTSTART;VALUE=DATE:20210504',
     'DTEND;VALUE=DATE:20210505',
     'UID:hebcal-20210504-45f4acad',

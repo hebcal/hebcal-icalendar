@@ -112,7 +112,11 @@ export class IcalEvent {
     if (options.emoji) {
       const prefix = ev.getEmoji();
       if (prefix) {
-        subj = prefix + ' ' + subj;
+        if (mask & flags.OMER_COUNT) {
+          subj = subj + ' ' + prefix;
+        } else {
+          subj = prefix + ' ' + subj;
+        }
       }
     }
 
