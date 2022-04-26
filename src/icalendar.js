@@ -384,7 +384,8 @@ function createMemo(e, options) {
   }
   const mask = e.getFlags();
   if (mask & flags.OMER_COUNT) {
-    return e.getTodayIs('en') + '\\n\\n' + e.memo;
+    const sefira = [e.sefira('en'), e.sefira('he'), e.sefira('translit')].join('\\n');
+    return e.getTodayIs('en') + '\\n\\n' + sefira + '\\n\\n' + e.url();
   }
   const url = appendTrackingToUrl(e.url(), options);
   const torahMemo = makeTorahMemo(e, options.il);
