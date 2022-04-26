@@ -1,4 +1,4 @@
-import {flags, Locale} from '@hebcal/core';
+import {flags, Locale, greg} from '@hebcal/core';
 import {murmur32HexSync} from 'murmurhash3';
 import {pad2, pad4, getCalendarTitle, makeAnchor, getEventCategories,
   getHolidayDescription, makeTorahMemoText, appendIsraelAndTracking,
@@ -126,19 +126,30 @@ export class IcalEvent {
       }
     }
     this.subj = subj;
-
-    const isUserEvent = Boolean(mask & flags.USER_EVENT);
-    if (ev.alarm) {
-      this.alarm = ev.alarm;
-    } else if (mask & flags.OMER_COUNT) {
-      this.alarm = '-P0DT3H30M0S'; // 8:30pm Omer alarm evening before
-    } else if (isUserEvent) {
-      this.alarm = '-P0DT12H0M0S'; // noon the day before
-    } else if (timed && ev.getDesc().startsWith('Candle lighting')) {
-      this.alarm = '-P0DT0H10M0S'; // ten minutes
-    }
-
     this.category = ev.category || CATEGORY[getEventCategories(ev)[0]];
+  }
+
+
+  /**
+   * @return {string}
+   */
+  getAlarm() {
+    const ev = this.ev;
+    const mask = ev.getFlags();
+    const evAlarm = ev.alarm;
+    if (typeof evAlarm === 'string') {
+      return 'TRIGGER:' + evAlarm;
+    } else if (greg.isDate(evAlarm)) {
+      evAlarm.setSeconds(0);
+      return 'TRIGGER;VALUE=DATE-TIME:' + IcalEvent.makeDtstamp(evAlarm);
+    } else if (mask & flags.OMER_COUNT) {
+      return 'TRIGGER:-P0DT3H30M0S'; // 8:30pm Omer alarm evening before
+    } else if (mask & flags.USER_EVENT) {
+      return 'TRIGGER:-P0DT12H0M0S'; // noon the day before
+    } else if (this.timed && ev.getDesc().startsWith('Candle lighting')) {
+      return 'TRIGGER:-P0DT0H10M0S';
+    }
+    return null;
   }
 
   /**
@@ -197,12 +208,13 @@ export class IcalEvent {
       arr.push('GEO:' + options.location.latitude + ';' + options.location.longitude);
     }
 
-    if (this.alarm) {
+    const trigger = this.getAlarm();
+    if (trigger) {
       arr.push(
           'BEGIN:VALARM',
           'ACTION:DISPLAY',
-          'DESCRIPTION:This is an event reminder',
-          `TRIGGER:${this.alarm}`,
+          'DESCRIPTION:Event reminder',
+          `${trigger}`,
           'END:VALARM',
       );
     }

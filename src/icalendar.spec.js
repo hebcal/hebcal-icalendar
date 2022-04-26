@@ -164,7 +164,7 @@ test('ical-candles', (t) => {
     'GEO:41.85003;-87.65005',
     'BEGIN:VALARM',
     'ACTION:DISPLAY',
-    'DESCRIPTION:This is an event reminder',
+    'DESCRIPTION:Event reminder',
     'TRIGGER:-P0DT0H10M0S',
     'END:VALARM',
     'END:VEVENT',
@@ -404,7 +404,7 @@ test('userEvent', (t) => {
     'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
     'BEGIN:VALARM',
     'ACTION:DISPLAY',
-    'DESCRIPTION:This is an event reminder',
+    'DESCRIPTION:Event reminder',
     'TRIGGER:-P0DT12H0M0S',
     'END:VALARM',
     'END:VEVENT',
@@ -509,12 +509,37 @@ test('OmerEvent', (t) => {
     ' rah shebiYesod',
     'BEGIN:VALARM',
     'ACTION:DISPLAY',
-    'DESCRIPTION:This is an event reminder',
+    'DESCRIPTION:Event reminder',
     'TRIGGER:-P0DT3H30M0S',
     'END:VALARM',
     'END:VEVENT',
   ];
   t.deepEqual(lines, expected);
+});
+
+test('omer-alarm', (t) => {
+  const dt = new Date(2022, 3, 26);
+  const options = {
+    start: dt,
+    end: dt,
+    noHolidays: true,
+    omer: true,
+    candlelighting: true,
+    location: Location.lookup('Vancouver'),
+  };
+  const ev = HebrewCalendar.calendar(options)[0];
+  const ical = new IcalEvent(ev, options);
+  const lines = ical.toString().split('\r\n');
+  const alarm = lines.slice(lines.length - 6);
+  const expected = [
+    'BEGIN:VALARM',
+    'ACTION:DISPLAY',
+    'DESCRIPTION:Event reminder',
+    'TRIGGER;VALUE=DATE-TIME:20220426T040300Z',
+    'END:VALARM',
+    'END:VEVENT',
+  ];
+  t.deepEqual(alarm, expected);
 });
 
 /** @private */

@@ -1,6 +1,6 @@
 {
   "name": "@hebcal/icalendar",
-  "version": "4.16.0",
+  "version": "4.17.0",
   "author": "Michael J. Radwin (https://github.com/mjradwin)",
   "keywords": [
     "ical",
@@ -24,7 +24,7 @@
     "url": "https://github.com/hebcal/hebcal-icalendar/issues"
   },
   "dependencies": {
-    "@hebcal/core": "^3.35.0",
+    "@hebcal/core": "^3.36.0",
     "@hebcal/rest-api": "^3.13.0",
     "murmurhash3": "^0.5.0"
   },
