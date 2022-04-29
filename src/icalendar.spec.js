@@ -506,7 +506,7 @@ test('OmerEvent', (t) => {
     'CLASS:PUBLIC',
     'DESCRIPTION:Today is 37 days\\, which is 5 weeks and 2 days of the Omer\\n\\n',
     ' Might within Foundation\\nגְבוּרָה שֶׁבִּיְּסוֹד\\nGevu',
-    ' rah shebiYesod\\n\\nhttps://www.hebcal.com/omer/5781/37',
+    ' rah shebiYesod',
     'BEGIN:VALARM',
     'ACTION:DISPLAY',
     'DESCRIPTION:Event reminder',
