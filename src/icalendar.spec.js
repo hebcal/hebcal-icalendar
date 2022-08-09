@@ -137,8 +137,8 @@ test('ical-transp-opaque', (t) => {
 
 test('ical-candles', (t) => {
   const options = {
-    year: 1993,
-    month: 3,
+    start: new Date(1993, 2, 12),
+    end: new Date(1993, 2, 14),
     location: new Location(41.85003, -87.65005, false, 'America/Chicago', 'Chicago', 'US', 4887398),
     candlelighting: true,
     noHolidays: true,
@@ -154,8 +154,8 @@ test('ical-candles', (t) => {
     'DTSTAMP:X',
     'CATEGORIES:Holiday',
     'SUMMARY:🕯️ Candle lighting',
-    'DTSTART;TZID=America/Chicago:19930305T172700',
-    'DTEND;TZID=America/Chicago:19930305T172700',
+    'DTSTART;TZID=America/Chicago:19930312T173500',
+    'DTEND;TZID=America/Chicago:19930312T173500',
     'UID:X',
     'TRANSP:TRANSPARENT',
     'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
