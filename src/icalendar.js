@@ -350,7 +350,7 @@ const HOLIDAY_IGNORE_MASK = flags.DAF_YOMI | flags.OMER_COUNT |
  * @return {string}
  */
 function makeTorahMemo(ev, il) {
-  if (ev.getFlags() & HOLIDAY_IGNORE_MASK) {
+  if ((ev.getFlags() & HOLIDAY_IGNORE_MASK) || ev.eventTime) {
     return '';
   }
   const hd = ev.getDate();

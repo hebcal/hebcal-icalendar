@@ -320,8 +320,8 @@ test('appendHebrewToSubject', (t) => {
 
 test('chanukah-candles', (t) => {
   const options = {
-    start: new Date(2020, 11, 10),
-    end: new Date(2020, 11, 10),
+    start: new Date(2020, 11, 11),
+    end: new Date(2020, 11, 11),
     location: Location.lookup('Boston'),
     candlelighting: true,
     emoji: true,
@@ -335,9 +335,9 @@ test('chanukah-candles', (t) => {
     'BEGIN:VEVENT',
     'DTSTAMP:X',
     'CATEGORIES:Holiday',
-    'SUMMARY:🕎1️⃣ Chanukah: 1 Candle',
-    'DTSTART;TZID=America/New_York:20201210T164300',
-    'DTEND;TZID=America/New_York:20201210T164300',
+    'SUMMARY:🕎2️⃣ Chanukah: 2 Candles',
+    'DTSTART;TZID=America/New_York:20201211T155300',
+    'DTEND;TZID=America/New_York:20201211T155300',
     'UID:X',
     'TRANSP:TRANSPARENT',
     'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
