@@ -188,7 +188,7 @@ test('ical-dafyomi', (t) => {
     locale: 'he',
   };
   const ev = HebrewCalendar.calendar(options)[0];
-  t.is(ev.render(), 'דף יומי: נדרים 14');
+  t.is(ev.getDesc(), 'Nedarim 14');
   const ical = new IcalEvent(ev, options);
   const lines = ical.toString().split('\r\n');
   lines[1] = 'DTSTAMP:X';
@@ -197,7 +197,7 @@ test('ical-dafyomi', (t) => {
     'BEGIN:VEVENT',
     'DTSTAMP:X',
     'CATEGORIES:Daf Yomi',
-    'SUMMARY:נדרים 14',
+    'SUMMARY:נדרים דף י״ד',
     'DTSTART;VALUE=DATE:19930301',
     'DTEND;VALUE=DATE:19930302',
     'UID:X',
@@ -207,7 +207,7 @@ test('ical-dafyomi', (t) => {
     'CLASS:PUBLIC',
     'DESCRIPTION:https://www.sefaria.org/Nedarim.14a?lang=bi&utm_source=hebcal.',
     ' com&utm_medium=icalendar',
-    'LOCATION:דף יומי',
+    'LOCATION:דַף יוֹמִי',
     'END:VEVENT',
   ];
   t.deepEqual(lines, expected);
