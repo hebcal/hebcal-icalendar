@@ -11,6 +11,7 @@ const CATEGORY = {
   candles: 'Holiday',
   dafyomi: 'Daf Yomi',
   mishnayomi: 'Mishna Yomi',
+  yerushalmi: 'Yerushalmi Yomi',
   havdalah: 'Holiday',
   hebdate: null,
   holiday: 'Holiday',
@@ -340,7 +341,7 @@ const torahMemoCache = new Map();
 
 const HOLIDAY_IGNORE_MASK = flags.DAF_YOMI | flags.OMER_COUNT |
   flags.SHABBAT_MEVARCHIM | flags.MOLAD | flags.USER_EVENT |
-  flags.MISHNA_YOMI |
+  flags.MISHNA_YOMI | flags.YERUSHALMI_YOMI |
   flags.HEBREW_DATE;
 
 /**

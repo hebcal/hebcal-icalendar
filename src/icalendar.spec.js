@@ -633,3 +633,35 @@ test('uid', (t) => {
   const ical2 = new IcalEvent(new Event(new HDate(2, 'Cheshvan', 5782), 'Hello World'), {});
   t.is(ical2.getUid(), 'hebcal-20211008-197683ce');
 });
+
+test('yerushalmi-yomi', (t) => {
+  const hd = new HDate(new Date(2022, 10, 15));
+  const options = {
+    start: hd,
+    end: hd,
+    noHolidays: true,
+    yerushalmi: true,
+    locale: 'ashkenazi',
+  };
+  const ev = HebrewCalendar.calendar(options)[0];
+  t.is(ev.getDesc(), 'Berakhot 2');
+  const ical = new IcalEvent(ev, options);
+  const lines = ical.toString().split('\r\n');
+  lines[1] = 'DTSTAMP:X';
+  lines[6] = 'UID:X';
+  const expected = [
+    'BEGIN:VEVENT',
+    'DTSTAMP:X',
+    'CATEGORIES:Yerushalmi Yomi',
+    'SUMMARY:Yerushalmi Berakhos 2',
+    'DTSTART;VALUE=DATE:20221115',
+    'DTEND;VALUE=DATE:20221116',
+    'UID:X',
+    'TRANSP:TRANSPARENT',
+    'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
+    'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
+    'CLASS:PUBLIC',
+    'END:VEVENT',
+  ];
+  t.deepEqual(lines, expected);
+});
