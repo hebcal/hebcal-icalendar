@@ -653,7 +653,7 @@ test('yerushalmi-yomi', (t) => {
     'BEGIN:VEVENT',
     'DTSTAMP:X',
     'CATEGORIES:Yerushalmi Yomi',
-    'SUMMARY:Yerushalmi Berakhos 2',
+    'SUMMARY:Berakhos 2',
     'DTSTART;VALUE=DATE:20221115',
     'DTEND;VALUE=DATE:20221116',
     'UID:X',
@@ -661,6 +661,9 @@ test('yerushalmi-yomi', (t) => {
     'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
     'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
     'CLASS:PUBLIC',
+    'DESCRIPTION:https://www.sefaria.org/Jerusalem_Talmud_Berakhot.1.1.7-11?lan',
+    ' g=bi&utm_source=hebcal.com&utm_medium=icalendar',
+    'LOCATION:Yerushalmi Yomi',
     'END:VEVENT',
   ];
   t.deepEqual(lines, expected);

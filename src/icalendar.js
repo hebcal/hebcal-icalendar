@@ -78,6 +78,8 @@ export class IcalEvent {
       this.locationName = ev.locationName;
     } else if (mask & flags.DAF_YOMI) {
       this.locationName = Locale.gettext('Daf Yomi');
+    } else if (mask & flags.YERUSHALMI_YOMI) {
+      this.locationName = Locale.gettext('Yerushalmi Yomi');
     } else if (mask & flags.MISHNA_YOMI) {
       this.locationName = Locale.gettext('Mishna Yomi');
     } else if (timed && options.location && options.location.name) {
