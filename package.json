@@ -24,8 +24,8 @@
     "url": "https://github.com/hebcal/hebcal-icalendar/issues"
   },
   "dependencies": {
-    "@hebcal/core": "^3.46.5",
-    "@hebcal/rest-api": "^4.3.8",
+    "@hebcal/core": "^3.46.6",
+    "@hebcal/rest-api": "^4.3.9",
     "murmurhash3": "^0.5.0"
   },
   "scripts": {
@@ -55,10 +55,10 @@
     "@rollup/plugin-commonjs": "^23.0.3",
     "@rollup/plugin-json": "^5.0.2",
     "ava": "^5.1.0",
-    "eslint": "^8.28.0",
+    "eslint": "^8.29.0",
     "eslint-config-google": "^0.14.0",
     "jsdoc": "^4.0.0",
     "jsdoc-to-markdown": "^8.0.0",
-    "rollup": "^3.5.1"
+    "rollup": "^3.6.0"
   }
 }
