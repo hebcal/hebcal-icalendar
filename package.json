@@ -1,6 +1,6 @@
 {
   "name": "@hebcal/icalendar",
-  "version": "4.18.5",
+  "version": "4.18.6",
   "author": "Michael J. Radwin (https://github.com/mjradwin)",
   "keywords": [
     "ical",
@@ -11,6 +11,10 @@
   "description": "Jewish holidays and Hebrew calendar as iCalendar RFC 2445",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
+  "exports": {
+    "import": "./dist/index.mjs",
+    "require": "./dist/index.js"
+  },
   "typings": "icalendar.d.ts",
   "files": [
     "dist",
@@ -24,8 +28,8 @@
     "url": "https://github.com/hebcal/hebcal-icalendar/issues"
   },
   "dependencies": {
-    "@hebcal/core": "^3.46.6",
-    "@hebcal/rest-api": "^4.3.9",
+    "@hebcal/core": "^3.48.2",
+    "@hebcal/rest-api": "^4.3.14",
     "murmurhash3": "^0.5.0"
   },
   "scripts": {
@@ -37,28 +41,20 @@
   },
   "license": "BSD-2-Clause",
   "ava": {
-    "files": [
-      "src/**/*.spec.js"
-    ],
-    "require": [
-      "@babel/register",
-      "regenerator-runtime/runtime"
-    ],
-    "inherit": true,
-    "verbose": true
+    "require": ["@babel/register"]
   },
   "devDependencies": {
     "@babel/core": "^7.20.5",
     "@babel/preset-env": "^7.20.2",
     "@babel/register": "^7.18.9",
     "@rollup/plugin-babel": "^6.0.3",
-    "@rollup/plugin-commonjs": "^23.0.3",
-    "@rollup/plugin-json": "^5.0.2",
+    "@rollup/plugin-commonjs": "^24.0.0",
+    "@rollup/plugin-json": "^6.0.0",
     "ava": "^5.1.0",
-    "eslint": "^8.29.0",
+    "eslint": "^8.30.0",
     "eslint-config-google": "^0.14.0",
     "jsdoc": "^4.0.0",
     "jsdoc-to-markdown": "^8.0.0",
-    "rollup": "^3.6.0"
+    "rollup": "^3.7.5"
   }
 }

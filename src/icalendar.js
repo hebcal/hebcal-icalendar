@@ -11,6 +11,7 @@ const CATEGORY = {
   candles: 'Holiday',
   dafyomi: 'Daf Yomi',
   mishnayomi: 'Mishna Yomi',
+  nachyomi: 'Nach Yomi',
   yerushalmi: 'Yerushalmi Yomi',
   havdalah: 'Holiday',
   hebdate: null,
@@ -80,6 +81,8 @@ export class IcalEvent {
       this.locationName = Locale.gettext('Daf Yomi');
     } else if (mask & flags.YERUSHALMI_YOMI) {
       this.locationName = Locale.gettext('Yerushalmi Yomi');
+    } else if (mask & flags.NACH_YOMI) {
+      this.locationName = Locale.gettext('Nach Yomi');
     } else if (mask & flags.MISHNA_YOMI) {
       this.locationName = Locale.gettext('Mishna Yomi');
     } else if (timed && options.location && options.location.name) {
@@ -343,7 +346,7 @@ const torahMemoCache = new Map();
 
 const HOLIDAY_IGNORE_MASK = flags.DAF_YOMI | flags.OMER_COUNT |
   flags.SHABBAT_MEVARCHIM | flags.MOLAD | flags.USER_EVENT |
-  flags.MISHNA_YOMI | flags.YERUSHALMI_YOMI |
+  flags.MISHNA_YOMI | flags.YERUSHALMI_YOMI | flags.NACH_YOMI |
   flags.HEBREW_DATE;
 
 /**
