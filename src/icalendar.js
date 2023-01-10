@@ -149,6 +149,8 @@ export class IcalEvent {
     const evAlarm = ev.alarm;
     if (typeof evAlarm === 'string') {
       return 'TRIGGER:' + evAlarm;
+    } else if (typeof evAlarm === 'boolean' && !evAlarm) {
+      return null;
     } else if (greg.isDate(evAlarm)) {
       evAlarm.setSeconds(0);
       return 'TRIGGER;VALUE=DATE-TIME:' + IcalEvent.makeDtstamp(evAlarm);
