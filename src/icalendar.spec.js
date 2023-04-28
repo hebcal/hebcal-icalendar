@@ -1,8 +1,9 @@
 /* eslint-disable max-len */
 import test from 'ava';
 import {HebrewCalendar, Location, HDate, Event, flags,
-  DafYomiEvent, ParshaEvent,
+  ParshaEvent,
   HebrewDateEvent, OmerEvent} from '@hebcal/core';
+import {DafYomiEvent} from '@hebcal/learning';
 import {IcalEvent, eventsToIcalendar} from './icalendar';
 
 /**
@@ -184,7 +185,7 @@ test('ical-dafyomi', (t) => {
     year: 1993,
     month: 3,
     noHolidays: true,
-    dafyomi: true,
+    dailyLearning: {dafYomi: true},
     locale: 'he',
   };
   const ev = HebrewCalendar.calendar(options)[0];
@@ -343,8 +344,9 @@ test('chanukah-candles', (t) => {
     'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
     'CLASS:PUBLIC',
     'DESCRIPTION:Hanukkah\\, the Jewish festival of rededication. Also known as ',
-    ' the Festival of Lights\\n\\nhttps://hebcal.com/h/chanukah-2020?us=js&um=ical',
-    ' endar',
+    ' the Festival of Lights\\, the eight-day festival is observed by lighting th',
+    ' e candles of a hanukkiah (menorah)\\n\\nhttps://hebcal.com/h/chanukah-2020?u',
+    ' s=js&um=icalendar',
     'LOCATION:Boston',
     'GEO:42.35843;-71.05977',
     'END:VEVENT',
@@ -376,9 +378,11 @@ test('ical-il-url', (t) => {
     'X-MICROSOFT-CDO-BUSYSTATUS:OOF',
     'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
     'CLASS:PUBLIC',
-    'DESCRIPTION:Eighth Day of Assembly\\n\\nTorah: Deuteronomy 33:1-34:12\\; Gene',
-    ' sis 1:1-2:3\\; Numbers 29:35-30:1\\nHaftarah: Joshua 1:1-18\\n\\nhttps://hebca',
-    ' l.com/h/shmini-atzeret-2021?i=on&us=js&um=icalendar',
+    'DESCRIPTION:Eighth Day of Assembly. Immediately following Sukkot\\, it is o',
+    ' bserved as a separate holiday in the Diaspora and is combined with Simchat',
+    '  Torah in Israel\\n\\nTorah: Deuteronomy 33:1-34:12\\; Genesis 1:1-2:3\\; Numb',
+    ' ers 29:35-30:1\\nHaftarah: Joshua 1:1-18\\n\\nhttps://hebcal.com/h/shmini-atz',
+    ' eret-2021?i=on&us=js&um=icalendar',
     'END:VEVENT',
   ];
   t.deepEqual(lines, expected);
@@ -640,7 +644,7 @@ test('yerushalmi-yomi', (t) => {
     start: hd,
     end: hd,
     noHolidays: true,
-    yerushalmi: true,
+    dailyLearning: {yerushalmi: true},
     locale: 'ashkenazi',
   };
   const ev = HebrewCalendar.calendar(options)[0];
