@@ -489,6 +489,8 @@ test('publishedTTL', async (t) => {
   const ical = await eventsToIcalendar([event], {publishedTTL: 'PT2D'});
   const lines = ical.split('\r\n');
   t.is(lines[6], 'X-PUBLISHED-TTL:PT2D');
+  const ical2 = await eventsToIcalendar([event], {publishedTTL: false});
+  t.is(ical2.indexOf('X-PUBLISHED-TTL'), -1);
 });
 
 test('OmerEvent', (t) => {
@@ -557,6 +559,10 @@ class TestEvent extends Event {
   /** @return {string} */
   url() {
     return 'https://www.hebcal.com/foobar';
+  }
+  /** @return {string[]} */
+  getCategories() {
+    return ['holiday'];
   }
 }
 

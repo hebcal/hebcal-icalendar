@@ -421,7 +421,7 @@ function createMemo(e, options) {
  * Generates an RFC 2445 iCalendar string from an array of events
  * @param {Event[]} events
  * @param {HebrewCalendar.Options} options
- * @return {string}
+ * @return {Promise<string>}
  */
 export async function eventsToIcalendar(events, options) {
   if (!events.length) throw new RangeError('Events can not be empty');
@@ -439,7 +439,7 @@ export async function eventsToIcalendar(events, options) {
  * Generates an RFC 2445 iCalendar string from an array of IcalEvents
  * @param {IcalEvent[]} icals
  * @param {HebrewCalendar.Options} options
- * @return {string}
+ * @return {Promise<string>}
  */
 export async function icalEventsToString(icals, options) {
   const stream = [];
@@ -451,7 +451,6 @@ export async function icalEventsToString(icals, options) {
     opts.yahrzeit ?
     'Yahrzeits + Anniversaries from www.hebcal.com' :
     'Jewish Holidays from www.hebcal.com';
-  const publishedTTL = opts.publishedTTL || 'PT7D';
   const prodid = opts.prodid || `-//hebcal.com/NONSGML Hebcal Calendar v1${version}//${uclang}`;
   const preamble = [
     'BEGIN:VCALENDAR',
@@ -460,10 +459,13 @@ export async function icalEventsToString(icals, options) {
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     'X-LOTUS-CHARSET:UTF-8',
-    `X-PUBLISHED-TTL:${publishedTTL}`,
-    `X-WR-CALNAME:${title}`,
-    `X-WR-CALDESC:${caldesc}`,
   ];
+  if (opts.publishedTTL !== false) {
+    const publishedTTL = opts.publishedTTL || 'PT7D';
+    preamble.push(`X-PUBLISHED-TTL:${publishedTTL}`);
+  }
+  preamble.push(`X-WR-CALNAME:${title}`);
+  preamble.push(`X-WR-CALDESC:${caldesc}`);
   for (const line of preamble.map(IcalEvent.fold)) {
     stream.push(line);
     stream.push('\r\n');

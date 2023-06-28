@@ -1,6 +1,6 @@
 {
   "name": "@hebcal/icalendar",
-  "version": "4.20.0",
+  "version": "4.20.1",
   "author": "Michael J. Radwin (https://github.com/mjradwin)",
   "keywords": [
     "ical",
@@ -28,8 +28,8 @@
     "url": "https://github.com/hebcal/hebcal-icalendar/issues"
   },
   "dependencies": {
-    "@hebcal/core": "^4.0.0",
-    "@hebcal/rest-api": "^4.5.0",
+    "@hebcal/core": "^4.1.1",
+    "@hebcal/rest-api": "^4.5.1",
     "murmurhash3": "^0.5.0"
   },
   "scripts": {
@@ -46,18 +46,18 @@
     ]
   },
   "devDependencies": {
-    "@babel/core": "^7.21.5",
-    "@babel/preset-env": "^7.21.5",
-    "@babel/register": "^7.21.0",
-    "@hebcal/learning": "^1.1.2",
+    "@babel/core": "^7.22.5",
+    "@babel/preset-env": "^7.22.5",
+    "@babel/register": "^7.22.5",
+    "@hebcal/learning": "^1.4.0",
     "@rollup/plugin-babel": "^6.0.3",
-    "@rollup/plugin-commonjs": "^24.1.0",
+    "@rollup/plugin-commonjs": "^25.0.2",
     "@rollup/plugin-json": "^6.0.0",
-    "ava": "^5.2.0",
-    "eslint": "^8.39.0",
+    "ava": "^5.3.1",
+    "eslint": "^8.43.0",
     "eslint-config-google": "^0.14.0",
     "jsdoc": "^4.0.2",
     "jsdoc-to-markdown": "^8.0.0",
-    "rollup": "^3.21.0"
+    "rollup": "^3.25.3"
   }
 }
