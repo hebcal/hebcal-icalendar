@@ -678,3 +678,18 @@ test('yerushalmi-yomi', (t) => {
   ];
   t.deepEqual(lines, expected);
 });
+
+test('sequence', (t) => {
+  const ev = new TestEvent(new HDate(22, 'Iyyar', 5781));
+  const icalEvent = new IcalEvent(ev, {sequence: 73});
+  const lines = icalEvent.toString().split('\r\n').slice(0, 5);
+  lines[1] = 'DTSTAMP:X';
+  const expected = [
+    'BEGIN:VEVENT',
+    'DTSTAMP:X',
+    'SEQUENCE:73',
+    'CATEGORIES:Holiday',
+    'SUMMARY:Test Event',
+  ];
+  t.deepEqual(lines, expected);
+});

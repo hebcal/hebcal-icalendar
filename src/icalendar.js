@@ -71,6 +71,11 @@ export class IcalEvent {
     this.ev = ev;
     this.options = options;
     this.dtstamp = options.dtstamp || IcalEvent.makeDtstamp(new Date());
+    if (typeof ev.sequence === 'number') {
+      this.sequence = ev.sequence;
+    } else if (typeof options.sequence === 'number') {
+      this.sequence = options.sequence;
+    }
     const timed = this.timed = Boolean(ev.eventTime);
     const locale = options.locale;
     let subj = shouldRenderBrief(ev) ? ev.renderBrief(locale) : ev.render(locale);
@@ -186,8 +191,11 @@ export class IcalEvent {
    */
   getLongLines() {
     if (this.lines) return this.lines;
-    const categoryLine = this.category ? `CATEGORIES:${this.category}` : [];
+    const categoryLine = this.category ? [`CATEGORIES:${this.category}`] : [];
     const uid = this.ev.uid || this.getUid();
+    if (this.sequence) {
+      categoryLine.unshift(`SEQUENCE:${this.sequence}`);
+    }
     const arr = this.lines = [
       'BEGIN:VEVENT',
       `DTSTAMP:${this.dtstamp}`,
