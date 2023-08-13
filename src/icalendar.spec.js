@@ -307,14 +307,14 @@ test('appendHebrewToSubject', (t) => {
   const summary = icals.map((i) => i.toString().split('\r\n').find((s) => s.startsWith('SUMMARY')));
   const expected = [
     'SUMMARY:Parashat Bamidbar / פָּרָשַׁת בְּמִדְבַּר',
-    'SUMMARY:✨ Havdalah / הַבדָלָה',
+    'SUMMARY:✨ Havdalah / הַבְדָּלָה',
     'SUMMARY:🌒 Rosh Chodesh Sivan / רֹאשׁ חוֹדֶשׁ סִיוָן',
     'SUMMARY:⛰️🌸 Erev Shavuot / עֶרֶב שָׁבוּעוֹת',
-    'SUMMARY:🕯️ Candle lighting / הַדלָקָת נֵרוֹת',
+    'SUMMARY:🕯️ Candle lighting / הַדְלָקַת נֵרוֹת',
     'SUMMARY:⛰️🌸 Shavuot I / שָׁבוּעוֹת א׳',
-    'SUMMARY:🕯️ Candle lighting / הַדלָקָת נֵרוֹת',
+    'SUMMARY:🕯️ Candle lighting / הַדְלָקַת נֵרוֹת',
     'SUMMARY:⛰️🌸 Shavuot II / שָׁבוּעוֹת ב׳',
-    'SUMMARY:✨ Havdalah / הַבדָלָה',
+    'SUMMARY:✨ Havdalah / הַבְדָּלָה',
   ];
   t.deepEqual(summary, expected);
 });
