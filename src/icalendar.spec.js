@@ -702,7 +702,6 @@ test('linkedEvent-memo', (t) => {
   const icalEvent = new IcalEvent(ev2, {});
   const lines = icalEvent.toString().split('\r\n');
   lines[1] = 'DTSTAMP:X';
-  console.log(lines);
   const expected = [
     'BEGIN:VEVENT',
     'DTSTAMP:X',
