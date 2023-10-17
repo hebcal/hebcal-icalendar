@@ -41,7 +41,7 @@ function addOptional(arr, key, val) {
 /**
  * @private
  * @param {string} url
- * @param {HebrewCalendar.Options} options
+ * @param {CalOptions} options
  * @return {string}
  */
 function appendTrackingToUrl(url, options) {
@@ -65,7 +65,7 @@ export class IcalEvent {
   /**
    * Builds an IcalEvent object from a Hebcal Event
    * @param {Event} ev
-   * @param {HebrewCalendar.Options} options
+   * @param {CalOptions} options
    */
   constructor(ev, options={}) {
     this.ev = ev;
@@ -90,7 +90,7 @@ export class IcalEvent {
       this.locationName = Locale.gettext('Nach Yomi');
     } else if (mask & flags.MISHNA_YOMI) {
       this.locationName = Locale.gettext('Mishna Yomi');
-    } else if (timed && options.location && options.location.name) {
+    } else if (timed && options.location?.name) {
       const comma = options.location.name.indexOf(',');
       this.locationName = (comma == -1) ? options.location.name : options.location.name.substring(0, comma);
     }
@@ -105,7 +105,7 @@ export class IcalEvent {
       minute = +minute;
       this.startDate += 'T' + pad2(hour) + pad2(minute) + '00';
       this.endDate = this.startDate;
-      if (options.location && options.location.tzid) {
+      if (options.location?.tzid) {
         this.dtargs = `;TZID=${options.location.tzid}`;
       }
     } else {
@@ -344,7 +344,7 @@ export class IcalEvent {
 /**
  * Transforms a single Event into a VEVENT string
  * @param {Event} ev
- * @param {HebrewCalendar.Options} options
+ * @param {CalOptions} options
  * @return {string} multi-line result, delimited by \r\n
  */
 export function eventToIcal(ev, options) {
@@ -386,17 +386,17 @@ function makeTorahMemo(ev, il) {
 /**
  * @private
  * @param {Event} e
- * @param {HebrewCalendar.Options} options
+ * @param {CalOptions} options
  * @return {string}
  */
 function createMemo(e, options) {
-  const desc = e.getDesc();
-  const candles = (desc === 'Havdalah' || desc === 'Candle lighting');
-  if (typeof e.memo === 'string' && e.memo.length && e.memo.indexOf('\n') !== -1) {
-    e.memo = e.memo.replace(/\n/g, '\\n');
+  let memo = e.memo;
+  if (typeof memo === 'string' && memo.length && memo.indexOf('\n') !== -1) {
+    memo = memo.replace(/\n/g, '\\n');
   }
-  if (candles) {
-    return e.memo || '';
+  const desc = e.getDesc();
+  if (desc === 'Havdalah' || desc === 'Candle lighting') {
+    return memo || '';
   }
   const mask = e.getFlags();
   if (mask & flags.OMER_COUNT) {
@@ -405,30 +405,32 @@ function createMemo(e, options) {
   }
   const url = appendTrackingToUrl(e.url(), options);
   const torahMemo = makeTorahMemo(e, options.il);
-  if (mask & flags.PARSHA_HASHAVUA) {
-    return torahMemo + '\\n\\n' + url;
-  } else {
-    let memo = e.memo || getHolidayDescription(e);
-    if (!memo && typeof e.linkedEvent !== 'undefined') {
+  if (!memo) {
+    if (typeof e.linkedEvent !== 'undefined') {
       memo = e.linkedEvent.render(options.locale);
+    } else {
+      memo = getHolidayDescription(e);
     }
-    if (torahMemo) {
-      memo += '\\n\\n' + torahMemo;
-    }
-    if (url) {
-      if (memo.length) {
-        memo += '\\n\\n';
-      }
-      memo += url;
-    }
-    return memo;
   }
+  if (torahMemo) {
+    if (memo.length) {
+      memo += '\\n\\n';
+    }
+    memo += torahMemo;
+  }
+  if (url) {
+    if (memo.length) {
+      memo += '\\n\\n';
+    }
+    memo += url;
+  }
+  return memo;
 }
 
 /**
  * Generates an RFC 2445 iCalendar string from an array of events
  * @param {Event[]} events
- * @param {HebrewCalendar.Options} options
+ * @param {CalOptions} options
  * @return {Promise<string>}
  */
 export async function eventsToIcalendar(events, options) {
@@ -446,7 +448,7 @@ export async function eventsToIcalendar(events, options) {
 /**
  * Generates an RFC 2445 iCalendar string from an array of IcalEvents
  * @param {IcalEvent[]} icals
- * @param {HebrewCalendar.Options} options
+ * @param {CalOptions} options
  * @return {Promise<string>}
  */
 export async function icalEventsToString(icals, options) {
@@ -486,7 +488,7 @@ export async function icalEventsToString(icals, options) {
     stream.push(`X-APPLE-CALENDAR-COLOR:${opts.calendarColor}\r\n`);
   }
   const location = opts.location;
-  if (location && location.tzid) {
+  if (location?.tzid) {
     const tzid = location.tzid;
     stream.push(`X-WR-TIMEZONE;VALUE=TEXT:${tzid}\r\n`);
     if (VTIMEZONE[tzid]) {

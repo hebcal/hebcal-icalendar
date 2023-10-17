@@ -693,3 +693,43 @@ test('sequence', (t) => {
   ];
   t.deepEqual(lines, expected);
 });
+
+test('linkedEvent-memo', (t) => {
+  const hd = new HDate(22, 'Iyyar', 5781);
+  const ev1 = new HebrewDateEvent(hd);
+  const ev2 = new Event(hd, 'Foo Bar Baaz', flags.USER_EVENT);
+  ev2.linkedEvent = ev1;
+  const icalEvent = new IcalEvent(ev2, {});
+  const lines = icalEvent.toString().split('\r\n');
+  lines[1] = 'DTSTAMP:X';
+  console.log(lines);
+  const expected = [
+    'BEGIN:VEVENT',
+    'DTSTAMP:X',
+    'CATEGORIES:Personal',
+    'SUMMARY:Foo Bar Baaz',
+    'DTSTART;VALUE=DATE:20210504',
+    'DTEND;VALUE=DATE:20210505',
+    'UID:hebcal-20210504-0401511f',
+    'TRANSP:TRANSPARENT',
+    'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
+    'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
+    'DESCRIPTION:22nd of Iyyar\\, 5781',
+    'BEGIN:VALARM',
+    'ACTION:DISPLAY',
+    'DESCRIPTION:Event reminder',
+    'TRIGGER:-P0DT12H0M0S',
+    'END:VALARM',
+    'END:VEVENT',
+  ];
+  t.deepEqual(lines, expected);
+});
+
+test('parsha-with-memo', (t) => {
+  const ev = new ParshaEvent(new HDate(new Date(2023, 9, 21)), ['Noach'], false);
+  ev.memo = 'Hello World!';
+  const icalEvent = new IcalEvent(ev, {});
+  const lines = icalEvent.getLongLines();
+  const description = findLine(lines, 'DESCRIPTION');
+  t.is(description, 'Hello World!\\n\\nTorah: Genesis 6:9-11:32\\nHaftarah: Isaiah 54:1-55:5\\nHaftarah for Sephardim: Isaiah 54:1-10\\n\\nhttps://hebcal.com/s/noach-20231021?us=js&um=icalendar');
+});
