@@ -90,9 +90,8 @@ export class IcalEvent {
       this.locationName = Locale.gettext('Nach Yomi');
     } else if (mask & flags.MISHNA_YOMI) {
       this.locationName = Locale.gettext('Mishna Yomi');
-    } else if (timed && options.location?.name) {
-      const comma = options.location.name.indexOf(',');
-      this.locationName = (comma == -1) ? options.location.name : options.location.name.substring(0, comma);
+    } else if (timed && options.location) {
+      this.locationName = options.location.getShortName();
     }
     const date = IcalEvent.formatYYYYMMDD(ev.getDate().greg());
     this.startDate = date;
@@ -105,8 +104,8 @@ export class IcalEvent {
       minute = +minute;
       this.startDate += 'T' + pad2(hour) + pad2(minute) + '00';
       this.endDate = this.startDate;
-      if (options.location?.tzid) {
-        this.dtargs = `;TZID=${options.location.tzid}`;
+      if (options.location?.getTzid()) {
+        this.dtargs = `;TZID=${options.location.getTzid()}`;
       }
     } else {
       this.endDate = IcalEvent.formatYYYYMMDD(ev.getDate().next().greg());
@@ -177,10 +176,11 @@ export class IcalEvent {
     const digest = murmur32HexSync(this.ev.getDesc());
     let uid = `hebcal-${this.startDate}-${digest}`;
     if (this.timed && options.location) {
-      if (options.location.geoid) {
-        uid += `-${options.location.geoid}`;
-      } else if (options.location.name) {
-        uid += '-' + makeAnchor(options.location.name);
+      const loc = options.location;
+      if (loc.getGeoId()) {
+        uid += `-${loc.getGeoId()}`;
+      } else if (loc.getName()) {
+        uid += '-' + makeAnchor(loc.getName());
       }
     }
     return uid;
@@ -225,7 +225,7 @@ export class IcalEvent {
     addOptional(arr, 'DESCRIPTION', memo);
     addOptional(arr, 'LOCATION', this.locationName);
     if (this.timed && options.location) {
-      arr.push('GEO:' + options.location.latitude + ';' + options.location.longitude);
+      arr.push('GEO:' + options.location.getLatitude() + ';' + options.location.getLongitude());
     }
 
     const trigger = this.getAlarm();
@@ -488,8 +488,8 @@ export async function icalEventsToString(icals, options) {
     stream.push(`X-APPLE-CALENDAR-COLOR:${opts.calendarColor}\r\n`);
   }
   const location = opts.location;
-  if (location?.tzid) {
-    const tzid = location.tzid;
+  const tzid = location?.getTzid();
+  if (tzid) {
     stream.push(`X-WR-TIMEZONE;VALUE=TEXT:${tzid}\r\n`);
     if (VTIMEZONE[tzid]) {
       stream.push(VTIMEZONE[tzid]);
