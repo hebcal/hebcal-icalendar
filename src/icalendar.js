@@ -94,7 +94,7 @@ export class IcalEvent {
       this.locationName = options.location.getShortName();
     }
     const date = IcalEvent.formatYYYYMMDD(ev.getDate().greg());
-    this.startDate = date;
+    this.startDate = this.isoDateOnly = date;
     this.dtargs = '';
     this.transp = 'TRANSPARENT';
     this.busyStatus = 'FREE';
@@ -140,7 +140,7 @@ export class IcalEvent {
       }
     }
     this.subj = subj;
-    this.category = ev.category || CATEGORY[getEventCategories(ev)[0]];
+    this.category = ev.category || CATEGORY[getEventCategories(ev)?.[0]];
   }
 
 
@@ -174,7 +174,7 @@ export class IcalEvent {
   getUid() {
     const options = this.options;
     const digest = murmur32HexSync(this.ev.getDesc());
-    let uid = `hebcal-${this.startDate}-${digest}`;
+    let uid = `hebcal-${this.isoDateOnly}-${digest}`;
     if (this.timed && options.location) {
       const loc = options.location;
       if (loc.getGeoId()) {

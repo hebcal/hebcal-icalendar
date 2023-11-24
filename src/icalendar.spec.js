@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import test from 'ava';
 import {HebrewCalendar, Location, HDate, Event, flags,
-  ParshaEvent,
+  ParshaEvent, TimedEvent,
   HebrewDateEvent, OmerEvent} from '@hebcal/core';
 import {DafYomiEvent} from '@hebcal/learning';
 import {IcalEvent, eventsToIcalendar} from './icalendar';
@@ -642,6 +642,20 @@ test('uid', (t) => {
   t.is(ical1.getUid(), 'hebcal-20210504-568cd823');
   const ical2 = new IcalEvent(new Event(new HDate(2, 'Cheshvan', 5782), 'Hello World'), {});
   t.is(ical2.getUid(), 'hebcal-20211008-197683ce');
+
+  const location = new Location(-23.5475, -46.63611, false,
+      'America/Sao_Paulo', 'São Paulo, Brazil');
+  const timedEv = new TimedEvent(new HDate(3, 'Kislev', 5783), 'Foo Bar',
+      flags.LIGHT_CANDLES, new Date(), location);
+  const ical3 = new IcalEvent(timedEv, {});
+  t.is(ical3.getUid(), 'hebcal-20221127-568cd823');
+
+  const ical4 = new IcalEvent(timedEv, {location});
+  t.is(ical4.getUid(), 'hebcal-20221127-568cd823-s-o-paulo-brazil');
+
+  location.geoid = 12345;
+  const ical5 = new IcalEvent(timedEv, {location});
+  t.is(ical5.getUid(), 'hebcal-20221127-568cd823-12345');
 });
 
 test('yerushalmi-yomi', (t) => {
