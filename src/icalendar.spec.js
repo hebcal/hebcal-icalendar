@@ -4,7 +4,7 @@ import {HebrewCalendar, Location, HDate, Event, flags,
   ParshaEvent, TimedEvent,
   HebrewDateEvent, OmerEvent} from '@hebcal/core';
 import {DafYomiEvent} from '@hebcal/learning';
-import {IcalEvent, eventsToIcalendar} from './icalendar';
+import {IcalEvent, eventsToIcalendar} from './icalendar.js';
 
 /**
  * @private

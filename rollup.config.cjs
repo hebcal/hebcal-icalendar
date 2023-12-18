@@ -1,5 +1,4 @@
 const commonjs = require('@rollup/plugin-commonjs');
-const babel = require('@rollup/plugin-babel');
 const json = require('@rollup/plugin-json');
 const pkg = require('./package.json');
 
@@ -14,10 +13,6 @@ module.exports = [
     ],
     plugins: [
       json({compact: true, preferConst: true}),
-      babel({
-        babelHelpers: 'bundled',
-        exclude: ['node_modules/**'],
-      }),
       commonjs(),
     ],
     external: ['@hebcal/core', '@hebcal/rest-api', 'fs', 'stream', 'murmurhash3'],

@@ -4,7 +4,7 @@ import {pad2, pad4, getCalendarTitle, makeAnchor, getEventCategories,
   getHolidayDescription, makeTorahMemoText, appendIsraelAndTracking,
   shouldRenderBrief} from '@hebcal/rest-api';
 import {promises as fs} from 'fs';
-import {version} from '../package.json';
+import {version} from './pkgVersion.js';
 
 const VTIMEZONE = {};
 const CATEGORY = {

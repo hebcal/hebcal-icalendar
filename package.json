@@ -1,6 +1,6 @@
 {
   "name": "@hebcal/icalendar",
-  "version": "5.0.1",
+  "version": "5.0.2",
   "author": "Michael J. Radwin (https://github.com/mjradwin)",
   "keywords": [
     "ical",
@@ -9,8 +9,13 @@
     "hebcal"
   ],
   "description": "Jewish holidays and Hebrew calendar as iCalendar RFC 2445",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
   "module": "dist/index.mjs",
+  "type": "module",
+  "exports": {
+    "import": "./dist/index.mjs",
+    "require": "./dist/index.cjs"
+  },
   "typings": "icalendar.d.ts",
   "files": [
     "dist",
@@ -24,36 +29,29 @@
     "url": "https://github.com/hebcal/hebcal-icalendar/issues"
   },
   "dependencies": {
-    "@hebcal/core": "^5.0.1",
-    "@hebcal/rest-api": "^5.0.1",
+    "@hebcal/core": "^5.0.3",
+    "@hebcal/rest-api": "^5.0.2",
     "murmurhash3": "^0.5.0"
   },
   "scripts": {
-    "build": "rollup -c",
+    "build:rollup": "rollup -c",
+    "build:version": "node ./version.cjs package.json src/pkgVersion.js",
+    "build": "npm run build:version && npm run build:rollup",
     "prepare": "npm run build",
     "pretest": "npm run build",
     "readme": "npx jsdoc2md dist/index.js",
     "test": "ava"
   },
   "license": "BSD-2-Clause",
-  "ava": {
-    "require": [
-      "@babel/register"
-    ]
-  },
   "devDependencies": {
-    "@babel/core": "^7.23.5",
-    "@babel/preset-env": "^7.23.5",
-    "@babel/register": "^7.22.15",
-    "@hebcal/learning": "^5.0.0",
-    "@rollup/plugin-babel": "^6.0.4",
+    "@hebcal/learning": "^5.0.2",
     "@rollup/plugin-commonjs": "^25.0.7",
-    "@rollup/plugin-json": "^6.0.1",
+    "@rollup/plugin-json": "^6.1.0",
     "ava": "^6.0.1",
-    "eslint": "^8.55.0",
+    "eslint": "^8.56.0",
     "eslint-config-google": "^0.14.0",
     "jsdoc": "^4.0.2",
     "jsdoc-to-markdown": "^8.0.0",
-    "rollup": "^4.7.0"
+    "rollup": "^4.9.1"
   }
 }
