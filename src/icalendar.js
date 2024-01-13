@@ -6,7 +6,7 @@ import {pad2, pad4, getCalendarTitle, makeAnchor, getEventCategories,
 import {promises as fs} from 'fs';
 import {version} from './pkgVersion.js';
 
-const VTIMEZONE = {};
+const vtimezoneCache = new Map();
 const CATEGORY = {
   candles: 'Holiday',
   dafyomi: 'Daf Yomi',
@@ -491,8 +491,9 @@ export async function icalEventsToString(icals, options) {
   const tzid = location?.getTzid();
   if (tzid) {
     stream.push(`X-WR-TIMEZONE;VALUE=TEXT:${tzid}\r\n`);
-    if (VTIMEZONE[tzid]) {
-      stream.push(VTIMEZONE[tzid]);
+    const vtz = vtimezoneCache.get(tzid);
+    if (typeof vtz === 'string') {
+      stream.push(vtz);
       stream.push('\r\n');
     } else {
       const vtimezoneFilename = `./zoneinfo/${tzid}.ics`;
@@ -503,7 +504,7 @@ export async function icalEventsToString(icals, options) {
         const str = lines.slice(3, lines.length - 2).join('\r\n');
         stream.push(str);
         stream.push('\r\n');
-        VTIMEZONE[tzid] = str; // cache for later
+        vtimezoneCache.set(tzid, str);
       } catch (error) {
         // ignore failure when no timezone definition to read
       }

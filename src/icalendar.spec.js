@@ -132,7 +132,7 @@ test('ical-transp-opaque', (t) => {
   t.deepEqual(lines, expected);
 
   lines = new IcalEvent(events[3], options).toString().split('\r\n');
-  t.is(findLine(lines, 'SUMMARY'), '🫓 Pesach III (CH\'\'M)');
+  t.is(findLine(lines, 'SUMMARY'), '🫓 Pesach III (CH’’M)');
   t.is(findLine(lines, 'TRANSP'), 'TRANSPARENT');
 });
 
