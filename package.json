@@ -1,6 +1,6 @@
 {
   "name": "@hebcal/icalendar",
-  "version": "5.0.3",
+  "version": "5.0.4",
   "author": "Michael J. Radwin (https://github.com/mjradwin)",
   "keywords": [
     "ical",
@@ -14,7 +14,8 @@
   "type": "module",
   "exports": {
     "import": "./dist/index.mjs",
-    "require": "./dist/index.cjs"
+    "require": "./dist/index.cjs",
+    "types": "./icalendar.d.ts"
   },
   "typings": "icalendar.d.ts",
   "files": [
