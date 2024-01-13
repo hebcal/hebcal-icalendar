@@ -746,3 +746,10 @@ test('parsha-with-memo', (t) => {
   const description = findLine(lines, 'DESCRIPTION');
   t.is(description, 'Hello World!\\n\\nTorah: Genesis 6:9-11:32\\nHaftarah: Isaiah 54:1-55:5\\nHaftarah for Sephardim: Isaiah 54:1-10\\n\\nhttps://hebcal.com/s/noach-20231021?us=js&um=icalendar');
 });
+
+test('parsha-apos', (t) => {
+  const ev = new ParshaEvent(new HDate(8, 'Tishrei', 5784), ['Ha\'azinu']);
+  const icalEvent = new IcalEvent(ev, {locale: 'en'});
+  const lines = icalEvent.getLongLines();
+  t.is(findLine(lines, 'SUMMARY'), 'Parashat Ha’azinu');
+});

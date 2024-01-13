@@ -30,7 +30,7 @@
     "url": "https://github.com/hebcal/hebcal-icalendar/issues"
   },
   "dependencies": {
-    "@hebcal/core": "^5.0.8",
+    "@hebcal/core": "^5.0.9",
     "@hebcal/rest-api": "^5.0.2",
     "murmurhash3": "^0.5.0"
   },
