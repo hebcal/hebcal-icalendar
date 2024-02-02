@@ -83,15 +83,17 @@ export class IcalEvent {
     if (ev.locationName) {
       this.locationName = ev.locationName;
     } else if (mask & flags.DAF_YOMI) {
-      this.locationName = Locale.gettext('Daf Yomi');
+      this.locationName = Locale.gettext('Daf Yomi', locale);
     } else if (mask & flags.YERUSHALMI_YOMI) {
-      this.locationName = Locale.gettext('Yerushalmi Yomi');
+      this.locationName = Locale.gettext('Yerushalmi Yomi', locale);
     } else if (mask & flags.NACH_YOMI) {
-      this.locationName = Locale.gettext('Nach Yomi');
+      this.locationName = Locale.gettext('Nach Yomi', locale);
     } else if (mask & flags.MISHNA_YOMI) {
-      this.locationName = Locale.gettext('Mishna Yomi');
+      this.locationName = Locale.gettext('Mishna Yomi', locale);
     } else if (timed && options.location) {
       this.locationName = options.location.getShortName();
+    } else if (ev.category) {
+      this.locationName = Locale.gettext(ev.category, locale);
     }
     const date = IcalEvent.formatYYYYMMDD(ev.getDate().greg());
     this.startDate = this.isoDateOnly = date;
@@ -357,7 +359,7 @@ const torahMemoCache = new Map();
 const HOLIDAY_IGNORE_MASK = flags.DAF_YOMI | flags.OMER_COUNT |
   flags.SHABBAT_MEVARCHIM | flags.MOLAD | flags.USER_EVENT |
   flags.MISHNA_YOMI | flags.YERUSHALMI_YOMI | flags.NACH_YOMI |
-  flags.HEBREW_DATE;
+  flags.HEBREW_DATE | flags.DAILY_LEARNING;
 
 /**
  * @private
@@ -453,7 +455,8 @@ export async function eventsToIcalendar(events, options) {
  */
 export async function icalEventsToString(icals, options) {
   const stream = [];
-  const uclang = Locale.getLocaleName().toUpperCase();
+  const locale = options.locale || Locale.getLocaleName();
+  const uclang = locale.toUpperCase();
   const opts = Object.assign({}, options);
   opts.dtstamp = opts.dtstamp || IcalEvent.makeDtstamp(new Date());
   const title = opts.title ? IcalEvent.escape(opts.title) : 'Untitled';

@@ -595,7 +595,7 @@ test('campaign2', (t) => {
   const ical1 = new IcalEvent(ev1, {utmCampaign: 'ical-foo-bar'});
   const lines1 = ical1.getLongLines();
   const desc1 = findLine(lines1, 'DESCRIPTION');
-  t.is(desc1, 'Torah: Leviticus 19:1-20:27\\nHaftarah: I Samuel 20:18-42 | Shabbat Machar Chodesh\\nHaftarah for Sephardim: Ezekiel 20:2-20\\n\\nhttps://hebcal.com/s/kedoshim-20220430?i=on&uc=ical-foo-bar');
+  t.is(desc1, 'Torah: Leviticus 19:1-20:27\\nHaftarah: I Samuel 20:18-42 | Shabbat Machar Chodesh\\n\\nhttps://hebcal.com/s/kedoshim-20220430?i=on&uc=ical-foo-bar');
 
   const ev2 = new DafYomiEvent(new HDate(new Date(1995, 11, 17)));
   const ical2 = new IcalEvent(ev2, {utmCampaign: 'ical-foo-bar'});
