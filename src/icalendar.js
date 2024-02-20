@@ -58,6 +58,9 @@ function appendTrackingToUrl(url, options) {
 const encoder = new TextEncoder();
 const char74re = /(.{1,74})/g;
 
+const DAILY_LEARNING = flags.DAILY_LEARNING | flags.DAF_YOMI |
+  flags.MISHNA_YOMI | flags.YERUSHALMI_YOMI | flags.NACH_YOMI;
+
 /**
  * Represents an RFC 2445 iCalendar VEVENT
  */
@@ -78,21 +81,14 @@ export class IcalEvent {
     }
     const timed = this.timed = Boolean(ev.eventTime);
     const locale = options.locale;
+    const location = options.location;
     let subj = shouldRenderBrief(ev) ? ev.renderBrief(locale) : ev.render(locale);
     const mask = ev.getFlags();
     if (ev.locationName) {
       this.locationName = ev.locationName;
-    } else if (mask & flags.DAF_YOMI) {
-      this.locationName = Locale.gettext('Daf Yomi', locale);
-    } else if (mask & flags.YERUSHALMI_YOMI) {
-      this.locationName = Locale.gettext('Yerushalmi Yomi', locale);
-    } else if (mask & flags.NACH_YOMI) {
-      this.locationName = Locale.gettext('Nach Yomi', locale);
-    } else if (mask & flags.MISHNA_YOMI) {
-      this.locationName = Locale.gettext('Mishna Yomi', locale);
-    } else if (timed && options.location) {
-      this.locationName = options.location.getShortName();
-    } else if (ev.category) {
+    } else if (timed && location) {
+      this.locationName = location.getShortName();
+    } else if ((mask & DAILY_LEARNING) && ev.category) {
       this.locationName = Locale.gettext(ev.category, locale);
     }
     const date = IcalEvent.formatYYYYMMDD(ev.getDate().greg());
@@ -106,8 +102,8 @@ export class IcalEvent {
       minute = +minute;
       this.startDate += 'T' + pad2(hour) + pad2(minute) + '00';
       this.endDate = this.startDate;
-      if (options.location?.getTzid()) {
-        this.dtargs = `;TZID=${options.location.getTzid()}`;
+      if (location?.getTzid()) {
+        this.dtargs = `;TZID=${location.getTzid()}`;
       }
     } else {
       this.endDate = IcalEvent.formatYYYYMMDD(ev.getDate().next().greg());
@@ -177,8 +173,8 @@ export class IcalEvent {
     const options = this.options;
     const digest = murmur32HexSync(this.ev.getDesc());
     let uid = `hebcal-${this.isoDateOnly}-${digest}`;
-    if (this.timed && options.location) {
-      const loc = options.location;
+    const loc = options.location;
+    if (this.timed && loc) {
       if (loc.getGeoId()) {
         uid += `-${loc.getGeoId()}`;
       } else if (loc.getName()) {
@@ -226,8 +222,9 @@ export class IcalEvent {
     const memo = createMemo(ev, options);
     addOptional(arr, 'DESCRIPTION', memo);
     addOptional(arr, 'LOCATION', this.locationName);
-    if (this.timed && options.location) {
-      arr.push('GEO:' + options.location.getLatitude() + ';' + options.location.getLongitude());
+    const loc = options.location;
+    if (this.timed && loc) {
+      arr.push('GEO:' + loc.getLatitude() + ';' + loc.getLongitude());
     }
 
     const trigger = this.getAlarm();
@@ -356,10 +353,9 @@ export function eventToIcal(ev, options) {
 
 const torahMemoCache = new Map();
 
-const HOLIDAY_IGNORE_MASK = flags.DAF_YOMI | flags.OMER_COUNT |
+const HOLIDAY_IGNORE_MASK = DAILY_LEARNING | flags.OMER_COUNT |
   flags.SHABBAT_MEVARCHIM | flags.MOLAD | flags.USER_EVENT |
-  flags.MISHNA_YOMI | flags.YERUSHALMI_YOMI | flags.NACH_YOMI |
-  flags.HEBREW_DATE | flags.DAILY_LEARNING;
+  flags.HEBREW_DATE;
 
 /**
  * @private
