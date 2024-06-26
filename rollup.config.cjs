@@ -1,17 +1,19 @@
 const commonjs = require('@rollup/plugin-commonjs');
 const json = require('@rollup/plugin-json');
+const typescript = require('@rollup/plugin-typescript');
 const pkg = require('./package.json');
 
 const banner = '/*! ' + pkg.name + ' v' + pkg.version + ' */';
 
 module.exports = [
   {
-    input: 'src/index.js',
+    input: 'src/icalendar.ts',
     output: [
       {file: pkg.main, format: 'cjs', name: pkg.name, banner},
       {file: pkg.module, format: 'es', name: pkg.name, banner},
     ],
     plugins: [
+      typescript(),
       json({compact: true, preferConst: true}),
       commonjs(),
     ],
