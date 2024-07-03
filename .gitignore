@@ -1,3 +1,5 @@
+src/pkgVersion.ts
+
 # Logs
 logs
 *.log

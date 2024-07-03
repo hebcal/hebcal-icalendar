@@ -3,7 +3,8 @@ import {HebrewCalendar, Location, HDate, Event, flags,
   ParshaEvent, TimedEvent, CalOptions,
   HebrewDateEvent, OmerEvent} from '@hebcal/core';
 import {DafYomiEvent} from '@hebcal/learning';
-import {ICalOptions, IcalEvent, eventsToIcalendar} from '../src/icalendar';
+import {ICalOptions, IcalEvent, eventsToIcalendar,
+  icalEventsToString} from '../src/icalendar';
 
 /**
  * @private
@@ -771,20 +772,33 @@ test('parsha-apos', () => {
 });
 
 test('empty-events', async () => {
-  const ical = await eventsToIcalendar([], {prodid: 'X'});
-  const lines = ical.split('\r\n');
+  expect.assertions(1);
+  try {
+    return await icalEventsToString([], {});
+  } catch (error) {
+    return expect((error as RangeError).message).toMatch('Events can not be empty');
+  }
+});
+
+test('url', async () => {
+  const ev = new TestEvent(new HDate(22, 'Iyyar', 5781));
+  const icalEvent = new IcalEvent(ev, {url: true, dtstamp: 'X'});
+  const lines = icalEvent.getLongLines();
   const expected = [
-    'BEGIN:VCALENDAR',
-    'VERSION:2.0',
-    'PRODID:X',
-    'CALSCALE:GREGORIAN',
-    'METHOD:PUBLISH',
-    'X-LOTUS-CHARSET:UTF-8',
-    'X-PUBLISHED-TTL:PT7D',
-    'X-WR-CALNAME:Hebcal Diaspora',
-    'X-WR-CALDESC:Jewish Holidays from www.hebcal.com',
-    'END:VCALENDAR',
-    '',
+    'BEGIN:VEVENT',
+    'DTSTAMP:X',
+    'CATEGORIES:Holiday',
+    'SUMMARY:Test Event',
+    'DTSTART;VALUE=DATE:20210504',
+    'DTEND;VALUE=DATE:20210505',
+    'UID:hebcal-20210504-9f01ca16',
+    'TRANSP:TRANSPARENT',
+    'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
+    'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
+    'CLASS:PUBLIC',
+    'DESCRIPTION:https://www.hebcal.com/foobar?utm_source=js&utm_medium=icalendar',
+    'URL:https://www.hebcal.com/foobar?utm_source=js&utm_medium=icalendar',
+    'END:VEVENT'
   ];
   expect(lines).toEqual(expected);
 });

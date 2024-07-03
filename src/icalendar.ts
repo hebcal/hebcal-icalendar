@@ -6,7 +6,7 @@ import {pad2, pad4, getCalendarTitle, makeAnchor, getEventCategories,
 import {promises as fs} from 'fs';
 import {version} from './pkgVersion';
 
-const vtimezoneCache = new Map();
+const vtimezoneCache = new Map<string,string>();
 const CATEGORY: {[key: string]: string|null} = {
   candles: 'Holiday',
   dafyomi: 'Daf Yomi',
@@ -51,6 +51,7 @@ export type ICalEventOptions = {
   relcalid?: string;
   yahrzeit?: boolean;
   subscribe?: string | boolean;
+  url?: boolean;
 };
 
 export type ICalOptions = CalOptions & ICalEventOptions;
@@ -255,6 +256,15 @@ export class IcalEvent {
       arr.push('GEO:' + loc.getLatitude() + ';' + loc.getLongitude());
     }
 
+    // In addition to the URL being part of the DESCRIPTION field,
+    // should we also generate an RFC 5545 URL property?
+    if (options.url) {
+      const url = ev.url();
+      if (url) {
+        arr.push('URL:' + appendTrackingToUrl(url, options));
+      }
+    }
+
     const trigger = this.getAlarm();
     if (trigger) {
       arr.push(
@@ -454,6 +464,7 @@ function createMemo(ev: Event, options: ICalOptions): string {
  * Generates an RFC 2445 iCalendar string from an array of events
  */
 export async function eventsToIcalendar(events: Event[], options: ICalOptions): Promise<string> {
+  if (!events.length) throw new RangeError('Events can not be empty');
   if (!options) throw new TypeError('Invalid options object');
   const opts = {...options};
   opts.dtstamp = opts.dtstamp || IcalEvent.makeDtstamp(new Date());
@@ -468,6 +479,8 @@ export async function eventsToIcalendar(events: Event[], options: ICalOptions): 
  * Generates an RFC 2445 iCalendar string from an array of IcalEvents
  */
 export async function icalEventsToString(icals: IcalEvent[], options: ICalOptions): Promise<string> {
+  if (!icals.length) throw new RangeError('Events can not be empty');
+  if (!options) throw new TypeError('Invalid options object');
   const stream = [];
   const locale = options.locale || Locale.getLocaleName();
   const uclang = locale.toUpperCase();
