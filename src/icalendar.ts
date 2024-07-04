@@ -1,13 +1,21 @@
 import {flags, Locale, greg, CalOptions, Event, OmerEvent} from '@hebcal/core';
 import {murmur32HexSync} from 'murmurhash3';
-import {pad2, pad4, getCalendarTitle, makeAnchor, getEventCategories,
-  getHolidayDescription, makeTorahMemoText, appendIsraelAndTracking,
-  shouldRenderBrief} from '@hebcal/rest-api';
+import {
+  pad2,
+  pad4,
+  getCalendarTitle,
+  makeAnchor,
+  getEventCategories,
+  getHolidayDescription,
+  makeTorahMemoText,
+  appendIsraelAndTracking,
+  shouldRenderBrief,
+} from '@hebcal/rest-api';
 import {promises as fs} from 'fs';
 import {version} from './pkgVersion';
 
-const vtimezoneCache = new Map<string,string>();
-const CATEGORY: {[key: string]: string|null} = {
+const vtimezoneCache = new Map<string, string>();
+const CATEGORY: {[key: string]: string | null} = {
   candles: 'Holiday',
   dafyomi: 'Daf Yomi',
   mishnayomi: 'Mishna Yomi',
@@ -28,7 +36,11 @@ const CATEGORY: {[key: string]: string|null} = {
 /**
  * @private
  */
-function addOptional(arr: string[], key: string, val: string | null | undefined) {
+function addOptional(
+  arr: string[],
+  key: string,
+  val: string | null | undefined
+) {
   if (val) {
     const str = IcalEvent.escape(val);
     arr.push(key + ':' + str);
@@ -59,22 +71,34 @@ export type ICalOptions = CalOptions & ICalEventOptions;
 /**
  * @private
  */
-function appendTrackingToUrl(url: string | undefined, options: ICalOptions): string | null {
+function appendTrackingToUrl(
+  url: string | undefined,
+  options: ICalOptions
+): string | null {
   if (!url) {
     return null;
   }
   const utmSource = options.utmSource || 'js';
   const utmMedium = options.utmMedium || 'icalendar';
   const utmCampaign = options.utmCampaign;
-  return appendIsraelAndTracking(url,
-      options.il!, utmSource, utmMedium, utmCampaign);
+  return appendIsraelAndTracking(
+    url,
+    options.il!,
+    utmSource,
+    utmMedium,
+    utmCampaign
+  );
 }
 
 const encoder = new TextEncoder();
 const char74re = /(.{1,74})/g;
 
-const DAILY_LEARNING = flags.DAILY_LEARNING | flags.DAF_YOMI |
-  flags.MISHNA_YOMI | flags.YERUSHALMI_YOMI | flags.NACH_YOMI;
+const DAILY_LEARNING =
+  flags.DAILY_LEARNING |
+  flags.DAF_YOMI |
+  flags.MISHNA_YOMI |
+  flags.YERUSHALMI_YOMI |
+  flags.NACH_YOMI;
 
 /**
  * Represents an RFC 2445 iCalendar VEVENT
@@ -98,7 +122,7 @@ export class IcalEvent {
   /**
    * Builds an IcalEvent object from a Hebcal Event
    */
-  constructor(ev: Event, options: ICalOptions={}) {
+  constructor(ev: Event, options: ICalOptions = {}) {
     this.ev = ev;
     const opts: ICalOptions = {...options};
     this.options = opts;
@@ -108,16 +132,18 @@ export class IcalEvent {
     } else if (typeof opts.sequence === 'number') {
       this.sequence = opts.sequence;
     }
-    const timed = this.timed = Boolean((ev as any).eventTime);
+    const timed = (this.timed = Boolean((ev as any).eventTime));
     const locale = opts.locale;
     const location = opts.location;
-    let subj = shouldRenderBrief(ev) ? ev.renderBrief(locale) : ev.render(locale);
+    let subj = shouldRenderBrief(ev)
+      ? ev.renderBrief(locale)
+      : ev.render(locale);
     const mask = ev.getFlags();
     if ((ev as any).locationName) {
       this.locationName = (ev as any).locationName;
     } else if (timed && location) {
       this.locationName = location.getShortName();
-    } else if ((mask & DAILY_LEARNING) && (ev as any).category) {
+    } else if (mask & DAILY_LEARNING && (ev as any).category) {
       this.locationName = Locale.gettext((ev as any).category, locale);
     }
     const date = IcalEvent.formatYYYYMMDD(ev.getDate().greg());
@@ -167,7 +193,8 @@ export class IcalEvent {
       }
     }
     this.subj = subj;
-    this.category = (ev as any).category || CATEGORY[getEventCategories(ev)?.[0]];
+    this.category =
+      (ev as any).category || CATEGORY[getEventCategories(ev)?.[0]];
   }
 
   getAlarm(): string | null {
@@ -223,17 +250,16 @@ export class IcalEvent {
     if (this.sequence) {
       categoryLine.unshift(`SEQUENCE:${this.sequence}`);
     }
-    const arr = this.lines = [
-      'BEGIN:VEVENT',
-      `DTSTAMP:${this.dtstamp}`,
-    ].concat(categoryLine).concat([
-      `SUMMARY:${this.subj}`,
-      `DTSTART${this.dtargs}:${this.startDate}`,
-      `DTEND${this.dtargs}:${this.endDate}`,
-      `UID:${uid}`,
-      `TRANSP:${this.transp}`,
-      `X-MICROSOFT-CDO-BUSYSTATUS:${this.busyStatus}`,
-    ]);
+    const arr = (this.lines = ['BEGIN:VEVENT', `DTSTAMP:${this.dtstamp}`]
+      .concat(categoryLine)
+      .concat([
+        `SUMMARY:${this.subj}`,
+        `DTSTART${this.dtargs}:${this.startDate}`,
+        `DTEND${this.dtargs}:${this.endDate}`,
+        `UID:${uid}`,
+        `TRANSP:${this.transp}`,
+        `X-MICROSOFT-CDO-BUSYSTATUS:${this.busyStatus}`,
+      ]));
 
     if (!this.timed) {
       arr.push('X-MICROSOFT-CDO-ALLDAYEVENT:TRUE');
@@ -268,11 +294,11 @@ export class IcalEvent {
     const trigger = this.getAlarm();
     if (trigger) {
       arr.push(
-          'BEGIN:VALARM',
-          'ACTION:DISPLAY',
-          'DESCRIPTION:Event reminder',
-          `${trigger}`,
-          'END:VALARM',
+        'BEGIN:VALARM',
+        'ACTION:DISPLAY',
+        'DESCRIPTION:Event reminder',
+        `${trigger}`,
+        'END:VALARM'
       );
     }
 
@@ -361,8 +387,9 @@ export class IcalEvent {
    * @return {string}
    */
   static formatYYYYMMDD(dt: Date): string {
-    return pad4(dt.getFullYear()) +
-          pad2(dt.getMonth() + 1) + pad2(dt.getDate());
+    return (
+      pad4(dt.getFullYear()) + pad2(dt.getMonth() + 1) + pad2(dt.getDate())
+    );
   }
 
   /**
@@ -372,8 +399,14 @@ export class IcalEvent {
    */
   static makeDtstamp(dt: Date): string {
     const s = dt.toISOString();
-    return s.slice(0, 4) + s.slice(5, 7) + s.slice(8, 13) +
-              s.slice(14, 16) + s.slice(17, 19) + 'Z';
+    return (
+      s.slice(0, 4) +
+      s.slice(5, 7) +
+      s.slice(8, 13) +
+      s.slice(14, 16) +
+      s.slice(17, 19) +
+      'Z'
+    );
   }
 
   /** @return {string} */
@@ -393,15 +426,19 @@ export function eventToIcal(ev: Event, options: ICalOptions): string {
 
 const torahMemoCache = new Map();
 
-const HOLIDAY_IGNORE_MASK = DAILY_LEARNING | flags.OMER_COUNT |
-  flags.SHABBAT_MEVARCHIM | flags.MOLAD | flags.USER_EVENT |
+const HOLIDAY_IGNORE_MASK =
+  DAILY_LEARNING |
+  flags.OMER_COUNT |
+  flags.SHABBAT_MEVARCHIM |
+  flags.MOLAD |
+  flags.USER_EVENT |
   flags.HEBREW_DATE;
 
 /**
  * @private
  */
 function makeTorahMemo(ev: Event, il: boolean): string {
-  if ((ev.getFlags() & HOLIDAY_IGNORE_MASK) || (ev as any).eventTime) {
+  if (ev.getFlags() & HOLIDAY_IGNORE_MASK || (ev as any).eventTime) {
     return '';
   }
   const hd = ev.getDate();
@@ -433,8 +470,18 @@ function createMemo(ev: Event, options: ICalOptions): string {
   const mask = ev.getFlags();
   if (mask & flags.OMER_COUNT) {
     const omerEv = ev as OmerEvent;
-    const sefira = [omerEv.sefira('en'), omerEv.sefira('he'), omerEv.sefira('translit')].join('\\n');
-    return omerEv.getTodayIs('en') + '\\n\\n' + omerEv.getTodayIs('he') + '\\n\\n' + sefira;
+    const sefira = [
+      omerEv.sefira('en'),
+      omerEv.sefira('he'),
+      omerEv.sefira('translit'),
+    ].join('\\n');
+    return (
+      omerEv.getTodayIs('en') +
+      '\\n\\n' +
+      omerEv.getTodayIs('he') +
+      '\\n\\n' +
+      sefira
+    );
   }
   const url = appendTrackingToUrl(ev.url(), options);
   const torahMemo = makeTorahMemo(ev, options.il!);
@@ -463,7 +510,10 @@ function createMemo(ev: Event, options: ICalOptions): string {
 /**
  * Generates an RFC 2445 iCalendar string from an array of events
  */
-export async function eventsToIcalendar(events: Event[], options: ICalOptions): Promise<string> {
+export async function eventsToIcalendar(
+  events: Event[],
+  options: ICalOptions
+): Promise<string> {
   if (!events.length) throw new RangeError('Events can not be empty');
   if (!options) throw new TypeError('Invalid options object');
   const opts = {...options};
@@ -471,14 +521,17 @@ export async function eventsToIcalendar(events: Event[], options: ICalOptions): 
   if (!opts.title) {
     opts.title = getCalendarTitle(events, opts);
   }
-  const icals = events.map((ev) => new IcalEvent(ev, opts));
+  const icals = events.map(ev => new IcalEvent(ev, opts));
   return icalEventsToString(icals, opts);
 }
 
 /**
  * Generates an RFC 2445 iCalendar string from an array of IcalEvents
  */
-export async function icalEventsToString(icals: IcalEvent[], options: ICalOptions): Promise<string> {
+export async function icalEventsToString(
+  icals: IcalEvent[],
+  options: ICalOptions
+): Promise<string> {
   if (!icals.length) throw new RangeError('Events can not be empty');
   if (!options) throw new TypeError('Invalid options object');
   const stream = [];
@@ -487,11 +540,14 @@ export async function icalEventsToString(icals: IcalEvent[], options: ICalOption
   const opts = {...options};
   opts.dtstamp = opts.dtstamp || IcalEvent.makeDtstamp(new Date());
   const title = opts.title ? IcalEvent.escape(opts.title) : 'Untitled';
-  const caldesc = opts.caldesc ? IcalEvent.escape(opts.caldesc) :
-    opts.yahrzeit ?
-    'Yahrzeits + Anniversaries from www.hebcal.com' :
-    'Jewish Holidays from www.hebcal.com';
-  const prodid = opts.prodid || `-//hebcal.com/NONSGML Hebcal Calendar v1${version}//${uclang}`;
+  const caldesc = opts.caldesc
+    ? IcalEvent.escape(opts.caldesc)
+    : opts.yahrzeit
+      ? 'Yahrzeits + Anniversaries from www.hebcal.com'
+      : 'Jewish Holidays from www.hebcal.com';
+  const prodid =
+    opts.prodid ||
+    `-//hebcal.com/NONSGML Hebcal Calendar v1${version}//${uclang}`;
   const preamble = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
