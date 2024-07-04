@@ -19,7 +19,7 @@
   },
   "typings": "dist/icalendar.d.ts",
   "engines": {
-    "node": ">= 20.0.0"
+    "node": ">= 18.0.0"
   },
   "files": [
     "dist"
@@ -49,8 +49,7 @@
     "lint": "gts lint",
     "clean": "gts clean",
     "compile": "tsc",
-    "fix": "gts fix",
-    "posttest": "npm run lint"
+    "fix": "gts fix"
   },
   "license": "BSD-2-Clause",
   "devDependencies": {
