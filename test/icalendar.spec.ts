@@ -1,16 +1,29 @@
 /* eslint-disable max-len */
-import {HebrewCalendar, Location, HDate, Event, flags,
-  ParshaEvent, TimedEvent, CalOptions,
-  HebrewDateEvent, OmerEvent} from '@hebcal/core';
+import {
+  HebrewCalendar,
+  Location,
+  HDate,
+  Event,
+  flags,
+  ParshaEvent,
+  TimedEvent,
+  CalOptions,
+  HebrewDateEvent,
+  OmerEvent,
+} from '@hebcal/core';
 import {DafYomiEvent} from '@hebcal/learning';
-import {ICalOptions, IcalEvent, eventsToIcalendar,
-  icalEventsToString} from '../src/icalendar';
+import {
+  ICalOptions,
+  IcalEvent,
+  eventsToIcalendar,
+  icalEventsToString,
+} from '../src/icalendar';
 
 /**
  * @private
  */
 function findLine(lines: string[], propName: string): string | null {
-  const line = lines.find((line) => line.startsWith(propName));
+  const line = lines.find(line => line.startsWith(propName));
   if (line) {
     return line.substring(line.indexOf(':') + 1);
   }
@@ -18,7 +31,12 @@ function findLine(lines: string[], propName: string): string | null {
 }
 
 test('ical-sedra', () => {
-  const options: ICalOptions = {year: 1993, month: 4, sedrot: true, noHolidays: true};
+  const options: ICalOptions = {
+    year: 1993,
+    month: 4,
+    sedrot: true,
+    noHolidays: true,
+  };
   const events = HebrewCalendar.calendar(options);
   const tzav = new IcalEvent(events[0], options);
   let lines = tzav.toString().split('\r\n');
@@ -140,7 +158,15 @@ test('ical-candles', () => {
   const options: CalOptions = {
     start: new Date(1993, 2, 12),
     end: new Date(1993, 2, 14),
-    location: new Location(41.85003, -87.65005, false, 'America/Chicago', 'Chicago', 'US', 4887398),
+    location: new Location(
+      41.85003,
+      -87.65005,
+      false,
+      'America/Chicago',
+      'Chicago',
+      'US',
+      4887398
+    ),
     candlelighting: true,
     noHolidays: true,
   };
@@ -309,8 +335,13 @@ test('appendHebrewToSubject', () => {
     emoji: true,
   };
   const events = HebrewCalendar.calendar(options);
-  const icals = events.map((ev) => new IcalEvent(ev, icalOpts));
-  const summary = icals.map((i) => i.toString().split('\r\n').find((s) => s.startsWith('SUMMARY')));
+  const icals = events.map(ev => new IcalEvent(ev, icalOpts));
+  const summary = icals.map(i =>
+    i
+      .toString()
+      .split('\r\n')
+      .find(s => s.startsWith('SUMMARY'))
+  );
   const expected = [
     'SUMMARY:Parashat Bamidbar / פָּרָשַׁת בְּמִדְבַּר',
     'SUMMARY:✨ Havdalah / הַבְדָּלָה',
@@ -402,7 +433,9 @@ test('ical-il-url', () => {
 
 test('userEvent', () => {
   const hd = new HDate(new Date(2021, 1, 13));
-  const userEvent = new Event(hd, 'User Event', flags.USER_EVENT, {uid: 'foo-bar-baaz'});
+  const userEvent = new Event(hd, 'User Event', flags.USER_EVENT, {
+    uid: 'foo-bar-baaz',
+  });
   const ical = new IcalEvent(userEvent, {yahrzeit: true});
   const lines = ical.toString().split('\r\n');
   lines[1] = 'DTSTAMP:X';
@@ -474,10 +507,18 @@ test('fastStartEnd', () => {
     emoji: true,
   };
   const events = HebrewCalendar.calendar(options);
-  const icals = events.map((ev) => new IcalEvent(ev, icalOpts)).map((i) => i.toString());
-  const actual = icals.map((s) => s.split('\r\n').filter((s) => {
-    return s.startsWith('SUMMARY') || s.startsWith('DTSTART') || s.startsWith('DESCRIPTION');
-  }));
+  const icals = events
+    .map(ev => new IcalEvent(ev, icalOpts))
+    .map(i => i.toString());
+  const actual = icals.map(s =>
+    s.split('\r\n').filter(s => {
+      return (
+        s.startsWith('SUMMARY') ||
+        s.startsWith('DTSTART') ||
+        s.startsWith('DESCRIPTION')
+      );
+    })
+  );
   const expected = [
     [
       'SUMMARY:Fast begins',
@@ -566,15 +607,12 @@ test('omer-alarm', () => {
 
 /** @private */
 class TestEvent extends Event {
-  /** @param {HDate} date */
   constructor(date: HDate) {
     super(date, 'Test Event', 0);
   }
-  /** @return {string} */
   url(): string {
     return 'https://www.hebcal.com/foobar';
   }
-  /** @return {string[]} */
   getCategories(): string[] {
     return ['holiday'];
   }
@@ -605,23 +643,32 @@ test('utm_campaign', () => {
 });
 
 test('campaign2', () => {
-  const ev1 = new ParshaEvent(new HDate(new Date(2022, 3, 30)), ['Kedoshim'], true);
+  const ev1 = new ParshaEvent(
+    new HDate(new Date(2022, 3, 30)),
+    ['Kedoshim'],
+    true
+  );
   const ical1 = new IcalEvent(ev1, {utmCampaign: 'ical-foo-bar'});
   const lines1 = ical1.getLongLines();
   const desc1 = findLine(lines1, 'DESCRIPTION');
-  expect(desc1).toBe('Torah: Leviticus 19:1-20:27\\nHaftarah: I Samuel 20:18-42 | Shabbat Machar Chodesh\\n\\nhttps://hebcal.com/s/kedoshim-20220430?i=on&uc=ical-foo-bar');
+  expect(desc1).toBe(
+    'Torah: Leviticus 19:1-20:27\\nHaftarah: I Samuel 20:18-42 | Shabbat Machar Chodesh\\n\\nhttps://hebcal.com/s/kedoshim-20220430?i=on&uc=ical-foo-bar'
+  );
 
   const ev2 = new DafYomiEvent(new HDate(new Date(1995, 11, 17)));
   const ical2 = new IcalEvent(ev2, {utmCampaign: 'ical-foo-bar'});
   const lines2 = ical2.getLongLines();
   const desc2 = findLine(lines2, 'DESCRIPTION');
-  expect(desc2).toBe('https://www.sefaria.org/Avodah_Zarah.68a?lang=bi&utm_source=hebcal.com&utm_medium=icalendar&utm_campaign=ical-foo-bar');
+  expect(desc2).toBe(
+    'https://www.sefaria.org/Avodah_Zarah.68a?lang=bi&utm_source=hebcal.com&utm_medium=icalendar&utm_campaign=ical-foo-bar'
+  );
 });
 
 test('caldesc', async () => {
   const ev = new TestEvent(new HDate(22, 'Iyyar', 5781));
   const ical = await eventsToIcalendar([ev], {
-    caldesc: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua',
+    caldesc:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua',
   });
   const lines = ical.split('\r\n').slice(8, 10);
   const expected = [
@@ -635,7 +682,8 @@ test('caldesc', async () => {
   }
 
   const ical2 = await eventsToIcalendar([ev], {
-    caldesc: 'לורם איפסום דולור סיט אמט, קונסקטורר אדיפיסינג אלית להאמית קרהשק סכעיט דז מא, מנכם למטכין נשואי מנורך. קולהע צופעט למרקוח איבן איף, ברומץ כלרשט מיחוצים.',
+    caldesc:
+      'לורם איפסום דולור סיט אמט, קונסקטורר אדיפיסינג אלית להאמית קרהשק סכעיט דז מא, מנכם למטכין נשואי מנורך. קולהע צופעט למרקוח איבן איף, ברומץ כלרשט מיחוצים.',
   });
   const lines2 = ical2.split('\r\n').slice(8, 12);
   const expected2 = [
@@ -652,9 +700,15 @@ test('caldesc', async () => {
 });
 
 test('uid', () => {
-  const ical1 = new IcalEvent(new Event(new HDate(22, 'Iyyar', 5781), 'Foo Bar'), {});
+  const ical1 = new IcalEvent(
+    new Event(new HDate(22, 'Iyyar', 5781), 'Foo Bar'),
+    {}
+  );
   expect(ical1.getUid()).toBe('hebcal-20210504-568cd823');
-  const ical2 = new IcalEvent(new Event(new HDate(2, 'Cheshvan', 5782), 'Hello World'), {});
+  const ical2 = new IcalEvent(
+    new Event(new HDate(2, 'Cheshvan', 5782), 'Hello World'),
+    {}
+  );
   expect(ical2.getUid()).toBe('hebcal-20211008-197683ce');
 
   const latitude = -23.5475;
@@ -662,16 +716,28 @@ test('uid', () => {
   const tzid = 'America/Sao_Paulo';
   const cityName = 'São Paulo, Brazil';
   const location = new Location(latitude, longitude, false, tzid, cityName);
-  const timedEv = new TimedEvent(new HDate(3, 'Kislev', 5783), 'Foo Bar',
-      flags.LIGHT_CANDLES, new Date(), location);
+  const timedEv = new TimedEvent(
+    new HDate(3, 'Kislev', 5783),
+    'Foo Bar',
+    flags.LIGHT_CANDLES,
+    new Date(),
+    location
+  );
   const ical3 = new IcalEvent(timedEv, {});
   expect(ical3.getUid()).toBe('hebcal-20221127-568cd823');
 
   const ical4 = new IcalEvent(timedEv, {location});
   expect(ical4.getUid()).toBe('hebcal-20221127-568cd823-s-o-paulo-brazil');
 
-  const loc2 = new Location(latitude, longitude, false, tzid, cityName,
-    undefined, 12345);
+  const loc2 = new Location(
+    latitude,
+    longitude,
+    false,
+    tzid,
+    cityName,
+    undefined,
+    12345
+  );
   const ical5 = new IcalEvent(timedEv, {location: loc2});
   expect(ical5.getUid()).toBe('hebcal-20221127-568cd823-12345');
 });
@@ -729,7 +795,9 @@ test('sequence', () => {
 test('linkedEvent-memo', () => {
   const hd = new HDate(22, 'Iyyar', 5781);
   const ev1 = new HebrewDateEvent(hd);
-  const ev2 = new Event(hd, 'Foo Bar Baaz', flags.USER_EVENT, {linkedEvent: ev1});
+  const ev2 = new Event(hd, 'Foo Bar Baaz', flags.USER_EVENT, {
+    linkedEvent: ev1,
+  });
   const icalEvent = new IcalEvent(ev2, {});
   const lines = icalEvent.toString().split('\r\n');
   lines[1] = 'DTSTAMP:X';
@@ -756,16 +824,22 @@ test('linkedEvent-memo', () => {
 });
 
 test('parsha-with-memo', () => {
-  const ev = new ParshaEvent(new HDate(new Date(2023, 9, 21)), ['Noach'], false);
+  const ev = new ParshaEvent(
+    new HDate(new Date(2023, 9, 21)),
+    ['Noach'],
+    false
+  );
   ev.memo = 'Hello World!';
   const icalEvent = new IcalEvent(ev, {});
   const lines = icalEvent.getLongLines();
   const description = findLine(lines, 'DESCRIPTION');
-  expect(description).toBe('Hello World!\\n\\nTorah: Genesis 6:9-11:32\\nHaftarah: Isaiah 54:1-55:5\\nHaftarah for Sephardim: Isaiah 54:1-10\\n\\nhttps://hebcal.com/s/noach-20231021?us=js&um=icalendar');
+  expect(description).toBe(
+    'Hello World!\\n\\nTorah: Genesis 6:9-11:32\\nHaftarah: Isaiah 54:1-55:5\\nHaftarah for Sephardim: Isaiah 54:1-10\\n\\nhttps://hebcal.com/s/noach-20231021?us=js&um=icalendar'
+  );
 });
 
 test('parsha-apos', () => {
-  const ev = new ParshaEvent(new HDate(8, 'Tishrei', 5784), ['Ha\'azinu']);
+  const ev = new ParshaEvent(new HDate(8, 'Tishrei', 5784), ["Ha'azinu"]);
   const icalEvent = new IcalEvent(ev, {locale: 'en'});
   const lines = icalEvent.getLongLines();
   expect(findLine(lines, 'SUMMARY')).toBe('Parashat Ha’azinu');
@@ -776,7 +850,9 @@ test('empty-events', async () => {
   try {
     return await icalEventsToString([], {});
   } catch (error) {
-    return expect((error as RangeError).message).toMatch('Events can not be empty');
+    return expect((error as RangeError).message).toMatch(
+      'Events can not be empty'
+    );
   }
 });
 
@@ -798,7 +874,7 @@ test('url', async () => {
     'CLASS:PUBLIC',
     'DESCRIPTION:https://www.hebcal.com/foobar?utm_source=js&utm_medium=icalendar',
     'URL:https://www.hebcal.com/foobar?utm_source=js&utm_medium=icalendar',
-    'END:VEVENT'
+    'END:VEVENT',
   ];
   expect(lines).toEqual(expected);
 });

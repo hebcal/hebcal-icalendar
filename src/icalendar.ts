@@ -219,9 +219,6 @@ export class IcalEvent {
     return null;
   }
 
-  /**
-   * @return {string}
-   */
   getUid(): string {
     if ((this.ev as any).uid) {
       return (this.ev as any).uid;
@@ -240,9 +237,6 @@ export class IcalEvent {
     return uid;
   }
 
-  /**
-   * @return {string[]}
-   */
   getLongLines(): string[] {
     if (this.lines) return this.lines;
     const categoryLine = this.category ? [`CATEGORIES:${this.category}`] : [];
@@ -307,16 +301,12 @@ export class IcalEvent {
     return arr;
   }
 
-  /**
-   * @return {string}
-   */
   toString(): string {
     return this.getLines().join('\r\n');
   }
 
   /**
    * fold lines to 75 characters
-   * @return {string[]}
    */
   getLines(): string[] {
     return this.getLongLines().map(IcalEvent.fold);
@@ -324,8 +314,6 @@ export class IcalEvent {
 
   /**
    * fold line to 75 characters
-   * @param {string} line
-   * @return {string}
    */
   static fold(line: string): string {
     let isASCII = true;
@@ -368,10 +356,6 @@ export class IcalEvent {
     return result + current;
   }
 
-  /**
-   * @param {string} str
-   * @return {string}
-   */
   static escape(str: string): string {
     if (str.indexOf(',') !== -1) {
       str = str.replace(/,/g, '\\,');
@@ -382,10 +366,6 @@ export class IcalEvent {
     return str;
   }
 
-  /**
-   * @param {Date} dt
-   * @return {string}
-   */
   static formatYYYYMMDD(dt: Date): string {
     return (
       pad4(dt.getFullYear()) + pad2(dt.getMonth() + 1) + pad2(dt.getDate())
@@ -394,8 +374,6 @@ export class IcalEvent {
 
   /**
    * Returns UTC string for iCalendar
-   * @param {Date} dt
-   * @return {string}
    */
   static makeDtstamp(dt: Date): string {
     const s = dt.toISOString();
@@ -409,7 +387,6 @@ export class IcalEvent {
     );
   }
 
-  /** @return {string} */
   static version(): string {
     return version;
   }
@@ -417,7 +394,7 @@ export class IcalEvent {
 
 /**
  * Transforms a single Event into a VEVENT string
- * @return {string} multi-line result, delimited by \r\n
+ * @returns multi-line result, delimited by \r\n
  */
 export function eventToIcal(ev: Event, options: ICalOptions): string {
   const ical = new IcalEvent(ev, options);
