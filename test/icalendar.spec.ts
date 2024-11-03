@@ -55,7 +55,7 @@ test('ical-sedra', () => {
     'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
     'CLASS:PUBLIC',
     'DESCRIPTION:Torah: Leviticus 6:1-8:36\\nHaftarah: Malachi 3:4-24 | Shabbat ',
-    ' HaGadol\\n\\nhttps://hebcal.com/s/tzav-19930403?us=js&um=icalendar',
+    ' HaGadol\\n\\nhttps://hebcal.com/s/5753/25?us=js&um=icalendar',
     'END:VEVENT',
   ];
   expect(lines).toEqual(expected);
@@ -79,8 +79,7 @@ test('ical-sedra', () => {
     'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
     'CLASS:PUBLIC',
     'DESCRIPTION:Torah: Numbers 16:1-18:32\\, 28:9-15\\nHaftarah: Isaiah 66:1-24 ',
-    ' | Shabbat Rosh Chodesh\\n\\nhttps://hebcal.com/s/korach-19930619?us=js&um=ic',
-    ' alendar',
+    ' | Shabbat Rosh Chodesh\\n\\nhttps://hebcal.com/s/5753/38?us=js&um=icalendar',
     'END:VEVENT',
   ];
   expect(lines).toEqual(expected);
@@ -652,7 +651,7 @@ test('campaign2', () => {
   const lines1 = ical1.getLongLines();
   const desc1 = findLine(lines1, 'DESCRIPTION');
   expect(desc1).toBe(
-    'Torah: Leviticus 19:1-20:27\\nHaftarah: I Samuel 20:18-42 | Shabbat Machar Chodesh\\n\\nhttps://hebcal.com/s/kedoshim-20220430?i=on&uc=ical-foo-bar'
+    'Torah: Leviticus 19:1-20:27\\nHaftarah: I Samuel 20:18-42 | Shabbat Machar Chodesh\\n\\nhttps://hebcal.com/s/5782i/30?uc=ical-foo-bar'
   );
 
   const ev2 = new DafYomiEvent(new HDate(new Date(1995, 11, 17)));
@@ -834,7 +833,7 @@ test('parsha-with-memo', () => {
   const lines = icalEvent.getLongLines();
   const description = findLine(lines, 'DESCRIPTION');
   expect(description).toBe(
-    'Hello World!\\n\\nTorah: Genesis 6:9-11:32\\nHaftarah: Isaiah 54:1-55:5\\nHaftarah for Sephardim: Isaiah 54:1-10\\n\\nhttps://hebcal.com/s/noach-20231021?us=js&um=icalendar'
+    'Hello World!\\n\\nTorah: Genesis 6:9-11:32\\nHaftarah: Isaiah 54:1-55:5\\nHaftarah for Sephardim: Isaiah 54:1-10\\n\\nhttps://hebcal.com/s/5784/2?us=js&um=icalendar'
   );
 });
 
