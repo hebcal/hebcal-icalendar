@@ -15,7 +15,6 @@ module.exports = [
       commonjs(),
     ],
     external: [
-      '@hebcal/hdate',
       '@hebcal/core',
       '@hebcal/rest-api',
       'fs',
