@@ -8,15 +8,19 @@ const banner = '/*! ' + pkg.name + ' v' + pkg.version + ' */';
 module.exports = [
   {
     input: 'src/icalendar.ts',
-    output: [
-      {file: pkg.main, format: 'cjs', name: pkg.name, banner},
-      {file: pkg.module, format: 'es', name: pkg.name, banner},
-    ],
+    output: [{file: pkg.module, format: 'es', name: pkg.name, banner}],
     plugins: [
       typescript(),
       json({compact: true, preferConst: true}),
       commonjs(),
     ],
-    external: ['@hebcal/core', '@hebcal/rest-api', 'fs', 'stream', 'murmurhash3'],
+    external: [
+      '@hebcal/hdate',
+      '@hebcal/core',
+      '@hebcal/rest-api',
+      'fs',
+      'stream',
+      'murmurhash3',
+    ],
   },
 ];
