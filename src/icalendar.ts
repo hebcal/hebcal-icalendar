@@ -1,7 +1,8 @@
-import {Locale, greg, pad2, pad4} from '@hebcal/hdate';
-import {flags, CalOptions, Event, OmerEvent} from '@hebcal/core';
+import {Locale, greg, flags, CalOptions, Event, OmerEvent} from '@hebcal/core';
 import {murmur32HexSync} from 'murmurhash3';
 import {
+  pad2,
+  pad4,
   getCalendarTitle,
   makeAnchor,
   getEventCategories,
