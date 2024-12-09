@@ -1,16 +1,15 @@
 import {Locale, greg, flags, CalOptions, Event, OmerEvent} from '@hebcal/core';
 import {murmur32HexSync} from 'murmurhash3';
+import {pad2, pad4} from '@hebcal/hdate';
 import {
-  pad2,
-  pad4,
   getCalendarTitle,
-  makeAnchor,
   getEventCategories,
   getHolidayDescription,
   makeTorahMemoText,
   appendIsraelAndTracking,
   shouldRenderBrief,
-} from '@hebcal/rest-api';
+} from '@hebcal/rest-api/dist/esm/common';
+import {makeAnchor} from '@hebcal/rest-api/dist/esm/makeAnchor';
 import {promises as fs} from 'fs';
 import {version} from './pkgVersion';
 
@@ -78,7 +77,13 @@ function appendTrackingToUrl(
   if (!url) {
     return null;
   }
-  const utmSource = options.utmSource || 'js';
+  let utmSource = options.utmSource;
+  if (!utmSource) {
+    const u = new URL(url);
+    if (u.host === 'www.hebcal.com') {
+      utmSource = 'js';
+    }
+  }
   const utmMedium = options.utmMedium || 'icalendar';
   const utmCampaign = options.utmCampaign;
   return appendIsraelAndTracking(
@@ -463,8 +468,9 @@ function createMemo(ev: Event, options: ICalOptions): string {
   const url = appendTrackingToUrl(ev.url(), options);
   const torahMemo = makeTorahMemo(ev, options.il!);
   if (!memo) {
-    if (typeof (ev as any).linkedEvent !== 'undefined') {
-      memo = (ev as any).linkedEvent.render(options.locale);
+    const linkedEvent = (ev as any).linkedEvent;
+    if (typeof linkedEvent !== 'undefined') {
+      memo = linkedEvent.render(options.locale);
     } else {
       memo = getHolidayDescription(ev);
     }
