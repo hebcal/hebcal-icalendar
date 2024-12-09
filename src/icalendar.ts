@@ -81,7 +81,7 @@ function appendTrackingToUrl(
   if (!utmSource) {
     const u = new URL(url);
     if (u.host === 'www.hebcal.com') {
-      utmSource = 'js';
+      utmSource = 'ical';
     }
   }
   const utmMedium = options.utmMedium || 'icalendar';

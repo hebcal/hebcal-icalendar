@@ -55,7 +55,7 @@ test('ical-sedra', () => {
     'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
     'CLASS:PUBLIC',
     'DESCRIPTION:Torah: Leviticus 6:1-8:36\\nHaftarah: Malachi 3:4-24 | Shabbat ',
-    ' HaGadol\\n\\nhttps://hebcal.com/s/5753/25?us=js&um=icalendar',
+    ' HaGadol\\n\\nhttps://hebcal.com/s/5753/25?us=ical&um=icalendar',
     'END:VEVENT',
   ];
   expect(lines).toEqual(expected);
@@ -79,7 +79,8 @@ test('ical-sedra', () => {
     'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
     'CLASS:PUBLIC',
     'DESCRIPTION:Torah: Numbers 16:1-18:32\\, 28:9-15\\nHaftarah: Isaiah 66:1-24 ',
-    ' | Shabbat Rosh Chodesh\\n\\nhttps://hebcal.com/s/5753/38?us=js&um=icalendar',
+    ' | Shabbat Rosh Chodesh\\n\\nhttps://hebcal.com/s/5753/38?us=ical&um=icalenda',
+    ' r',
     'END:VEVENT',
   ];
   expect(lines).toEqual(expected);
@@ -116,7 +117,7 @@ test('ical-transp-opaque', () => {
     'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
     'CLASS:PUBLIC',
     'DESCRIPTION:Passover\\, the Feast of Unleavened Bread\\n\\nhttps://hebcal.com',
-    ' /h/pesach-1993?us=js&um=icalendar',
+    ' /h/pesach-1993?us=ical&um=icalendar',
     'END:VEVENT',
   ];
   expect(lines).toEqual(expected);
@@ -143,7 +144,7 @@ test('ical-transp-opaque', () => {
     'CLASS:PUBLIC',
     'DESCRIPTION:Passover\\, the Feast of Unleavened Bread\\n\\nTorah: Leviticus 2',
     ' 2:26-23:44\\; Numbers 28:16-25\\nHaftarah: II Kings 23:1-9\\, 23:21-25\\n\\nhtt',
-    ' ps://hebcal.com/h/pesach-1993?us=js&um=icalendar',
+    ' ps://hebcal.com/h/pesach-1993?us=ical&um=icalendar',
     'END:VEVENT',
   ];
   expect(lines).toEqual(expected);
@@ -385,7 +386,7 @@ test('chanukah-candles', () => {
     'DESCRIPTION:Hanukkah\\, the Jewish festival of rededication. Also known as ',
     ' the Festival of Lights\\, the eight-day festival is observed by lighting th',
     ' e candles of a hanukkiah (menorah)\\n\\nhttps://hebcal.com/h/chanukah-2020?u',
-    ' s=js&um=icalendar',
+    ' s=ical&um=icalendar',
     'LOCATION:Boston',
     'GEO:42.35843;-71.05977',
     'END:VEVENT',
@@ -424,7 +425,7 @@ test('ical-il-url', () => {
     ' bserved as a separate holiday in the Diaspora and is combined with Simchat',
     '  Torah in Israel\\n\\nTorah: Deuteronomy 33:1-34:12\\; Genesis 1:1-2:3\\; Numb',
     ' ers 29:35-30:1\\nHaftarah: Joshua 1:1-18\\n\\nhttps://hebcal.com/h/shmini-atz',
-    ' eret-2021?i=on&us=js&um=icalendar',
+    ' eret-2021?i=on&us=ical&um=icalendar',
     'END:VEVENT',
   ];
   expect(lines).toEqual(expected);
@@ -833,7 +834,7 @@ test('parsha-with-memo', () => {
   const lines = icalEvent.getLongLines();
   const description = findLine(lines, 'DESCRIPTION');
   expect(description).toBe(
-    'Hello World!\\n\\nTorah: Genesis 6:9-11:32\\nHaftarah: Isaiah 54:1-55:5\\nHaftarah for Sephardim: Isaiah 54:1-10\\n\\nhttps://hebcal.com/s/5784/2?us=js&um=icalendar'
+    'Hello World!\\n\\nTorah: Genesis 6:9-11:32\\nHaftarah: Isaiah 54:1-55:5\\nHaftarah for Sephardim: Isaiah 54:1-10\\n\\nhttps://hebcal.com/s/5784/2?us=ical&um=icalendar'
   );
 });
 
@@ -871,8 +872,8 @@ test('url', async () => {
     'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
     'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
     'CLASS:PUBLIC',
-    'DESCRIPTION:https://www.hebcal.com/foobar?utm_source=js&utm_medium=icalendar',
-    'URL:https://www.hebcal.com/foobar?utm_source=js&utm_medium=icalendar',
+    'DESCRIPTION:https://www.hebcal.com/foobar?utm_source=ical&utm_medium=icalendar',
+    'URL:https://www.hebcal.com/foobar?utm_source=ical&utm_medium=icalendar',
     'END:VEVENT',
   ];
   expect(lines).toEqual(expected);
