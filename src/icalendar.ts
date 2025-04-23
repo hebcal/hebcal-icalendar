@@ -468,11 +468,12 @@ function createMemo(ev: Event, options: ICalOptions): string {
   const url = appendTrackingToUrl(ev.url(), options);
   const torahMemo = makeTorahMemo(ev, options.il!);
   if (!memo) {
+    memo = getHolidayDescription(ev);
+  }
+  if (!memo) {
     const linkedEvent = (ev as any).linkedEvent;
     if (typeof linkedEvent !== 'undefined') {
       memo = linkedEvent.render(options.locale);
-    } else {
-      memo = getHolidayDescription(ev);
     }
   }
   if (torahMemo) {
