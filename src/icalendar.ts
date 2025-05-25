@@ -441,13 +441,13 @@ function makeTorahMemo(ev: Event, il: boolean): string {
  * @private
  */
 function createMemo(ev: Event, options: ICalOptions): string {
-  let memo = ev.memo;
-  if (typeof memo === 'string' && memo.length && memo.indexOf('\n') !== -1) {
+  let memo: string = ev.memo || '';
+  if (memo.length && memo.indexOf('\n') !== -1) {
     memo = memo.replace(/\n/g, '\\n');
   }
   const desc = ev.getDesc();
   if (desc === 'Havdalah' || desc === 'Candle lighting') {
-    return memo || '';
+    return memo;
   }
   const mask = ev.getFlags();
   if (mask & flags.OMER_COUNT) {
@@ -465,30 +465,30 @@ function createMemo(ev: Event, options: ICalOptions): string {
       sefira
     );
   }
-  const url = appendTrackingToUrl(ev.url(), options);
-  const torahMemo = makeTorahMemo(ev, options.il!);
   if (!memo) {
     memo = getHolidayDescription(ev);
   }
   if (!memo) {
-    const linkedEvent = (ev as any).linkedEvent;
-    if (typeof linkedEvent !== 'undefined') {
-      memo = linkedEvent.render(options.locale);
+    const linkEv = (ev as any).linkedEvent;
+    if (typeof linkEv !== 'undefined' && linkEv.getDesc() !== ev.getDesc()) {
+      memo = linkEv.render(options.locale);
     }
   }
+  const torahMemo = makeTorahMemo(ev, options.il!);
   if (torahMemo) {
-    if (memo!.length) {
+    if (memo.length) {
       memo += '\\n\\n';
     }
     memo += torahMemo;
   }
+  const url = appendTrackingToUrl(ev.url(), options);
   if (url) {
-    if (memo!.length) {
+    if (memo.length) {
       memo += '\\n\\n';
     }
     memo += url;
   }
-  return memo!;
+  return memo;
 }
 
 /**
