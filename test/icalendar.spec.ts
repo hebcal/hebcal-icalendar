@@ -238,7 +238,7 @@ test('ical-dafyomi', () => {
     'CLASS:PUBLIC',
     'DESCRIPTION:https://www.sefaria.org/Nedarim.14a?lang=bi&utm_source=hebcal.',
     ' com&utm_medium=icalendar',
-    'LOCATION:דַף יוֹמִי',
+    'LOCATION:דַּף יוֹמִי',
     'END:VEVENT',
   ];
   expect(lines).toEqual(expected);
