@@ -11,9 +11,6 @@
   "description": "Jewish holidays and Hebrew calendar as iCalendar RFC 2445",
   "module": "dist/index.js",
   "type": "module",
-  "exports": {
-    ".": "./dist/index.js"
-  },
   "typings": "dist/icalendar.d.ts",
   "engines": {
     "node": ">= 18.0.0"
