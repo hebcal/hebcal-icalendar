@@ -1,6 +1,6 @@
 {
   "name": "@hebcal/icalendar",
-  "version": "6.2.0",
+  "version": "6.2.1",
   "author": "Michael J. Radwin (https://github.com/mjradwin)",
   "keywords": [
     "ical",
@@ -9,9 +9,12 @@
     "hebcal"
   ],
   "description": "Jewish holidays and Hebrew calendar as iCalendar RFC 2445",
-  "module": "dist/index.js",
   "type": "module",
-  "typings": "dist/icalendar.d.ts",
+  "module": "./dist/index.js",
+  "typings": "./dist/icalendar.d.ts",
+  "exports": {
+    ".": "./dist/index.js"
+  },
   "engines": {
     "node": ">= 18.0.0"
   },
@@ -25,6 +28,7 @@
   "bugs": {
     "url": "https://github.com/hebcal/hebcal-icalendar/issues"
   },
+  "homepage": "https://hebcal.github.io/api/icalendar/",
   "dependencies": {
     "@hebcal/core": "^6.0.0",
     "@hebcal/hdate": "^0.21.0",
