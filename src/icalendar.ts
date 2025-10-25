@@ -519,7 +519,7 @@ export async function icalEventsToString(
   if (!icals.length) throw new RangeError('Events can not be empty');
   if (!options) throw new TypeError('Invalid options object');
   const stream = [];
-  const locale = options.locale || Locale.getLocaleName();
+  const locale = options.locale || 'en';
   const uclang = locale.toUpperCase();
   const opts = {...options};
   opts.dtstamp = opts.dtstamp || IcalEvent.makeDtstamp(new Date());

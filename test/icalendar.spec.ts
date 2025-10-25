@@ -644,11 +644,12 @@ test('utm_campaign', () => {
 });
 
 test('campaign2', () => {
-  const ev1 = new ParshaEvent(
-    new HDate(new Date(2022, 3, 30)),
-    ['Kedoshim'],
-    true
-  );
+  const ev1 = new ParshaEvent({
+    hdate: new HDate(new Date(2022, 3, 30)),
+    parsha: ['Kedoshim'],
+    il: true,
+    chag: false,
+  });
   const ical1 = new IcalEvent(ev1, {utmCampaign: 'ical-foo-bar'});
   const lines1 = ical1.getLongLines();
   const desc1 = findLine(lines1, 'DESCRIPTION');
@@ -825,11 +826,12 @@ test('linkedEvent-memo', () => {
 });
 
 test('parsha-with-memo', () => {
-  const ev = new ParshaEvent(
-    new HDate(new Date(2023, 9, 21)),
-    ['Noach'],
-    false
-  );
+  const ev = new ParshaEvent({
+    hdate: new HDate(new Date(2023, 9, 21)),
+    parsha: ['Noach'],
+    il: false,
+    chag: false,
+  });
   ev.memo = 'Hello World!';
   const icalEvent = new IcalEvent(ev, {});
   const lines = icalEvent.getLongLines();
@@ -840,7 +842,12 @@ test('parsha-with-memo', () => {
 });
 
 test('parsha-apos', () => {
-  const ev = new ParshaEvent(new HDate(8, 'Tishrei', 5784), ["Ha'azinu"]);
+  const ev = new ParshaEvent({
+    hdate: new HDate(8, 'Tishrei', 5784),
+    parsha: ["Ha'azinu"],
+    il: false,
+    chag: false,
+  });
   const icalEvent = new IcalEvent(ev, {locale: 'en'});
   const lines = icalEvent.getLongLines();
   expect(findLine(lines, 'SUMMARY')).toBe('Parashat Ha’azinu');
