@@ -32,17 +32,16 @@ function findLine(lines: string[], propName: string): string | null {
 }
 
 test('ical-sedra', () => {
-  const options: ICalOptions = {
+  const options: CalOptions = {
     year: 1993,
     month: 4,
     sedrot: true,
     noHolidays: true,
   };
   const events = HebrewCalendar.calendar(options);
-  const tzav = new IcalEvent(events[0], options);
+  const icalOpts: ICalOptions = {...options, dtstamp: 'X'};
+  const tzav = new IcalEvent(events[0], icalOpts);
   let lines = tzav.toString().split('\r\n');
-  lines[1] = 'DTSTAMP:X';
-  lines[6] = 'UID:X';
   let expected = [
     'BEGIN:VEVENT',
     'DTSTAMP:X',
@@ -50,7 +49,7 @@ test('ical-sedra', () => {
     'SUMMARY:Parashat Tzav',
     'DTSTART;VALUE=DATE:19930403',
     'DTEND;VALUE=DATE:19930404',
-    'UID:X',
+    'UID:hebcal-19930403-b025cb50',
     'TRANSP:TRANSPARENT',
     'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
     'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
@@ -63,10 +62,9 @@ test('ical-sedra', () => {
 
   const options2 = {year: 1993, month: 6, sedrot: true, noHolidays: true};
   const events2 = HebrewCalendar.calendar(options2);
-  const korach = new IcalEvent(events2[2], options);
+  const icalOpts2: ICalOptions = {...options2, dtstamp: 'X'};
+  const korach = new IcalEvent(events2[2], icalOpts2);
   lines = korach.toString().split('\r\n');
-  lines[1] = 'DTSTAMP:X';
-  lines[6] = 'UID:X';
   expected = [
     'BEGIN:VEVENT',
     'DTSTAMP:X',
@@ -74,7 +72,7 @@ test('ical-sedra', () => {
     'SUMMARY:Parashat Korach',
     'DTSTART;VALUE=DATE:19930619',
     'DTEND;VALUE=DATE:19930620',
-    'UID:X',
+    'UID:hebcal-19930619-a23938d3',
     'TRANSP:TRANSPARENT',
     'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
     'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
@@ -97,14 +95,13 @@ test('ical-transp-opaque', () => {
   };
   const icalOpts: ICalOptions = {
     ...options,
+    dtstamp: 'X',
     emoji: true,
   };
   const events = HebrewCalendar.calendar(options);
   const memo = 'Passover, the Feast of Unleavened Bread';
   events[0].memo = memo;
   let lines = new IcalEvent(events[0], icalOpts).toString().split('\r\n');
-  lines[1] = 'DTSTAMP:X';
-  lines[6] = 'UID:X';
   let expected = [
     'BEGIN:VEVENT',
     'DTSTAMP:X',
@@ -112,7 +109,7 @@ test('ical-transp-opaque', () => {
     'SUMMARY:🫓🍷 Erev Pesach',
     'DTSTART;VALUE=DATE:19930405',
     'DTEND;VALUE=DATE:19930406',
-    'UID:X',
+    'UID:hebcal-19930405-b899d38a',
     'TRANSP:TRANSPARENT',
     'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
     'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
@@ -129,8 +126,6 @@ test('ical-transp-opaque', () => {
 
   events[2].memo = memo;
   lines = new IcalEvent(events[2], icalOpts).toString().split('\r\n');
-  lines[1] = 'DTSTAMP:X';
-  lines[6] = 'UID:X';
   expected = [
     'BEGIN:VEVENT',
     'DTSTAMP:X',
@@ -138,7 +133,7 @@ test('ical-transp-opaque', () => {
     'SUMMARY:🫓 Pesach II',
     'DTSTART;VALUE=DATE:19930407',
     'DTEND;VALUE=DATE:19930408',
-    'UID:X',
+    'UID:hebcal-19930407-8a7f3521',
     'TRANSP:OPAQUE',
     'X-MICROSOFT-CDO-BUSYSTATUS:OOF',
     'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
@@ -173,13 +168,12 @@ test('ical-candles', () => {
   };
   const icalOpts: ICalOptions = {
     ...options,
+    dtstamp: 'X',
     emoji: true,
   };
   const events = HebrewCalendar.calendar(options);
   const ical = new IcalEvent(events[0], icalOpts);
   let lines = ical.toString().split('\r\n');
-  lines[1] = 'DTSTAMP:X';
-  lines[6] = 'UID:X';
   const expected = [
     'BEGIN:VEVENT',
     'DTSTAMP:X',
@@ -187,7 +181,7 @@ test('ical-candles', () => {
     'SUMMARY:🕯️ Candle lighting',
     'DTSTART;TZID=America/Chicago:19930312T173700',
     'DTEND;TZID=America/Chicago:19930312T173700',
-    'UID:X',
+    'UID:hebcal-19930312-37b70ea1-4887398',
     'TRANSP:TRANSPARENT',
     'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
     'CLASS:PUBLIC',
@@ -211,7 +205,7 @@ test('ical-candles', () => {
 });
 
 test('ical-dafyomi', () => {
-  const options: ICalOptions = {
+  const options: CalOptions = {
     year: 1993,
     month: 3,
     noHolidays: true,
@@ -220,10 +214,9 @@ test('ical-dafyomi', () => {
   };
   const ev = HebrewCalendar.calendar(options)[0];
   expect(ev.getDesc()).toBe('Nedarim 14');
-  const ical = new IcalEvent(ev, options);
+  const icalOpts: ICalOptions = {...options, dtstamp: 'X'};
+  const ical = new IcalEvent(ev, icalOpts);
   const lines = ical.toString().split('\r\n');
-  lines[1] = 'DTSTAMP:X';
-  lines[6] = 'UID:X';
   const expected = [
     'BEGIN:VEVENT',
     'DTSTAMP:X',
@@ -231,7 +224,7 @@ test('ical-dafyomi', () => {
     'SUMMARY:נדרים דף י״ד',
     'DTSTART;VALUE=DATE:19930301',
     'DTEND;VALUE=DATE:19930302',
-    'UID:X',
+    'UID:hebcal-19930301-e9496fc2',
     'TRANSP:TRANSPARENT',
     'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
     'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
@@ -245,7 +238,7 @@ test('ical-dafyomi', () => {
 });
 
 test('eventsToIcalendar', async () => {
-  const options: ICalOptions = {
+  const options: CalOptions = {
     year: 2020,
     month: 2,
     sedrot: true,
@@ -253,9 +246,9 @@ test('eventsToIcalendar', async () => {
     location: Location.lookup('Hawaii'),
   };
   const events = HebrewCalendar.calendar(options);
-  options.prodid = 'X';
-  const ical = await eventsToIcalendar(events, options);
-  const lines = ical.split('\r\n').slice(0, 12);
+  const icalOpts: ICalOptions = {...options, prodid: 'X'};
+  const ical = await eventsToIcalendar(events, icalOpts);
+  const lines = ical.split('\r\n').slice(0, 13);
   const expected = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
@@ -263,7 +256,8 @@ test('eventsToIcalendar', async () => {
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     'X-LOTUS-CHARSET:UTF-8',
-    'X-PUBLISHED-TTL:PT7D',
+    'REFRESH-INTERVAL;VALUE=DURATION:P7D',
+    'X-PUBLISHED-TTL:P7D',
     'X-WR-CALNAME:Hebcal Hawaii February 2020',
     'X-WR-CALDESC:Jewish Holidays from www.hebcal.com',
     'X-WR-TIMEZONE;VALUE=TEXT:Pacific/Honolulu',
@@ -274,7 +268,7 @@ test('eventsToIcalendar', async () => {
 });
 
 test('subscribe-suppress-title-years', async () => {
-  const options: ICalOptions = {
+  const options: CalOptions = {
     year: 2026,
     month: 2,
     sedrot: true,
@@ -282,20 +276,19 @@ test('subscribe-suppress-title-years', async () => {
     location: Location.lookup('Hawaii'),
   };
   const events = HebrewCalendar.calendar(options);
-  options.prodid = 'X';
-  options.subscribe = '1';
-  const ical = await eventsToIcalendar(events, options);
+  const icalOpts: ICalOptions = {...options, prodid: 'X', subscribe: '1'};
+  const ical = await eventsToIcalendar(events, icalOpts);
   const lines = ical.split('\r\n');
   expect(findLine(lines, 'X-WR-CALNAME')).toBe('Hebcal Hawaii');
 
-  options.subscribe = false;
-  const ical2 = await eventsToIcalendar(events, options);
+  icalOpts.subscribe = false;
+  const ical2 = await eventsToIcalendar(events, icalOpts);
   const lines2 = ical2.split('\r\n');
   expect(findLine(lines2, 'X-WR-CALNAME')).toBe('Hebcal Hawaii February 2026');
 });
 
 test('eventsToIcalendar-no-vtimezone', async () => {
-  const options: ICalOptions = {
+  const options: CalOptions = {
     year: 2020,
     month: 2,
     sedrot: true,
@@ -303,9 +296,9 @@ test('eventsToIcalendar-no-vtimezone', async () => {
     location: Location.lookup('Boston'),
   };
   const events = HebrewCalendar.calendar(options);
-  options.prodid = 'X';
-  const ical = await eventsToIcalendar(events, options);
-  const lines = ical.split('\r\n').slice(0, 11);
+  const icalOpts: ICalOptions = {...options, prodid: 'X'};
+  const ical = await eventsToIcalendar(events, icalOpts);
+  const lines = ical.split('\r\n').slice(0, 12);
   const expected = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
@@ -313,7 +306,8 @@ test('eventsToIcalendar-no-vtimezone', async () => {
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     'X-LOTUS-CHARSET:UTF-8',
-    'X-PUBLISHED-TTL:PT7D',
+    'REFRESH-INTERVAL;VALUE=DURATION:P7D',
+    'X-PUBLISHED-TTL:P7D',
     'X-WR-CALNAME:Hebcal Boston February 2020',
     'X-WR-CALDESC:Jewish Holidays from www.hebcal.com',
     'X-WR-TIMEZONE;VALUE=TEXT:America/New_York',
@@ -366,13 +360,12 @@ test('chanukah-candles', () => {
   };
   const icalOpts: ICalOptions = {
     ...options,
+    dtstamp: 'X',
     emoji: true,
   };
   const events = HebrewCalendar.calendar(options);
   const ical = new IcalEvent(events[0], icalOpts);
   const lines = ical.toString().split('\r\n');
-  lines[1] = 'DTSTAMP:X';
-  lines[6] = 'UID:X';
   const expected = [
     'BEGIN:VEVENT',
     'DTSTAMP:X',
@@ -380,7 +373,7 @@ test('chanukah-candles', () => {
     'SUMMARY:🕎2️⃣ Chanukah: 2 Candles',
     'DTSTART;TZID=America/New_York:20201211T155300',
     'DTEND;TZID=America/New_York:20201211T155300',
-    'UID:X',
+    'UID:hebcal-20201211-bf71330e-boston',
     'TRANSP:TRANSPARENT',
     'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
     'CLASS:PUBLIC',
@@ -403,13 +396,12 @@ test('ical-il-url', () => {
   };
   const icalOpts: ICalOptions = {
     ...options,
+    dtstamp: 'X',
     emoji: true,
   };
   const events = HebrewCalendar.calendar(options);
   const ical = new IcalEvent(events[0], icalOpts);
   const lines = ical.toString().split('\r\n');
-  lines[1] = 'DTSTAMP:X';
-  lines[6] = 'UID:X';
   const expected = [
     'BEGIN:VEVENT',
     'DTSTAMP:X',
@@ -417,7 +409,7 @@ test('ical-il-url', () => {
     'SUMMARY:✡️ Shmini Atzeret',
     'DTSTART;VALUE=DATE:20210928',
     'DTEND;VALUE=DATE:20210929',
-    'UID:X',
+    'UID:hebcal-20210928-e6edcf39',
     'TRANSP:OPAQUE',
     'X-MICROSOFT-CDO-BUSYSTATUS:OOF',
     'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
@@ -437,9 +429,8 @@ test('userEvent', () => {
   const userEvent = new Event(hd, 'User Event', flags.USER_EVENT, {
     uid: 'foo-bar-baaz',
   });
-  const ical = new IcalEvent(userEvent, {yahrzeit: true});
+  const ical = new IcalEvent(userEvent, {yahrzeit: true, dtstamp: 'X'});
   const lines = ical.toString().split('\r\n');
-  lines[1] = 'DTSTAMP:X';
   const expected = [
     'BEGIN:VEVENT',
     'DTSTAMP:X',
@@ -464,10 +455,10 @@ test('userEvent', () => {
 test('relcalid', async () => {
   const event = new HebrewDateEvent(new HDate(new Date(2021, 1, 13)));
   const relcalid = '01enedk40bytfd4enm1673bdqh';
-  const ical = await eventsToIcalendar([event], {relcalid, prodid: 'X'});
+  const icalOpts: ICalOptions = {relcalid, prodid: 'X', dtstamp: 'X'};
+  (event as any).uid = 'X';
+  const ical = await eventsToIcalendar([event], icalOpts);
   const lines = ical.split('\r\n');
-  lines[11] = 'DTSTAMP:X';
-  lines[15] = 'UID:X';
   const expected = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
@@ -475,7 +466,8 @@ test('relcalid', async () => {
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     'X-LOTUS-CHARSET:UTF-8',
-    'X-PUBLISHED-TTL:PT7D',
+    'REFRESH-INTERVAL;VALUE=DURATION:P7D',
+    'X-PUBLISHED-TTL:P7D',
     'X-WR-CALNAME:Hebcal Diaspora February 2021',
     'X-WR-CALDESC:Jewish Holidays from www.hebcal.com',
     `X-WR-RELCALID:${relcalid}`,
@@ -542,19 +534,20 @@ test('fastStartEnd', () => {
 
 test('publishedTTL', async () => {
   const event = new HebrewDateEvent(new HDate(new Date(2021, 1, 13)));
-  const ical = await eventsToIcalendar([event], {publishedTTL: 'PT2D'});
+  const ical = await eventsToIcalendar([event], {publishedTTL: 'P2D'});
   const lines = ical.split('\r\n');
-  expect(lines[6]).toBe('X-PUBLISHED-TTL:PT2D');
+  expect(lines[6]).toBe('REFRESH-INTERVAL;VALUE=DURATION:P2D');
+  expect(lines[7]).toBe('X-PUBLISHED-TTL:P2D');
   const ical2 = await eventsToIcalendar([event], {publishedTTL: false});
+  expect(ical2.indexOf('REFRESH-INTERVAL')).toBe(-1);
   expect(ical2.indexOf('X-PUBLISHED-TTL')).toBe(-1);
 });
 
 test('OmerEvent', () => {
   const ev = new OmerEvent(new HDate(22, 'Iyyar', 5781), 37);
-  const icalEvent = new IcalEvent(ev, {emoji: true});
+  const icalOpts: ICalOptions = {emoji: true, dtstamp: 'X'};
+  const icalEvent = new IcalEvent(ev, icalOpts);
   const lines = icalEvent.toString().split('\r\n');
-  lines[1] = 'DTSTAMP:X';
-  lines[6] = 'UID:X';
   const expected = [
     'BEGIN:VEVENT',
     'DTSTAMP:X',
@@ -562,7 +555,7 @@ test('OmerEvent', () => {
     'DTSTART;VALUE=DATE:20210504',
     'DTEND;VALUE=DATE:20210505',
     'UID:hebcal-20210504-45f4acad',
-    'UID:X',
+    'TRANSP:TRANSPARENT',
     'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
     'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
     'CLASS:PUBLIC',
@@ -608,8 +601,10 @@ test('omer-alarm', () => {
 
 /** @private */
 class TestEvent extends Event {
+  uid: string;
   constructor(date: HDate) {
     super(date, 'Test Event', 0);
+    this.uid = 'X';
   }
   url(): string {
     return 'https://www.hebcal.com/foobar';
@@ -621,9 +616,13 @@ class TestEvent extends Event {
 
 test('utm_campaign', () => {
   const ev = new TestEvent(new HDate(22, 'Iyyar', 5781));
-  const icalEvent = new IcalEvent(ev, {utmSource: 'baaz', utmCampaign: 'quux'});
+  const icalOpts: ICalOptions = {
+    utmSource: 'baaz',
+    utmCampaign: 'quux',
+    dtstamp: 'X',
+  };
+  const icalEvent = new IcalEvent(ev, icalOpts);
   const lines = icalEvent.toString().split('\r\n');
-  lines[1] = 'DTSTAMP:X';
   const expected = [
     'BEGIN:VEVENT',
     'DTSTAMP:X',
@@ -631,7 +630,7 @@ test('utm_campaign', () => {
     'SUMMARY:Test Event',
     'DTSTART;VALUE=DATE:20210504',
     'DTEND;VALUE=DATE:20210505',
-    'UID:hebcal-20210504-9f01ca16',
+    'UID:X',
     'TRANSP:TRANSPARENT',
     'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
     'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
@@ -672,7 +671,7 @@ test('caldesc', async () => {
     caldesc:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua',
   });
-  const lines = ical.split('\r\n').slice(8, 10);
+  const lines = ical.split('\r\n').slice(9, 11);
   const expected = [
     'X-WR-CALDESC:Lorem ipsum dolor sit amet\\, consectetur adipiscing elit\\, se',
     ' d do eiusmod tempor incididunt ut labore et dolore magna aliqua',
@@ -687,7 +686,7 @@ test('caldesc', async () => {
     caldesc:
       'לורם איפסום דולור סיט אמט, קונסקטורר אדיפיסינג אלית להאמית קרהשק סכעיט דז מא, מנכם למטכין נשואי מנורך. קולהע צופעט למרקוח איבן איף, ברומץ כלרשט מיחוצים.',
   });
-  const lines2 = ical2.split('\r\n').slice(8, 12);
+  const lines2 = ical2.split('\r\n').slice(9, 13);
   const expected2 = [
     'X-WR-CALDESC:לורם איפסום דולור סיט אמט\\, קונסקט',
     ' ורר אדיפיסינג אלית להאמית קרהשק סכעיט דז',
@@ -746,7 +745,7 @@ test('uid', () => {
 
 test('yerushalmi-yomi', () => {
   const hd = new HDate(new Date(2022, 10, 15));
-  const options: ICalOptions = {
+  const options: CalOptions = {
     start: hd,
     end: hd,
     noHolidays: true,
@@ -755,10 +754,9 @@ test('yerushalmi-yomi', () => {
   };
   const ev = HebrewCalendar.calendar(options)[0];
   expect(ev.getDesc()).toBe('Berakhot 2');
-  const ical = new IcalEvent(ev, options);
+  const icalOpts: ICalOptions = {...options, dtstamp: 'X'};
+  const ical = new IcalEvent(ev, icalOpts);
   const lines = ical.toString().split('\r\n');
-  lines[1] = 'DTSTAMP:X';
-  lines[6] = 'UID:X';
   const expected = [
     'BEGIN:VEVENT',
     'DTSTAMP:X',
@@ -766,7 +764,7 @@ test('yerushalmi-yomi', () => {
     'SUMMARY:Berakhos 2',
     'DTSTART;VALUE=DATE:20221115',
     'DTEND;VALUE=DATE:20221116',
-    'UID:X',
+    'UID:hebcal-20221115-40fb0520',
     'TRANSP:TRANSPARENT',
     'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
     'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
@@ -781,9 +779,8 @@ test('yerushalmi-yomi', () => {
 
 test('sequence', () => {
   const ev = new TestEvent(new HDate(22, 'Iyyar', 5781));
-  const icalEvent = new IcalEvent(ev, {sequence: 73});
+  const icalEvent = new IcalEvent(ev, {sequence: 73, dtstamp: 'X'});
   const lines = icalEvent.toString().split('\r\n').slice(0, 5);
-  lines[1] = 'DTSTAMP:X';
   const expected = [
     'BEGIN:VEVENT',
     'DTSTAMP:X',
@@ -800,9 +797,8 @@ test('linkedEvent-memo', () => {
   const ev2 = new Event(hd, 'Foo Bar Baaz', flags.USER_EVENT, {
     linkedEvent: ev1,
   });
-  const icalEvent = new IcalEvent(ev2, {});
+  const icalEvent = new IcalEvent(ev2, {dtstamp: 'X'});
   const lines = icalEvent.toString().split('\r\n');
-  lines[1] = 'DTSTAMP:X';
   const expected = [
     'BEGIN:VEVENT',
     'DTSTAMP:X',
@@ -875,7 +871,7 @@ test('url', async () => {
     'SUMMARY:Test Event',
     'DTSTART;VALUE=DATE:20210504',
     'DTEND;VALUE=DATE:20210505',
-    'UID:hebcal-20210504-9f01ca16',
+    'UID:X',
     'TRANSP:TRANSPARENT',
     'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
     'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',

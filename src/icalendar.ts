@@ -225,13 +225,14 @@ export class IcalEvent {
   }
 
   getUid(): string {
-    if ((this.ev as any).uid) {
-      return (this.ev as any).uid;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let uid = (this.ev as any).uid;
+    if (uid) {
+      return uid;
     }
-    const options = this.options;
     const digest = murmur32HexSync(this.ev.getDesc());
-    let uid = `hebcal-${this.isoDateOnly}-${digest}`;
-    const loc = options.location;
+    uid = `hebcal-${this.isoDateOnly}-${digest}`;
+    const loc = this.options.location;
     if (this.timed && loc) {
       if (loc.getGeoId()) {
         uid += `-${loc.getGeoId()}`;
@@ -541,7 +542,8 @@ export async function icalEventsToString(
     'X-LOTUS-CHARSET:UTF-8',
   ];
   if (opts.publishedTTL !== false) {
-    const publishedTTL = opts.publishedTTL || 'PT7D';
+    const publishedTTL = opts.publishedTTL || 'P7D';
+    preamble.push(`REFRESH-INTERVAL;VALUE=DURATION:${publishedTTL}`);
     preamble.push(`X-PUBLISHED-TTL:${publishedTTL}`);
   }
   preamble.push(`X-WR-CALNAME:${title}`);
