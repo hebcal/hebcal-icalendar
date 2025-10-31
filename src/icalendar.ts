@@ -132,32 +132,34 @@ export class IcalEvent {
     const opts: ICalOptions = {...options};
     this.options = opts;
     this.dtstamp = opts.dtstamp || IcalEvent.makeDtstamp(new Date());
-    if (typeof (ev as any).sequence === 'number') {
-      this.sequence = (ev as any).sequence;
+    const ev0 = ev as any;
+    if (typeof ev0.sequence === 'number') {
+      this.sequence = ev0.sequence;
     } else if (typeof opts.sequence === 'number') {
       this.sequence = opts.sequence;
     }
-    const timed = (this.timed = Boolean((ev as any).eventTime));
+    const timed = (this.timed = Boolean(ev0.eventTime));
     const locale = opts.locale;
     const location = opts.location;
     let subj = shouldRenderBrief(ev)
       ? ev.renderBrief(locale)
       : ev.render(locale);
     const mask = ev.getFlags();
-    if ((ev as any).locationName) {
-      this.locationName = (ev as any).locationName;
+    if (ev0.locationName) {
+      this.locationName = ev0.locationName;
     } else if (timed && location) {
       this.locationName = location.getShortName();
-    } else if (mask & DAILY_LEARNING && (ev as any).category) {
-      this.locationName = Locale.gettext((ev as any).category, locale);
+    } else if (mask & DAILY_LEARNING && ev0.category) {
+      this.locationName = Locale.gettext(ev0.category, locale);
     }
-    const date = IcalEvent.formatYYYYMMDD(ev.getDate().greg());
+    const hd = ev.getDate();
+    const date = IcalEvent.formatYYYYMMDD(hd.greg());
     this.startDate = this.isoDateOnly = date;
     this.dtargs = '';
     this.transp = 'TRANSPARENT';
     this.busyStatus = 'FREE';
     if (timed) {
-      let [hour, minute] = (ev as any).eventTimeStr.split(':');
+      let [hour, minute] = ev0.eventTimeStr.split(':');
       hour = +hour;
       minute = +minute;
       this.startDate += 'T' + pad2(hour) + pad2(minute) + '00';
@@ -166,7 +168,7 @@ export class IcalEvent {
         this.dtargs = `;TZID=${location.getTzid()}`;
       }
     } else {
-      this.endDate = IcalEvent.formatYYYYMMDD(ev.getDate().next().greg());
+      this.endDate = IcalEvent.formatYYYYMMDD(hd.next().greg());
       // for all-day untimed, use DTEND;VALUE=DATE intsead of DURATION:P1D.
       // It's more compatible with everthing except ancient versions of
       // Lotus Notes circa 2004
@@ -198,8 +200,7 @@ export class IcalEvent {
       }
     }
     this.subj = subj;
-    this.category =
-      (ev as any).category || CATEGORY[getEventCategories(ev)?.[0]];
+    this.category = ev0.category || CATEGORY[getEventCategories(ev)?.[0]];
   }
 
   getAlarm(): string | null {
@@ -510,6 +511,16 @@ export async function eventsToIcalendar(
   return icalEventsToString(icals, opts);
 }
 
+const localeMap: Record<string, string> = {
+  'he-x-NoNikud': 'he',
+  'he-x-nonikud': 'he',
+  h: 'he',
+  a: 'en',
+  s: 'en',
+  ashkenazi: 'en',
+  ashkenazi_romanian: 'ro',
+} as const;
+
 /**
  * Generates an RFC 2445 iCalendar string from an array of IcalEvents
  */
@@ -521,7 +532,8 @@ export async function icalEventsToString(
   if (!options) throw new TypeError('Invalid options object');
   const stream = [];
   const locale = options.locale || 'en';
-  const uclang = locale.toUpperCase();
+  const lang = locale.length === 2 ? locale : localeMap[locale] || 'en';
+  const uclang = lang.toUpperCase();
   const opts = {...options};
   opts.dtstamp = opts.dtstamp || IcalEvent.makeDtstamp(new Date());
   const title = opts.title ? IcalEvent.escape(opts.title) : 'Untitled';

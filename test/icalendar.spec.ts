@@ -882,3 +882,39 @@ test('url', async () => {
   ];
   expect(lines).toEqual(expected);
 });
+
+test('prodid-locale-s', async () => {
+  const ev = new TestEvent(new HDate(new Date(2021, 1, 13)));
+  const ical = await eventsToIcalendar([ev], {locale: 's'});
+  const lines = ical.split('\r\n');
+  const prodid = findLine(lines, 'PRODID');
+  expect(prodid).not.toBeNull();
+  expect(prodid!.endsWith('//EN')).toBe(true);
+});
+
+test('prodid-locale-h', async () => {
+  const ev = new TestEvent(new HDate(new Date(2021, 1, 13)));
+  const ical = await eventsToIcalendar([ev], {locale: 'h'});
+  const lines = ical.split('\r\n');
+  const prodid = findLine(lines, 'PRODID');
+  expect(prodid).not.toBeNull();
+  expect(prodid!.endsWith('//HE')).toBe(true);
+});
+
+test('prodid-locale-bogus', async () => {
+  const ev = new TestEvent(new HDate(new Date(2021, 1, 13)));
+  const ical = await eventsToIcalendar([ev], {locale: 'bogus'});
+  const lines = ical.split('\r\n');
+  const prodid = findLine(lines, 'PRODID');
+  expect(prodid).not.toBeNull();
+  expect(prodid!.endsWith('//EN')).toBe(true);
+});
+
+test('prodid-locale-fr', async () => {
+  const ev = new TestEvent(new HDate(new Date(2021, 1, 13)));
+  const ical = await eventsToIcalendar([ev], {locale: 'fr'});
+  const lines = ical.split('\r\n');
+  const prodid = findLine(lines, 'PRODID');
+  expect(prodid).not.toBeNull();
+  expect(prodid!.endsWith('//FR')).toBe(true);
+});
