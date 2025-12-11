@@ -1,6 +1,6 @@
 {
   "name": "@hebcal/icalendar",
-  "version": "6.3.1",
+  "version": "6.3.2",
   "author": "Michael J. Radwin (https://github.com/mjradwin)",
   "keywords": [
     "ical",
@@ -30,9 +30,9 @@
   },
   "homepage": "https://hebcal.github.io/api/icalendar/",
   "dependencies": {
-    "@hebcal/core": "^6.0.5",
+    "@hebcal/core": "^6.0.6",
     "@hebcal/hdate": "^0.21.1",
-    "@hebcal/rest-api": "^6.3.0",
+    "@hebcal/rest-api": "^6.4.0",
     "murmurhash3": "^0.5.0",
     "tslib": "^2.8.1"
   },
@@ -55,9 +55,9 @@
     "@rollup/plugin-typescript": "^12.3.0",
     "@types/node": "24.9.2",
     "gts": "^5.3.1",
-    "rollup": "^4.52.5",
-    "typedoc": "^0.28.14",
+    "rollup": "^4.53.3",
+    "typedoc": "^0.28.15",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.6"
+    "vitest": "^4.0.15"
   }
 }

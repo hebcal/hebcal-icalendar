@@ -4,11 +4,11 @@ import {pad2, pad4} from '@hebcal/hdate';
 import {
   getCalendarTitle,
   getEventCategories,
-  getHolidayDescription,
-  makeTorahMemoText,
-  appendIsraelAndTracking,
   shouldRenderBrief,
 } from '@hebcal/rest-api/dist/esm/common';
+import {getHolidayDescription} from '@hebcal/rest-api/dist/esm/holiday';
+import {makeTorahMemoText} from '@hebcal/rest-api/dist/esm/memo';
+import {appendIsraelAndTracking} from '@hebcal/rest-api/dist/esm/url';
 import {makeAnchor} from '@hebcal/rest-api/dist/esm/makeAnchor';
 import {promises as fs} from 'fs';
 import {version} from './pkgVersion';
