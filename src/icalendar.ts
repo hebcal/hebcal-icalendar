@@ -1,6 +1,9 @@
-import {Locale, greg, flags, CalOptions, Event, OmerEvent} from '@hebcal/core';
+import {Event, flags} from '@hebcal/core/dist/esm/event';
+import {CalOptions} from '@hebcal/core/dist/esm/CalOptions';
+import {Locale} from '@hebcal/core/dist/esm/locale';
+import {OmerEvent} from '@hebcal/core/dist/esm/omer';
 import {murmur32HexSync} from 'murmurhash3';
-import {pad2, pad4} from '@hebcal/hdate';
+import {pad2, pad4, isDate} from '@hebcal/hdate';
 import {
   getCalendarTitle,
   getEventCategories,
@@ -211,7 +214,7 @@ export class IcalEvent {
       return 'TRIGGER:' + evAlarm;
     } else if (typeof evAlarm === 'boolean' && !evAlarm) {
       return null;
-    } else if (greg.isDate(evAlarm)) {
+    } else if (isDate(evAlarm)) {
       const alarmDt = evAlarm as Date;
       alarmDt.setSeconds(0);
       return 'TRIGGER;VALUE=DATE-TIME:' + IcalEvent.makeDtstamp(alarmDt);

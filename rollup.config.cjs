@@ -8,13 +8,6 @@ module.exports = [
     input: 'src/icalendar.ts',
     output: [{file: pkg.module, format: 'es', name: pkg.name, banner}],
     plugins: [typescript()],
-    external: [
-      '@hebcal/hdate',
-      '@hebcal/core',
-      /@hebcal\/rest-api/,
-      'fs',
-      'stream',
-      'murmurhash3',
-    ],
+    external: [/@hebcal\//, 'fs', 'stream', 'murmurhash3'],
   },
 ];
