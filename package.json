@@ -1,6 +1,6 @@
 {
   "name": "@hebcal/icalendar",
-  "version": "6.3.3",
+  "version": "6.3.4",
   "author": "Michael J. Radwin (https://github.com/mjradwin)",
   "keywords": [
     "ical",
@@ -10,13 +10,13 @@
   ],
   "description": "Jewish holidays and Hebrew calendar as iCalendar RFC 2445",
   "type": "module",
-  "module": "./dist/index.js",
+  "module": "./dist/icalendar.js",
   "typings": "./dist/icalendar.d.ts",
   "exports": {
-    ".": "./dist/index.js"
+    ".": "./dist/icalendar.js"
   },
   "engines": {
-    "node": ">= 18.0.0"
+    "node": ">= 20"
   },
   "files": [
     "dist"
@@ -30,7 +30,7 @@
   },
   "homepage": "https://hebcal.github.io/api/icalendar/",
   "dependencies": {
-    "@hebcal/core": "^6.0.7",
+    "@hebcal/core": "^6.0.8",
     "@hebcal/hdate": "^0.21.1",
     "@hebcal/rest-api": "^6.4.0",
     "murmurhash3": "^0.5.0",
@@ -40,7 +40,6 @@
     "build:rollup": "rollup -c",
     "build:version": "node ./version.cjs package.json src/pkgVersion.ts",
     "build": "npm run build:version && npm run build:rollup",
-    "prepare": "npm run build",
     "pretest": "npm run build",
     "docs": "typedoc",
     "test": "vitest",
@@ -53,9 +52,9 @@
   "devDependencies": {
     "@hebcal/learning": "^6.6.0",
     "@rollup/plugin-typescript": "^12.3.0",
-    "@types/node": "24.9.2",
-    "gts": "^5.3.1",
-    "rollup": "^4.54.0",
+    "@types/node": "25.0.6",
+    "gts": "^7.0.0",
+    "rollup": "^4.55.1",
     "typedoc": "^0.28.15",
     "typescript": "^5.9.3",
     "vitest": "^4.0.16"

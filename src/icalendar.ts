@@ -13,7 +13,7 @@ import {getHolidayDescription} from '@hebcal/rest-api/dist/esm/holiday';
 import {makeTorahMemoText} from '@hebcal/rest-api/dist/esm/memo';
 import {appendIsraelAndTracking} from '@hebcal/rest-api/dist/esm/url';
 import {makeAnchor} from '@hebcal/rest-api/dist/esm/makeAnchor';
-import {promises as fs} from 'fs';
+import {promises as fs} from 'node:fs';
 import {version} from './pkgVersion';
 
 const vtimezoneCache = new Map<string, string>();
@@ -135,6 +135,7 @@ export class IcalEvent {
     const opts: ICalOptions = {...options};
     this.options = opts;
     this.dtstamp = opts.dtstamp || IcalEvent.makeDtstamp(new Date());
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const ev0 = ev as any;
     if (typeof ev0.sequence === 'number') {
       this.sequence = ev0.sequence;
@@ -367,11 +368,11 @@ export class IcalEvent {
   }
 
   static escape(str: string): string {
-    if (str.indexOf(',') !== -1) {
-      str = str.replace(/,/g, '\\,');
+    if (str.includes(',')) {
+      str = str.replaceAll(',', '\\,');
     }
-    if (str.indexOf(';') !== -1) {
-      str = str.replace(/;/g, '\\;');
+    if (str.includes(';')) {
+      str = str.replaceAll(';', '\\;');
     }
     return str;
   }
@@ -421,10 +422,14 @@ const HOLIDAY_IGNORE_MASK =
   flags.USER_EVENT |
   flags.HEBREW_DATE;
 
+const ESC_NEWLINE = String.raw`\n`;
+const DBL_NEWLINE = ESC_NEWLINE + ESC_NEWLINE;
+
 /**
  * @private
  */
 function makeTorahMemo(ev: Event, il: boolean): string {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if (ev.getFlags() & HOLIDAY_IGNORE_MASK || (ev as any).eventTime) {
     return '';
   }
@@ -437,7 +442,7 @@ function makeTorahMemo(ev: Event, il: boolean): string {
   if (typeof memo === 'string') {
     return memo;
   }
-  memo = makeTorahMemoText(ev, il).replace(/\n/g, '\\n');
+  memo = makeTorahMemoText(ev, il).replaceAll('\n', ESC_NEWLINE);
   torahMemoCache.set(key, memo);
   return memo;
 }
@@ -447,8 +452,8 @@ function makeTorahMemo(ev: Event, il: boolean): string {
  */
 function createMemo(ev: Event, options: ICalOptions): string {
   let memo: string = ev.memo || '';
-  if (memo.length && memo.indexOf('\n') !== -1) {
-    memo = memo.replace(/\n/g, '\\n');
+  if (memo.length && memo.includes('\n')) {
+    memo = memo.replaceAll('\n', ESC_NEWLINE);
   }
   const desc = ev.getDesc();
   if (desc === 'Havdalah' || desc === 'Candle lighting') {
@@ -461,12 +466,12 @@ function createMemo(ev: Event, options: ICalOptions): string {
       omerEv.sefira('en'),
       omerEv.sefira('he'),
       omerEv.sefira('translit'),
-    ].join('\\n');
+    ].join(ESC_NEWLINE);
     return (
       omerEv.getTodayIs('en') +
-      '\\n\\n' +
+      DBL_NEWLINE +
       omerEv.getTodayIs('he') +
-      '\\n\\n' +
+      DBL_NEWLINE +
       sefira
     );
   }
@@ -474,22 +479,23 @@ function createMemo(ev: Event, options: ICalOptions): string {
     memo = getHolidayDescription(ev);
   }
   if (!memo) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const linkEv = (ev as any).linkedEvent;
-    if (typeof linkEv !== 'undefined' && linkEv.getDesc() !== ev.getDesc()) {
+    if (linkEv && linkEv.getDesc() !== ev.getDesc()) {
       memo = linkEv.render(options.locale);
     }
   }
   const torahMemo = makeTorahMemo(ev, options.il!);
   if (torahMemo) {
     if (memo.length) {
-      memo += '\\n\\n';
+      memo += DBL_NEWLINE;
     }
     memo += torahMemo;
   }
   const url = appendTrackingToUrl(ev.url(), options);
   if (url) {
     if (memo.length) {
-      memo += '\\n\\n';
+      memo += DBL_NEWLINE;
     }
     memo += url;
   }
@@ -592,7 +598,7 @@ export async function icalEventsToString(
         stream.push(str);
         stream.push('\r\n');
         vtimezoneCache.set(tzid, str);
-      } catch (error) {
+      } catch {
         // ignore failure when no timezone definition to read
       }
     }

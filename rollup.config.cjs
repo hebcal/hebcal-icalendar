@@ -6,8 +6,22 @@ const banner = '/*! ' + pkg.name + ' v' + pkg.version + ' */';
 module.exports = [
   {
     input: 'src/icalendar.ts',
-    output: [{file: pkg.module, format: 'es', name: pkg.name, banner}],
-    plugins: [typescript()],
-    external: [/@hebcal\//, 'fs', 'stream', 'murmurhash3'],
+    output: [
+      {
+        dir: 'dist',
+        format: 'es',
+        name: pkg.name,
+        banner,
+        preserveModules: true,
+        preserveModulesRoot: 'src',
+      },
+    ],
+    plugins: [
+      typescript({
+        tsconfig: './tsconfig.json',
+        outputToFilesystem: false,
+      }),
+    ],
+    external: [/@hebcal\//, 'node:fs', 'stream', 'murmurhash3'],
   },
 ];
