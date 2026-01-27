@@ -329,7 +329,7 @@ export class IcalEvent {
   static fold(line: string): string {
     let isASCII = true;
     for (let i = 0; i < line.length; i++) {
-      if (line.charCodeAt(i) > 255) {
+      if (line.codePointAt(i)! > 255) {
         isASCII = false;
         break;
       }
@@ -346,22 +346,22 @@ export class IcalEvent {
     }
     // iterate unicode character by character, making sure
     // that adding a new character would keep the line <= 75 octets
+    const segmenter = new Intl.Segmenter('en', {granularity: 'grapheme'});
+    const segments = segmenter.segment(line);
+    const chars = Array.from(segments, s => s.segment);
     let result = '';
     let current = '';
     let len = 0;
-    for (let i = 0; i < line.length; i++) {
-      const char = line[i];
-      const octets = char.charCodeAt(0) < 256 ? 1 : encoder.encode(char).length;
+    for (const ch of chars) {
+      const octets = ch.codePointAt(0)! < 256 ? 1 : encoder.encode(ch).length;
       const newlen = len + octets;
       if (newlen < 75) {
-        current += char;
+        current += ch;
         len = newlen;
       } else {
         result += current + '\r\n ';
-        line = line.substring(i);
-        current = '';
-        len = 0;
-        i = -1;
+        current = ch;
+        len = octets;
       }
     }
     return result + current;
@@ -369,10 +369,10 @@ export class IcalEvent {
 
   static escape(str: string): string {
     if (str.includes(',')) {
-      str = str.replaceAll(',', '\\,');
+      str = str.replaceAll(',', String.raw`\,`);
     }
     if (str.includes(';')) {
-      str = str.replaceAll(';', '\\;');
+      str = str.replaceAll(';', String.raw`\;`);
     }
     return str;
   }
@@ -530,21 +530,29 @@ const localeMap: Record<string, string> = {
   ashkenazi_romanian: 'ro',
 } as const;
 
-/**
- * Generates an RFC 2445 iCalendar string from an array of IcalEvents
- */
-export async function icalEventsToString(
-  icals: IcalEvent[],
-  options: ICalOptions
-): Promise<string> {
-  if (!icals.length) throw new RangeError('Events can not be empty');
-  if (!options) throw new TypeError('Invalid options object');
-  const stream = [];
-  const locale = options.locale || 'en';
+async function getVtimezone(tzid: string): Promise<string | undefined> {
+  const vtz = vtimezoneCache.get(tzid);
+  if (typeof vtz === 'string') {
+    return vtz;
+  }
+  const filename = `./zoneinfo/${tzid}.ics`;
+  try {
+    const contents = await fs.readFile(filename, 'utf-8');
+    const lines = contents.split('\r\n');
+    // ignore first 3 and last 1 lines
+    const str = lines.slice(3, lines.length - 2).join('\r\n');
+    vtimezoneCache.set(tzid, str);
+    return str;
+  } catch {
+    // ignore failure when no timezone definition to read
+    return undefined;
+  }
+}
+
+function makeIcalPreamble(opts: ICalOptions): string[] {
+  const locale = opts.locale || 'en';
   const lang = locale.length === 2 ? locale : localeMap[locale] || 'en';
   const uclang = lang.toUpperCase();
-  const opts = {...options};
-  opts.dtstamp = opts.dtstamp || IcalEvent.makeDtstamp(new Date());
   const title = opts.title ? IcalEvent.escape(opts.title) : 'Untitled';
   const caldesc = opts.caldesc
     ? IcalEvent.escape(opts.caldesc)
@@ -564,43 +572,46 @@ export async function icalEventsToString(
   ];
   if (opts.publishedTTL !== false) {
     const publishedTTL = opts.publishedTTL || 'P7D';
-    preamble.push(`REFRESH-INTERVAL;VALUE=DURATION:${publishedTTL}`);
-    preamble.push(`X-PUBLISHED-TTL:${publishedTTL}`);
+    preamble.push(
+      `REFRESH-INTERVAL;VALUE=DURATION:${publishedTTL}`,
+      `X-PUBLISHED-TTL:${publishedTTL}`
+    );
   }
-  preamble.push(`X-WR-CALNAME:${title}`);
-  preamble.push(`X-WR-CALDESC:${caldesc}`);
+  preamble.push(`X-WR-CALNAME:${title}`, `X-WR-CALDESC:${caldesc}`);
+  const relcalid = opts.relcalid;
+  if (relcalid) {
+    preamble.push(`X-WR-RELCALID:${relcalid}`);
+  }
+  const calendarColor = opts.calendarColor;
+  if (calendarColor) {
+    preamble.push(`X-APPLE-CALENDAR-COLOR:${calendarColor}`);
+  }
+  return preamble;
+}
+
+/**
+ * Generates an RFC 2445 iCalendar string from an array of IcalEvents
+ */
+export async function icalEventsToString(
+  icals: IcalEvent[],
+  options: ICalOptions
+): Promise<string> {
+  if (!icals.length) throw new RangeError('Events can not be empty');
+  if (!options) throw new TypeError('Invalid options object');
+  const stream = [];
+  const preamble = makeIcalPreamble(options);
   for (const line of preamble.map(IcalEvent.fold)) {
     stream.push(line);
     stream.push('\r\n');
   }
-  if (opts.relcalid) {
-    stream.push(IcalEvent.fold(`X-WR-RELCALID:${opts.relcalid}`));
-    stream.push('\r\n');
-  }
-  if (opts.calendarColor) {
-    stream.push(`X-APPLE-CALENDAR-COLOR:${opts.calendarColor}\r\n`);
-  }
-  const location = opts.location;
+  const location = options.location;
   const tzid = location?.getTzid();
   if (tzid) {
     stream.push(`X-WR-TIMEZONE;VALUE=TEXT:${tzid}\r\n`);
-    const vtz = vtimezoneCache.get(tzid);
+    const vtz = await getVtimezone(tzid);
     if (typeof vtz === 'string') {
       stream.push(vtz);
       stream.push('\r\n');
-    } else {
-      const vtimezoneFilename = `./zoneinfo/${tzid}.ics`;
-      try {
-        const vtimezoneIcs = await fs.readFile(vtimezoneFilename, 'utf-8');
-        const lines = vtimezoneIcs.split('\r\n');
-        // ignore first 3 and last 1 lines
-        const str = lines.slice(3, lines.length - 2).join('\r\n');
-        stream.push(str);
-        stream.push('\r\n');
-        vtimezoneCache.set(tzid, str);
-      } catch {
-        // ignore failure when no timezone definition to read
-      }
     }
   }
 

@@ -560,10 +560,10 @@ test('OmerEvent', () => {
     'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
     'CLASS:PUBLIC',
     'DESCRIPTION:Today is 37 days\\, which is 5 weeks and 2 days of the Omer\\n\\n',
-    ' הַיּוֹם שִׁבְעָה וּשְׁלוֹשִׁים יוֹם\\, שֶ',
-    ' ׁהֵם חֲמִשָּׁה שָׁבוּעוֹת וּשְׁנֵי יָמִ',
-    ' ים לָעֽוֹמֶר\\n\\nMight within Foundation\\nגְּבוּרָה ש',
-    ' ֶׁבִּיְסוֹד\\nGevurah shebiYesod',
+    ' הַיּוֹם שִׁבְעָה וּשְׁלוֹשִׁים יוֹם\\, ',
+    ' שֶׁהֵם חֲמִשָּׁה שָׁבוּעוֹת וּשְׁנֵי יָ',
+    ' מִים לָעֽוֹמֶר\\n\\nMight within Foundation\\nגְּבוּרָה',
+    '  שֶׁבִּיְסוֹד\\nGevurah shebiYesod',
     'BEGIN:VALARM',
     'ACTION:DISPLAY',
     'DESCRIPTION:Event reminder',
@@ -648,6 +648,7 @@ test('campaign2', () => {
     parsha: ['Kedoshim'],
     il: true,
     chag: false,
+    num: -1,
   });
   const ical1 = new IcalEvent(ev1, {utmCampaign: 'ical-foo-bar'});
   const lines1 = ical1.getLongLines();
@@ -827,6 +828,7 @@ test('parsha-with-memo', () => {
     parsha: ['Noach'],
     il: false,
     chag: false,
+    num: -1,
   });
   ev.memo = 'Hello World!';
   const icalEvent = new IcalEvent(ev, {});
@@ -843,6 +845,7 @@ test('parsha-apos', () => {
     parsha: ["Ha'azinu"],
     il: false,
     chag: false,
+    num: -1,
   });
   const icalEvent = new IcalEvent(ev, {locale: 'en'});
   const lines = icalEvent.getLongLines();
@@ -917,4 +920,26 @@ test('prodid-locale-fr', async () => {
   const prodid = findLine(lines, 'PRODID');
   expect(prodid).not.toBeNull();
   expect(prodid!.endsWith('//FR')).toBe(true);
+});
+
+test('fold-ascii-short', () => {
+  const str = 'SUMMARY:Rum Rebellion Day';
+  expect(IcalEvent.fold(str)).toEqual(str);
+});
+
+test('fold-ascii-long', () => {
+  const str = 'SUMMARY:' + 'Foo'.repeat(50);
+  expect(IcalEvent.fold(str)).toEqual("SUMMARY:FooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFoo\r\n FooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFo\r\n oFooFooFoo");
+});
+
+test('fold-non-ascii', () => {
+  const str = 'SUMMARY:🏴󠁧󠁢󠁳󠁣󠁴󠁿 Burns Night 🏴󠁧󠁢󠁳󠁣󠁴󠁿';
+  const actual = IcalEvent.fold(str);
+  expect(actual).toEqual('SUMMARY:🏴󠁧󠁢󠁳󠁣󠁴󠁿 Burns Night \r\n 🏴󠁧󠁢󠁳󠁣󠁴󠁿');
+});
+
+test('fold-hebrew-long', () => {
+  const str = 'SUMMARY:בְּרֵאשִׁ֖ית בָּרָ֣א אֱלֹקִ֑ים אֵ֥ת הַשָּׁמַ֖יִם וְאֵ֥ת הָאָֽרֶץ';
+  const actual = IcalEvent.fold(str);
+  expect(actual).toEqual('SUMMARY:בְּרֵאשִׁ֖ית בָּרָ֣א אֱלֹקִ֑ים אֵ֥\r\n ת הַשָּׁמַ֖יִם וְאֵ֥ת הָאָֽרֶץ');
 });
