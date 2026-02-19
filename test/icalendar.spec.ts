@@ -248,7 +248,7 @@ test('eventsToIcalendar', async () => {
   const events = HebrewCalendar.calendar(options);
   const icalOpts: ICalOptions = {...options, prodid: 'X'};
   const ical = await eventsToIcalendar(events, icalOpts);
-  const lines = ical.split('\r\n').slice(0, 13);
+  const lines = ical.split('\r\n').slice(0, 12);
   const expected = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
@@ -259,7 +259,6 @@ test('eventsToIcalendar', async () => {
     'REFRESH-INTERVAL;VALUE=DURATION:P7D',
     'X-PUBLISHED-TTL:P7D',
     'X-WR-CALNAME:Hebcal Hawaii February 2020',
-    'X-WR-CALDESC:Jewish Holidays from www.hebcal.com',
     'X-WR-TIMEZONE;VALUE=TEXT:Pacific/Honolulu',
     'BEGIN:VTIMEZONE',
     'TZID:Pacific/Honolulu',
@@ -298,7 +297,7 @@ test('eventsToIcalendar-no-vtimezone', async () => {
   const events = HebrewCalendar.calendar(options);
   const icalOpts: ICalOptions = {...options, prodid: 'X'};
   const ical = await eventsToIcalendar(events, icalOpts);
-  const lines = ical.split('\r\n').slice(0, 12);
+  const lines = ical.split('\r\n').slice(0, 11);
   const expected = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
@@ -309,7 +308,6 @@ test('eventsToIcalendar-no-vtimezone', async () => {
     'REFRESH-INTERVAL;VALUE=DURATION:P7D',
     'X-PUBLISHED-TTL:P7D',
     'X-WR-CALNAME:Hebcal Boston February 2020',
-    'X-WR-CALDESC:Jewish Holidays from www.hebcal.com',
     'X-WR-TIMEZONE;VALUE=TEXT:America/New_York',
     'BEGIN:VEVENT',
   ];
@@ -429,7 +427,7 @@ test('userEvent', () => {
   const userEvent = new Event(hd, 'User Event', flags.USER_EVENT, {
     uid: 'foo-bar-baaz',
   });
-  const ical = new IcalEvent(userEvent, {yahrzeit: true, dtstamp: 'X'});
+  const ical = new IcalEvent(userEvent, {dtstamp: 'X'});
   const lines = ical.toString().split('\r\n');
   const expected = [
     'BEGIN:VEVENT',
@@ -469,7 +467,6 @@ test('relcalid', async () => {
     'REFRESH-INTERVAL;VALUE=DURATION:P7D',
     'X-PUBLISHED-TTL:P7D',
     'X-WR-CALNAME:Hebcal Diaspora February 2021',
-    'X-WR-CALDESC:Jewish Holidays from www.hebcal.com',
     `X-WR-RELCALID:${relcalid}`,
     'BEGIN:VEVENT',
     'DTSTAMP:X',

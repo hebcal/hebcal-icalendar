@@ -63,7 +63,6 @@ export type ICalEventOptions = {
   publishedTTL?: string | boolean;
   calendarColor?: string;
   relcalid?: string;
-  yahrzeit?: boolean;
   subscribe?: string | boolean;
   url?: boolean;
 };
@@ -556,9 +555,7 @@ function makeIcalPreamble(opts: ICalOptions): string[] {
   const title = opts.title ? IcalEvent.escape(opts.title) : 'Untitled';
   const caldesc = opts.caldesc
     ? IcalEvent.escape(opts.caldesc)
-    : opts.yahrzeit
-      ? 'Yahrzeits + Anniversaries from www.hebcal.com'
-      : 'Jewish Holidays from www.hebcal.com';
+    : undefined;
   const prodid =
     opts.prodid ||
     `-//hebcal.com/NONSGML Hebcal Calendar v1${version}//${uclang}`;
@@ -577,7 +574,10 @@ function makeIcalPreamble(opts: ICalOptions): string[] {
       `X-PUBLISHED-TTL:${publishedTTL}`
     );
   }
-  preamble.push(`X-WR-CALNAME:${title}`, `X-WR-CALDESC:${caldesc}`);
+  preamble.push(`X-WR-CALNAME:${title}`);
+  if (caldesc) {
+    preamble.push(`X-WR-CALDESC:${caldesc}`);
+  }
   const relcalid = opts.relcalid;
   if (relcalid) {
     preamble.push(`X-WR-RELCALID:${relcalid}`);
