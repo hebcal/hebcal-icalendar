@@ -1,3 +1,4 @@
+import {Buffer} from 'node:buffer';
 import {Event, flags} from '@hebcal/core/dist/esm/event';
 import {CalOptions} from '@hebcal/core/dist/esm/CalOptions';
 import {Locale} from '@hebcal/core/dist/esm/locale';
@@ -97,7 +98,6 @@ function appendTrackingToUrl(
   );
 }
 
-const encoder = new TextEncoder();
 const char74re = /(.{1,74})/g;
 
 const DAILY_LEARNING =
@@ -326,6 +326,9 @@ export class IcalEvent {
    * fold line to 75 characters
    */
   static fold(line: string): string {
+    if (Buffer.byteLength(line) <= 74) {
+      return line;
+    }
     let isASCII = true;
     for (let i = 0; i < line.length; i++) {
       if (line.codePointAt(i)! > 255) {
@@ -334,14 +337,10 @@ export class IcalEvent {
       }
     }
     if (isASCII) {
-      if (line.length <= 74) {
-        return line;
-      }
+      // It's longer than 74 octets, and all characters are ASCII, so we
+      // use a simple regex to split it into chunks of 74 characters
       const matches = line.match(char74re);
       return matches!.join('\r\n ');
-    }
-    if (encoder.encode(line).length <= 74) {
-      return line;
     }
     // iterate unicode character by character, making sure
     // that adding a new character would keep the line <= 75 octets
@@ -352,7 +351,7 @@ export class IcalEvent {
     let current = '';
     let len = 0;
     for (const ch of chars) {
-      const octets = ch.codePointAt(0)! < 256 ? 1 : encoder.encode(ch).length;
+      const octets = ch.codePointAt(0)! < 256 ? 1 : Buffer.byteLength(ch);
       const newlen = len + octets;
       if (newlen < 75) {
         current += ch;
@@ -553,9 +552,7 @@ function makeIcalPreamble(opts: ICalOptions): string[] {
   const lang = locale.length === 2 ? locale : localeMap[locale] || 'en';
   const uclang = lang.toUpperCase();
   const title = opts.title ? IcalEvent.escape(opts.title) : 'Untitled';
-  const caldesc = opts.caldesc
-    ? IcalEvent.escape(opts.caldesc)
-    : undefined;
+  const caldesc = opts.caldesc ? IcalEvent.escape(opts.caldesc) : undefined;
   const prodid =
     opts.prodid ||
     `-//hebcal.com/NONSGML Hebcal Calendar v1${version}//${uclang}`;

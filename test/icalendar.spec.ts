@@ -924,6 +924,11 @@ test('fold-ascii-short', () => {
   expect(IcalEvent.fold(str)).toEqual(str);
 });
 
+test('fold-non-ascii-short', () => {
+  const str = 'SUMMARY:Ĥéļļö Ŵöŕļđ';
+  expect(IcalEvent.fold(str)).toEqual(str);
+});
+
 test('fold-ascii-long', () => {
   const str = 'SUMMARY:' + 'Foo'.repeat(50);
   expect(IcalEvent.fold(str)).toEqual("SUMMARY:FooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFoo\r\n FooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFo\r\n oFooFooFoo");

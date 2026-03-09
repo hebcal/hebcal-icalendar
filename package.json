@@ -52,7 +52,7 @@
   "devDependencies": {
     "@hebcal/learning": "^6.6.1",
     "@rollup/plugin-typescript": "^12.3.0",
-    "@types/node": "25.3.0",
+    "@types/node": "25.3.5",
     "gts": "^7.0.0",
     "rollup": "^4.59.0",
     "typedoc": "^0.28.17",
