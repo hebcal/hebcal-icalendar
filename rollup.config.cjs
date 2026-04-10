@@ -22,6 +22,6 @@ module.exports = [
         outputToFilesystem: false,
       }),
     ],
-    external: [/@hebcal\//, 'node:fs', 'stream', 'murmurhash3'],
+    external: [/@hebcal\//, 'node:fs', 'node:buffer', 'stream', 'murmurhash3'],
   },
 ];
