@@ -100,6 +100,8 @@ function appendTrackingToUrl(
 
 const char74re = /(.{1,74})/g;
 
+let foldSegmenter: Intl.Segmenter | undefined;
+
 const DAILY_LEARNING =
   flags.DAILY_LEARNING |
   flags.DAF_YOMI |
@@ -326,43 +328,47 @@ export class IcalEvent {
    * fold line to 75 characters
    */
   static fold(line: string): string {
-    if (Buffer.byteLength(line) <= 74) {
+    const lineBytes = Buffer.byteLength(line);
+    if (lineBytes <= 74) {
       return line;
     }
-    let isASCII = true;
-    for (let i = 0; i < line.length; i++) {
-      if (line.codePointAt(i)! > 255) {
-        isASCII = false;
-        break;
-      }
+    if (lineBytes === line.length) {
+      // All-ASCII fast path: every UTF-16 unit encodes to one UTF-8 byte
+      // iff the string is pure ASCII, so we can split by JS chars.
+      return line.match(char74re)!.join('\r\n ');
     }
-    if (isASCII) {
-      // It's longer than 74 octets, and all characters are ASCII, so we
-      // use a simple regex to split it into chunks of 74 characters
-      const matches = line.match(char74re);
-      return matches!.join('\r\n ');
+    // Walk grapheme clusters so we never split a multi-octet UTF-8
+    // sequence (or a combining/ZWJ/regional-indicator cluster) across
+    // a fold boundary. Reuse a single Segmenter to avoid per-call
+    // construction cost.
+    if (!foldSegmenter) {
+      foldSegmenter = new Intl.Segmenter('en', {granularity: 'grapheme'});
     }
-    // iterate unicode character by character, making sure
-    // that adding a new character would keep the line <= 75 octets
-    const segmenter = new Intl.Segmenter('en', {granularity: 'grapheme'});
-    const segments = segmenter.segment(line);
-    const chars = Array.from(segments, s => s.segment);
-    let result = '';
-    let current = '';
+    const parts: string[] = [];
+    let chunkStart = 0;
     let len = 0;
-    for (const ch of chars) {
-      const octets = ch.codePointAt(0)! < 256 ? 1 : Buffer.byteLength(ch);
-      const newlen = len + octets;
-      if (newlen < 75) {
-        current += ch;
-        len = newlen;
+    for (const {segment, index} of foldSegmenter.segment(line)) {
+      const cp = segment.codePointAt(0)!;
+      // Most segments are a single code point; compute UTF-8 length
+      // arithmetically and skip the Buffer.byteLength call.
+      const cpUnits = cp >= 0x10000 ? 2 : 1;
+      let octets: number;
+      if (segment.length === cpUnits) {
+        octets =
+          cp < 0x80 ? 1 : cp < 0x800 ? 2 : cp < 0x10000 ? 3 : 4;
       } else {
-        result += current + '\r\n ';
-        current = ch;
+        octets = Buffer.byteLength(segment);
+      }
+      if (len + octets >= 75) {
+        parts.push(line.slice(chunkStart, index));
+        chunkStart = index;
         len = octets;
+      } else {
+        len += octets;
       }
     }
-    return result + current;
+    parts.push(line.slice(chunkStart));
+    return parts.join('\r\n ');
   }
 
   static escape(str: string): string {

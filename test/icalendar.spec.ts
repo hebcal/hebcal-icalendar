@@ -945,3 +945,29 @@ test('fold-hebrew-long', () => {
   const actual = IcalEvent.fold(str);
   expect(actual).toEqual('SUMMARY:בְּרֵאשִׁ֖ית בָּרָ֣א אֱלֹקִ֑ים אֵ֥\r\n ת הַשָּׁמַ֖יִם וְאֵ֥ת הָאָֽרֶץ');
 });
+
+test('fold-latin1-long', () => {
+  // Codepoints in U+0080..U+00FF each encode to two UTF-8 bytes;
+  // the folded chunks must not exceed 75 octets.
+  const str = 'SUMMARY:' + 'é'.repeat(60);
+  const folded = IcalEvent.fold(str);
+  for (const chunk of folded.split('\r\n ')) {
+    expect(Buffer.byteLength(chunk)).toBeLessThanOrEqual(75);
+  }
+  // Round-trip: unfolding restores the original.
+  expect(folded.split('\r\n ').join('')).toEqual(str);
+});
+
+test('fold-flag-emoji', () => {
+  // 🇮🇱 is two regional-indicator code points (8 UTF-8 bytes) that must
+  // stay together as a single grapheme cluster across folds.
+  const str = 'SUMMARY:Hello ' + '🇮🇱 Israel '.repeat(20);
+  const folded = IcalEvent.fold(str);
+  for (const chunk of folded.split('\r\n ')) {
+    expect(Buffer.byteLength(chunk)).toBeLessThanOrEqual(75);
+  }
+  expect(folded.split('\r\n ').join('')).toEqual(str);
+  // The flag is never split across a fold boundary.
+  expect(folded).not.toContain('🇮\r\n');
+  expect(folded).not.toContain('\r\n 🇱');
+});
