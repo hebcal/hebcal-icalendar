@@ -1,4 +1,3 @@
-import {Buffer} from 'node:buffer';
 import {Event, flags} from '@hebcal/core/dist/esm/event';
 import {CalOptions} from '@hebcal/core/dist/esm/CalOptions';
 import {Locale} from '@hebcal/core/dist/esm/locale';
@@ -16,6 +15,7 @@ import {appendIsraelAndTracking} from '@hebcal/rest-api/dist/esm/url';
 import {makeAnchor} from '@hebcal/rest-api/dist/esm/makeAnchor';
 import {promises as fs} from 'node:fs';
 import {version} from './pkgVersion';
+import {foldLine} from './foldLine';
 
 const vtimezoneCache = new Map<string, string>();
 const CATEGORY: {[key: string]: string | null} = {
@@ -97,10 +97,6 @@ function appendTrackingToUrl(
     utmCampaign
   );
 }
-
-const char74re = /(.{1,74})/g;
-
-let foldSegmenter: Intl.Segmenter | undefined;
 
 const DAILY_LEARNING =
   flags.DAILY_LEARNING |
@@ -321,54 +317,14 @@ export class IcalEvent {
    * fold lines to 75 characters
    */
   getLines(): string[] {
-    return this.getLongLines().map(IcalEvent.fold);
+    return this.getLongLines().map(foldLine);
   }
 
   /**
    * fold line to 75 characters
    */
   static fold(line: string): string {
-    const lineBytes = Buffer.byteLength(line);
-    if (lineBytes <= 74) {
-      return line;
-    }
-    if (lineBytes === line.length) {
-      // All-ASCII fast path: every UTF-16 unit encodes to one UTF-8 byte
-      // iff the string is pure ASCII, so we can split by JS chars.
-      return line.match(char74re)!.join('\r\n ');
-    }
-    // Walk grapheme clusters so we never split a multi-octet UTF-8
-    // sequence (or a combining/ZWJ/regional-indicator cluster) across
-    // a fold boundary. Reuse a single Segmenter to avoid per-call
-    // construction cost.
-    if (!foldSegmenter) {
-      foldSegmenter = new Intl.Segmenter('en', {granularity: 'grapheme'});
-    }
-    const parts: string[] = [];
-    let chunkStart = 0;
-    let len = 0;
-    for (const {segment, index} of foldSegmenter.segment(line)) {
-      const cp = segment.codePointAt(0)!;
-      // Most segments are a single code point; compute UTF-8 length
-      // arithmetically and skip the Buffer.byteLength call.
-      const cpUnits = cp >= 0x10000 ? 2 : 1;
-      let octets: number;
-      if (segment.length === cpUnits) {
-        octets =
-          cp < 0x80 ? 1 : cp < 0x800 ? 2 : cp < 0x10000 ? 3 : 4;
-      } else {
-        octets = Buffer.byteLength(segment);
-      }
-      if (len + octets >= 75) {
-        parts.push(line.slice(chunkStart, index));
-        chunkStart = index;
-        len = octets;
-      } else {
-        len += octets;
-      }
-    }
-    parts.push(line.slice(chunkStart));
-    return parts.join('\r\n ');
+    return foldLine(line);
   }
 
   static escape(str: string): string {
@@ -603,7 +559,7 @@ export async function icalEventsToString(
   if (!options) throw new TypeError('Invalid options object');
   const stream = [];
   const preamble = makeIcalPreamble(options);
-  for (const line of preamble.map(IcalEvent.fold)) {
+  for (const line of preamble.map(foldLine)) {
     stream.push(line);
     stream.push('\r\n');
   }
