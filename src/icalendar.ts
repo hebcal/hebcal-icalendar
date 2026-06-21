@@ -14,8 +14,8 @@ import {makeTorahMemoText} from '@hebcal/rest-api/dist/esm/memo';
 import {appendIsraelAndTracking} from '@hebcal/rest-api/dist/esm/url';
 import {makeAnchor} from '@hebcal/rest-api/dist/esm/makeAnchor';
 import {promises as fs} from 'node:fs';
-import {version} from './pkgVersion';
-import {foldLine} from './foldLine';
+import {version} from './pkgVersion.js';
+import {foldLine} from './foldLine.js';
 
 const vtimezoneCache = new Map<string, string>();
 const CATEGORY: {[key: string]: string | null} = {

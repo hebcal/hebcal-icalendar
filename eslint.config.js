@@ -9,7 +9,7 @@ const gtsConfig = require('gts/build/eslint.config.js');
 export default [
   ...gtsConfig,
   {
-    ignores: ['build/', 'test/', 'docs/', 'dist/', '.rollup.cache/'],
+    ignores: ['test/', 'dist/'],
   },
   {
     files: ['eslint.config.js'],
@@ -18,7 +18,7 @@ export default [
     },
   },
   {
-    files: ['**/*.ts', '**/*.tsx'],
+    files: ['**/*.ts'],
     languageOptions: {
       parserOptions: {
         project: join(__dirname, 'tsconfig.json'),
