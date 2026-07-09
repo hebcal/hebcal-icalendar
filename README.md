@@ -1,12 +1,15 @@
 # @hebcal/icalendar
+
 Jewish holidays and Hebrew calendar as iCalendar RFC 2445
 
 ## Installation
+
 ```bash
 $ npm install @hebcal/icalendar
 ```
 
 ## Synopsis
+
 ```javascript
 import {HebrewCalendar, Location} from '@hebcal/core';
 import {eventsToIcalendar} from '@hebcal/icalendar';
@@ -24,7 +27,7 @@ const events = HebrewCalendar.calendar(options);
 const str = await eventsToIcalendar(events, {
   locale: 'he',
   ...options,
-})
+});
 
 const icalStream = fs.createWriteStream('feed.ics');
 icalStream.write(str);

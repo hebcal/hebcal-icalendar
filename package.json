@@ -42,21 +42,19 @@
     "pretest": "npm run build",
     "docs": "typedoc",
     "test": "vitest",
-    "lint": "gts lint",
-    "clean": "gts clean",
+    "lint": "oxlint && prettier --check .",
+    "clean": "rm -rf dist",
     "compile": "tsc",
-    "fix": "gts fix"
+    "fix": "oxlint --fix && prettier --write ."
   },
   "license": "BSD-2-Clause",
   "devDependencies": {
     "@hebcal/learning": "^6.9.5",
     "@types/node": "26.0.0",
-    "gts": "^7.0.0",
+    "oxlint": "^1.73.0",
+    "prettier": "^3.8.4",
     "typedoc": "^0.28.19",
     "typescript": "^6.0.3",
     "vitest": "^4.1.9"
-  },
-  "overrides": {
-    "tmp": "^0.2.6"
   }
 }
