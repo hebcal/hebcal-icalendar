@@ -14,7 +14,9 @@ test('fold-non-ascii-short', () => {
 
 test('fold-ascii-long', () => {
   const str = 'SUMMARY:' + 'Foo'.repeat(50);
-  expect(foldLine(str)).toEqual("SUMMARY:FooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFoo\r\n FooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFo\r\n oFooFooFoo");
+  expect(foldLine(str)).toEqual(
+    'SUMMARY:FooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFoo\r\n FooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFo\r\n oFooFooFoo'
+  );
 });
 
 test('fold-non-ascii', () => {
@@ -24,9 +26,12 @@ test('fold-non-ascii', () => {
 });
 
 test('fold-hebrew-long', () => {
-  const str = 'SUMMARY:בְּרֵאשִׁ֖ית בָּרָ֣א אֱלֹקִ֑ים אֵ֥ת הַשָּׁמַ֖יִם וְאֵ֥ת הָאָֽרֶץ';
+  const str =
+    'SUMMARY:בְּרֵאשִׁ֖ית בָּרָ֣א אֱלֹקִ֑ים אֵ֥ת הַשָּׁמַ֖יִם וְאֵ֥ת הָאָֽרֶץ';
   const actual = foldLine(str);
-  expect(actual).toEqual('SUMMARY:בְּרֵאשִׁ֖ית בָּרָ֣א אֱלֹקִ֑ים אֵ֥\r\n ת הַשָּׁמַ֖יִם וְאֵ֥ת הָאָֽרֶץ');
+  expect(actual).toEqual(
+    'SUMMARY:בְּרֵאשִׁ֖ית בָּרָ֣א אֱלֹקִ֑ים אֵ֥\r\n ת הַשָּׁמַ֖יִם וְאֵ֥ת הָאָֽרֶץ'
+  );
 });
 
 test('fold-latin1-long', () => {
