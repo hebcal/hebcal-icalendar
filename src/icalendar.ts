@@ -202,7 +202,8 @@ export class IcalEvent {
     }
     this.subj = subj;
     this.category =
-      ev0.category || (CATEGORY[getEventCategories(ev)?.[0]] ?? null);
+      ev0.category ||
+      (CATEGORY[getEventCategories(ev)?.[0] as keyof typeof CATEGORY] ?? null);
   }
 
   getAlarm(): string | null {
