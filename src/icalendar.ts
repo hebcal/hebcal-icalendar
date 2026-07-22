@@ -201,7 +201,8 @@ export class IcalEvent {
       }
     }
     this.subj = subj;
-    this.category = ev0.category || CATEGORY[getEventCategories(ev)?.[0]] ?? null;
+    this.category =
+      ev0.category || (CATEGORY[getEventCategories(ev)?.[0]] ?? null);
   }
 
   getAlarm(): string | null {
