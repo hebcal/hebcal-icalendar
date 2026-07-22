@@ -109,20 +109,20 @@ const DAILY_LEARNING =
  * Represents an RFC 2445 iCalendar VEVENT
  */
 export class IcalEvent {
-  ev: Event;
-  options: ICalOptions;
-  dtstamp: string;
-  sequence?: number;
-  timed: boolean;
-  locationName: string | null | undefined;
-  startDate: string;
-  isoDateOnly: string;
-  dtargs: string;
-  transp: string;
-  busyStatus: string;
-  endDate: string;
-  subj: string;
-  category: string | null;
+  readonly ev: Event;
+  readonly options: ICalOptions;
+  readonly dtstamp: string;
+  readonly sequence?: number;
+  readonly timed: boolean;
+  readonly locationName: string | null | undefined;
+  readonly startDate: string;
+  readonly isoDateOnly: string;
+  readonly dtargs: string;
+  readonly transp: string;
+  readonly busyStatus: string;
+  readonly endDate: string;
+  readonly subj: string;
+  readonly category: string | null;
   lines?: string[];
   /**
    * Builds an IcalEvent object from a Hebcal Event
