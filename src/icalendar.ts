@@ -18,7 +18,7 @@ import {version} from './pkgVersion.js';
 import {foldLine} from './foldLine.js';
 
 const vtimezoneCache = new Map<string, string>();
-const CATEGORY: {[key: string]: string | null} = {
+const CATEGORY = {
   candles: 'Holiday',
   dafyomi: 'Daf Yomi',
   mishnayomi: 'Mishna Yomi',
@@ -34,7 +34,7 @@ const CATEGORY: {[key: string]: string | null} = {
   roshchodesh: 'Holiday',
   user: 'Personal',
   zmanim: null,
-};
+} as const;
 
 /**
  * @private
@@ -201,7 +201,7 @@ export class IcalEvent {
       }
     }
     this.subj = subj;
-    this.category = ev0.category || CATEGORY[getEventCategories(ev)?.[0]];
+    this.category = ev0.category || CATEGORY[getEventCategories(ev)?.[0]] ?? null;
   }
 
   getAlarm(): string | null {
