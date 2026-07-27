@@ -785,6 +785,23 @@ test('parsha-with-memo', () => {
   expect(description).toBe('Hello World!\\nTorah: Genesis 6:9-11:32');
 });
 
+test('memo-from-options', () => {
+  const ev = new ParshaEvent({
+    hdate: new HDate(new Date(2023, 9, 21)),
+    parsha: ['Noach'],
+    il: false,
+    chag: false,
+    num: -1,
+  });
+  const lines = new IcalEvent(ev, {memo: 'Foo\nBar'}).getLongLines();
+  expect(findLine(lines, 'DESCRIPTION')).toBe('Foo\\nBar');
+
+  // options.memo wins over ev.memo
+  ev.memo = 'Hello World!';
+  const lines2 = new IcalEvent(ev, {memo: 'Foo Bar'}).getLongLines();
+  expect(findLine(lines2, 'DESCRIPTION')).toBe('Foo Bar');
+});
+
 test('no-memo-no-description', () => {
   const ev = new ParshaEvent({
     hdate: new HDate(new Date(2023, 9, 21)),
