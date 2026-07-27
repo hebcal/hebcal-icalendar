@@ -1,6 +1,6 @@
 {
   "name": "@hebcal/icalendar",
-  "version": "6.3.8",
+  "version": "7.0.0",
   "author": "Michael J. Radwin (https://github.com/mjradwin)",
   "keywords": [
     "ical",
@@ -32,7 +32,7 @@
   "dependencies": {
     "@hebcal/core": "^6.6.0",
     "@hebcal/hdate": "^0.22.5",
-    "@hebcal/rest-api": "^6.5.1",
+    "@hebcal/rest-api": "^7.0.0",
     "murmurhash3": "^0.5.0"
   },
   "scripts": {

@@ -1,7 +1,6 @@
 import {Event, flags} from '@hebcal/core/dist/esm/event';
 import {CalOptions} from '@hebcal/core/dist/esm/CalOptions';
 import {Locale} from '@hebcal/core/dist/esm/locale';
-import {OmerEvent} from '@hebcal/core/dist/esm/omer';
 import {murmur32HexSync} from 'murmurhash3';
 import {pad2, pad4, isDate} from '@hebcal/hdate';
 import {
@@ -9,13 +8,13 @@ import {
   getEventCategories,
   shouldRenderBrief,
 } from '@hebcal/rest-api/dist/esm/common';
-import {getHolidayDescription} from '@hebcal/rest-api/dist/esm/holiday';
-import {makeTorahMemoText} from '@hebcal/rest-api/dist/esm/memo';
 import {appendIsraelAndTracking} from '@hebcal/rest-api/dist/esm/url';
 import {makeAnchor} from '@hebcal/rest-api/dist/esm/makeAnchor';
 import {promises as fs} from 'node:fs';
 import {version} from './pkgVersion.js';
 import {foldLine} from './foldLine.js';
+
+const ESC_NEWLINE = String.raw`\n`;
 
 const vtimezoneCache = new Map<string, string>();
 const CATEGORY = {
@@ -277,9 +276,12 @@ export class IcalEvent {
     }
 
     const options = this.options;
-    // create memo (holiday descr, Torah, etc)
-    const memo = createMemo(ev, options);
-    addOptional(arr, 'DESCRIPTION', memo);
+    // The caller is responsible for building the memo (holiday description,
+    // Torah reading, URL, etc); we only escape newlines for RFC 5545
+    const memo = ev.memo;
+    if (memo) {
+      addOptional(arr, 'DESCRIPTION', memo.replaceAll('\n', ESC_NEWLINE));
+    }
     addOptional(arr, 'LOCATION', this.locationName);
     const loc = options.location;
     if (this.timed && loc) {
@@ -372,96 +374,6 @@ export class IcalEvent {
 export function eventToIcal(ev: Event, options: ICalOptions): string {
   const ical = new IcalEvent(ev, options);
   return ical.toString();
-}
-
-const torahMemoCache = new Map();
-
-const HOLIDAY_IGNORE_MASK =
-  DAILY_LEARNING |
-  flags.OMER_COUNT |
-  flags.SHABBAT_MEVARCHIM |
-  flags.MOLAD |
-  flags.USER_EVENT |
-  flags.HEBREW_DATE;
-
-const ESC_NEWLINE = String.raw`\n`;
-const DBL_NEWLINE = ESC_NEWLINE + ESC_NEWLINE;
-
-/**
- * @private
- */
-function makeTorahMemo(ev: Event, il: boolean): string {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  if (ev.getFlags() & HOLIDAY_IGNORE_MASK || (ev as any).eventTime) {
-    return '';
-  }
-  const hd = ev.getDate();
-  const yy = hd.getFullYear();
-  const mm = hd.getMonth();
-  const dd = hd.getDate();
-  const key = [yy, mm, dd, il ? '1' : '0', ev.getDesc()].join('-');
-  let memo = torahMemoCache.get(key);
-  if (typeof memo === 'string') {
-    return memo;
-  }
-  memo = makeTorahMemoText(ev, il).replaceAll('\n', ESC_NEWLINE);
-  torahMemoCache.set(key, memo);
-  return memo;
-}
-
-/**
- * @private
- */
-function createMemo(ev: Event, options: ICalOptions): string {
-  let memo: string = ev.memo || '';
-  if (memo.length && memo.includes('\n')) {
-    memo = memo.replaceAll('\n', ESC_NEWLINE);
-  }
-  const desc = ev.getDesc();
-  if (desc === 'Havdalah' || desc === 'Candle lighting') {
-    return memo;
-  }
-  const mask = ev.getFlags();
-  if (mask & flags.OMER_COUNT) {
-    const omerEv = ev as OmerEvent;
-    const sefira = [
-      omerEv.sefira('en'),
-      omerEv.sefira('he'),
-      omerEv.sefira('translit'),
-    ].join(ESC_NEWLINE);
-    return (
-      omerEv.getTodayIs('en') +
-      DBL_NEWLINE +
-      omerEv.getTodayIs('he') +
-      DBL_NEWLINE +
-      sefira
-    );
-  }
-  if (!memo) {
-    memo = getHolidayDescription(ev);
-  }
-  if (!memo) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const linkEv = (ev as any).linkedEvent;
-    if (linkEv && linkEv.getDesc() !== ev.getDesc()) {
-      memo = linkEv.render(options.locale);
-    }
-  }
-  const torahMemo = makeTorahMemo(ev, options.il!);
-  if (torahMemo) {
-    if (memo.length) {
-      memo += DBL_NEWLINE;
-    }
-    memo += torahMemo;
-  }
-  const url = appendTrackingToUrl(ev.url(), options);
-  if (url) {
-    if (memo.length) {
-      memo += DBL_NEWLINE;
-    }
-    memo += url;
-  }
-  return memo;
 }
 
 /**
