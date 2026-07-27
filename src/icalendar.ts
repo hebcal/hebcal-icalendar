@@ -52,6 +52,13 @@ function addOptional(
 export type ICalEventOptions = {
   dtstamp?: string;
   sequence?: number;
+  /**
+   * Text for the `DESCRIPTION` property, overriding `ev.memo`. This is
+   * per-event, so pass a fresh options object to each `IcalEvent` (for
+   * example `new IcalEvent(ev, {...opts, memo})`) rather than setting it on
+   * an options object shared by a whole calendar.
+   */
+  memo?: string;
   emoji?: boolean;
   utmSource?: string;
   utmMedium?: string;
@@ -277,8 +284,9 @@ export class IcalEvent {
 
     const options = this.options;
     // The caller is responsible for building the memo (holiday description,
-    // Torah reading, URL, etc); we only escape newlines for RFC 5545
-    const memo = ev.memo;
+    // Torah reading, URL, etc), either as `options.memo` or on the event
+    // itself; we only escape newlines for RFC 5545
+    const memo = options.memo ?? ev.memo;
     if (memo) {
       addOptional(arr, 'DESCRIPTION', memo.replaceAll('\n', ESC_NEWLINE));
     }
