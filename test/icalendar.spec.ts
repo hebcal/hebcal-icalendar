@@ -12,7 +12,7 @@ import {
   HebrewDateEvent,
   OmerEvent,
 } from '@hebcal/core';
-import {DafYomiEvent} from '@hebcal/learning';
+import '@hebcal/learning';
 import {
   ICalOptions,
   IcalEvent,
@@ -40,6 +40,10 @@ test('ical-sedra', () => {
   };
   const events = HebrewCalendar.calendar(options);
   const icalOpts: ICalOptions = {...options, dtstamp: 'X'};
+  events[0].memo =
+    'Torah: Leviticus 6:1-8:36\n' +
+    'Haftarah: Malachi 3:4-24 | Shabbat HaGadol\n\n' +
+    'https://hebcal.com/s/5753/25?us=ical&um=icalendar';
   const tzav = new IcalEvent(events[0], icalOpts);
   let lines = tzav.toString().split('\r\n');
   let expected = [
@@ -63,6 +67,10 @@ test('ical-sedra', () => {
   const options2 = {year: 1993, month: 6, sedrot: true, noHolidays: true};
   const events2 = HebrewCalendar.calendar(options2);
   const icalOpts2: ICalOptions = {...options2, dtstamp: 'X'};
+  events2[2].memo =
+    'Torah: Numbers 16:1-18:32, 28:9-15\n' +
+    'Haftarah: Isaiah 66:1-24 | Shabbat Rosh Chodesh\n\n' +
+    'https://hebcal.com/s/5753/38?us=ical&um=icalendar';
   const korach = new IcalEvent(events2[2], icalOpts2);
   lines = korach.toString().split('\r\n');
   expected = [
@@ -114,8 +122,7 @@ test('ical-transp-opaque', () => {
     'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
     'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
     'CLASS:PUBLIC',
-    'DESCRIPTION:Passover\\, the Feast of Unleavened Bread\\n\\nhttps://hebcal.com',
-    ' /h/pesach-1993?us=ical&um=icalendar',
+    'DESCRIPTION:Passover\\, the Feast of Unleavened Bread',
     'END:VEVENT',
   ];
   expect(lines).toEqual(expected);
@@ -138,9 +145,7 @@ test('ical-transp-opaque', () => {
     'X-MICROSOFT-CDO-BUSYSTATUS:OOF',
     'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
     'CLASS:PUBLIC',
-    'DESCRIPTION:Passover\\, the Feast of Unleavened Bread\\n\\nTorah: Leviticus 2',
-    ' 2:26-23:44\\; Numbers 28:16-25\\nHaftarah: II Kings 23:1-9\\, 23:21-25\\n\\nhtt',
-    ' ps://hebcal.com/h/pesach-1993?us=ical&um=icalendar',
+    'DESCRIPTION:Passover\\, the Feast of Unleavened Bread',
     'END:VEVENT',
   ];
   expect(lines).toEqual(expected);
@@ -229,8 +234,6 @@ test('ical-dafyomi', () => {
     'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
     'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
     'CLASS:PUBLIC',
-    'DESCRIPTION:https://www.sefaria.org/Nedarim.14a?lang=bi&utm_source=hebcal.',
-    ' com&utm_medium=icalendar',
     'LOCATION:דַּף יוֹמִי',
     'END:VEVENT',
   ];
@@ -375,10 +378,6 @@ test('chanukah-candles', () => {
     'TRANSP:TRANSPARENT',
     'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
     'CLASS:PUBLIC',
-    'DESCRIPTION:Hanukkah\\, the Jewish festival of rededication. Also known as ',
-    ' the Festival of Lights\\, the eight-day festival is observed by lighting th',
-    ' e candles of a hanukkiah (menorah)\\n\\nhttps://hebcal.com/h/chanukah-2020?u',
-    ' s=ical&um=icalendar',
     'LOCATION:Boston',
     'GEO:42.35843;-71.05977',
     'END:VEVENT',
@@ -412,11 +411,6 @@ test('ical-il-url', () => {
     'X-MICROSOFT-CDO-BUSYSTATUS:OOF',
     'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
     'CLASS:PUBLIC',
-    'DESCRIPTION:Eighth Day of Assembly. Immediately following Sukkot\\, it is o',
-    ' bserved as a separate holiday in the Diaspora and is combined with Simchat',
-    '  Torah in Israel\\n\\nTorah: Deuteronomy 33:1-34:12\\; Genesis 1:1-2:3\\; Numb',
-    ' ers 29:35-30:1\\nHaftarah: Joshua 1:1-18\\n\\nhttps://hebcal.com/h/shmini-atz',
-    ' eret-2021?i=on&us=ical&um=icalendar',
     'END:VEVENT',
   ];
   expect(lines).toEqual(expected);
@@ -510,21 +504,9 @@ test('fastStartEnd', () => {
     })
   );
   const expected = [
-    [
-      'SUMMARY:Fast begins',
-      'DTSTART;TZID=America/New_York:20210627T032000',
-      'DESCRIPTION:Tzom Tammuz',
-    ],
-    [
-      'SUMMARY:✡️ Tzom Tammuz',
-      'DTSTART;VALUE=DATE:20210627',
-      'DESCRIPTION:Fast commemorating breaching of the walls of Jerusalem before ',
-    ],
-    [
-      'SUMMARY:Fast ends',
-      'DTSTART;TZID=America/New_York:20210627T210700',
-      'DESCRIPTION:Tzom Tammuz',
-    ],
+    ['SUMMARY:Fast begins', 'DTSTART;TZID=America/New_York:20210627T032000'],
+    ['SUMMARY:✡️ Tzom Tammuz', 'DTSTART;VALUE=DATE:20210627'],
+    ['SUMMARY:Fast ends', 'DTSTART;TZID=America/New_York:20210627T210700'],
   ];
   expect(actual).toEqual(expected);
 });
@@ -556,11 +538,6 @@ test('OmerEvent', () => {
     'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
     'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
     'CLASS:PUBLIC',
-    'DESCRIPTION:Today is 37 days\\, which are 5 weeks and 2 days of the Omer\\n\\',
-    ' nהַיּוֹם שִׁבְעָה וּשְׁלוֹשִׁים יוֹם\\, ',
-    ' שֶׁהֵם חֲמִשָּׁה שָׁבוּעוֹת וּשְׁנֵי יָ',
-    ' מִים לָעֽוֹמֶר\\n\\nMight within Foundation\\nגְּבוּרָה',
-    '  שֶׁבִּיְסוֹד\\nGevurah shebiYesod',
     'BEGIN:VALARM',
     'ACTION:DISPLAY',
     'DESCRIPTION:Event reminder',
@@ -617,6 +594,7 @@ test('utm_campaign', () => {
     utmSource: 'baaz',
     utmCampaign: 'quux',
     dtstamp: 'X',
+    url: true,
   };
   const icalEvent = new IcalEvent(ev, icalOpts);
   const lines = icalEvent.toString().split('\r\n');
@@ -632,35 +610,11 @@ test('utm_campaign', () => {
     'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
     'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
     'CLASS:PUBLIC',
-    'DESCRIPTION:https://www.hebcal.com/foobar?utm_source=baaz&utm_medium=icale',
-    ' ndar&utm_campaign=quux',
+    'URL:https://www.hebcal.com/foobar?utm_source=baaz&utm_medium=icalendar&utm',
+    ' _campaign=quux',
     'END:VEVENT',
   ];
   expect(lines).toEqual(expected);
-});
-
-test('campaign2', () => {
-  const ev1 = new ParshaEvent({
-    hdate: new HDate(new Date(2022, 3, 30)),
-    parsha: ['Kedoshim'],
-    il: true,
-    chag: false,
-    num: -1,
-  });
-  const ical1 = new IcalEvent(ev1, {utmCampaign: 'ical-foo-bar'});
-  const lines1 = ical1.getLongLines();
-  const desc1 = findLine(lines1, 'DESCRIPTION');
-  expect(desc1).toBe(
-    'Torah: Leviticus 19:1-20:27\\nHaftarah: I Samuel 20:18-42 | Shabbat Machar Chodesh\\n\\nhttps://hebcal.com/s/5782i/30?uc=ical-foo-bar'
-  );
-
-  const ev2 = new DafYomiEvent(new HDate(new Date(1995, 11, 17)));
-  const ical2 = new IcalEvent(ev2, {utmCampaign: 'ical-foo-bar'});
-  const lines2 = ical2.getLongLines();
-  const desc2 = findLine(lines2, 'DESCRIPTION');
-  expect(desc2).toBe(
-    'https://www.sefaria.org/Avodah_Zarah.68a?lang=bi&utm_source=hebcal.com&utm_medium=icalendar&utm_campaign=ical-foo-bar'
-  );
 });
 
 test('caldesc', async () => {
@@ -767,8 +721,6 @@ test('yerushalmi-yomi', () => {
     'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
     'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
     'CLASS:PUBLIC',
-    'DESCRIPTION:https://www.sefaria.org/Jerusalem_Talmud_Berakhot.1.1.7-11?lan',
-    ' g=bi&utm_source=hebcal.com&utm_medium=icalendar',
     'LOCATION:Yerushalmi Yomi',
     'END:VEVENT',
   ];
@@ -789,7 +741,7 @@ test('sequence', () => {
   expect(lines).toEqual(expected);
 });
 
-test('linkedEvent-memo', () => {
+test('linkedEvent-no-memo', () => {
   const hd = new HDate(22, 'Iyyar', 5781);
   const ev1 = new HebrewDateEvent(hd);
   const ev2 = new Event(hd, 'Foo Bar Baaz', flags.USER_EVENT, {
@@ -808,7 +760,6 @@ test('linkedEvent-memo', () => {
     'TRANSP:TRANSPARENT',
     'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
     'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
-    'DESCRIPTION:22nd of Iyyar\\, 5781',
     'BEGIN:VALARM',
     'ACTION:DISPLAY',
     'DESCRIPTION:Event reminder',
@@ -827,13 +778,28 @@ test('parsha-with-memo', () => {
     chag: false,
     num: -1,
   });
-  ev.memo = 'Hello World!';
+  ev.memo = 'Hello World!\nTorah: Genesis 6:9-11:32';
   const icalEvent = new IcalEvent(ev, {});
   const lines = icalEvent.getLongLines();
   const description = findLine(lines, 'DESCRIPTION');
-  expect(description).toBe(
-    'Hello World!\\n\\nTorah: Genesis 6:9-11:32\\nHaftarah: Isaiah 54:1-55:5\\nHaftarah for Sephardim: Isaiah 54:1-10\\n\\nhttps://hebcal.com/s/5784/2?us=ical&um=icalendar'
-  );
+  expect(description).toBe('Hello World!\\nTorah: Genesis 6:9-11:32');
+});
+
+test('no-memo-no-description', () => {
+  const ev = new ParshaEvent({
+    hdate: new HDate(new Date(2023, 9, 21)),
+    parsha: ['Noach'],
+    il: false,
+    chag: false,
+    num: -1,
+  });
+  expect(
+    findLine(new IcalEvent(ev, {}).getLongLines(), 'DESCRIPTION')
+  ).toBeNull();
+  ev.memo = '';
+  expect(
+    findLine(new IcalEvent(ev, {}).getLongLines(), 'DESCRIPTION')
+  ).toBeNull();
 });
 
 test('parsha-apos', () => {
@@ -876,7 +842,6 @@ test('url', async () => {
     'X-MICROSOFT-CDO-BUSYSTATUS:FREE',
     'X-MICROSOFT-CDO-ALLDAYEVENT:TRUE',
     'CLASS:PUBLIC',
-    'DESCRIPTION:https://www.hebcal.com/foobar?utm_source=ical&utm_medium=icalendar',
     'URL:https://www.hebcal.com/foobar?utm_source=ical&utm_medium=icalendar',
     'END:VEVENT',
   ];
