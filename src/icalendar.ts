@@ -1,7 +1,7 @@
 import {Event, flags} from '@hebcal/core/dist/esm/event';
 import {CalOptions} from '@hebcal/core/dist/esm/CalOptions';
 import {Locale} from '@hebcal/core/dist/esm/locale';
-import {murmur32HexSync} from 'murmurhash3';
+import {murmur32HexSync} from '@hebcal/murmurhash3';
 import {pad2, pad4, isDate} from '@hebcal/hdate';
 import {
   getCalendarTitle,
