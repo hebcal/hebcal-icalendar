@@ -30,10 +30,10 @@
   },
   "homepage": "https://hebcal.github.io/api/icalendar/",
   "dependencies": {
-    "@hebcal/core": "^6.8.2",
-    "@hebcal/hdate": "^0.22.5",
+    "@hebcal/core": "^6.9.1",
+    "@hebcal/hdate": "^0.22.7",
     "@hebcal/murmurhash3": "^1.0.0",
-    "@hebcal/rest-api": "^7.0.0"
+    "@hebcal/rest-api": "^7.1.1"
   },
   "scripts": {
     "build:version": "node ./version.js package.json src/pkgVersion.ts",
@@ -49,7 +49,7 @@
   "license": "BSD-2-Clause",
   "devDependencies": {
     "@hebcal/learning": "^6.9.5",
-    "@types/node": "26.1.1",
+    "@types/node": "26.1.2",
     "oxlint": "^1.76.0",
     "prettier": "^3.9.6",
     "typescript": "^7.0.2",
