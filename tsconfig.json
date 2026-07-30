@@ -5,7 +5,6 @@
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "strict": true,
-    "skipLibCheck": true,
     "declaration": true,
     "rootDir": "./src",
     "outDir": "./dist",
