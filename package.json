@@ -1,6 +1,6 @@
 {
   "name": "@hebcal/icalendar",
-  "version": "7.0.2",
+  "version": "7.0.3",
   "author": "Michael J. Radwin (https://github.com/mjradwin)",
   "keywords": [
     "ical",
@@ -33,7 +33,7 @@
     "@hebcal/core": "^6.9.1",
     "@hebcal/hdate": "^0.22.7",
     "@hebcal/murmurhash3": "^1.0.0",
-    "@hebcal/rest-api": "^7.1.1"
+    "@hebcal/rest-api": "^7.1.3"
   },
   "scripts": {
     "build:version": "node ./version.js package.json src/pkgVersion.ts",
@@ -48,9 +48,9 @@
   },
   "license": "BSD-2-Clause",
   "devDependencies": {
-    "@hebcal/learning": "^6.9.5",
-    "@types/node": "26.1.2",
-    "oxlint": "^1.76.0",
+    "@hebcal/learning": "^6.9.7",
+    "@types/node": "26.2.0",
+    "oxlint": "^1.77.0",
     "prettier": "^3.9.6",
     "typescript": "^7.0.2",
     "vitest": "^4.1.10"
