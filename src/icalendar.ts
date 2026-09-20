@@ -53,6 +53,18 @@ export type ICalEventOptions = {
   dtstamp?: string;
   sequence?: number;
   /**
+   * For a timed event, an explicit end time so the generated `VEVENT` has a
+   * non-zero duration. By default a timed event's `DTEND` equals its
+   * `DTSTART` (a zero-length event); set this to make `DTEND` later than
+   * `DTSTART`. The `Date`'s local wall-clock fields (year/month/day and
+   * hours/minutes/seconds) are emitted verbatim and tagged with the same
+   * `TZID` as `DTSTART`, so construct it in the event location's local time.
+   * This is per-event, so pass a fresh options object to each `IcalEvent`.
+   * Ignored for all-day (untimed) events, whose `DTEND` is always the next
+   * day.
+   */
+  endDate?: Date;
+  /**
    * Text for the `DESCRIPTION` property, overriding `ev.memo`. This is
    * per-event, so pass a fresh options object to each `IcalEvent` (for
    * example `new IcalEvent(ev, {...opts, memo})`) rather than setting it on
@@ -170,7 +182,9 @@ export class IcalEvent {
       hour = +hour;
       minute = +minute;
       this.startDate += 'T' + pad2(hour) + pad2(minute) + '00';
-      this.endDate = this.startDate;
+      this.endDate = opts.endDate
+        ? IcalEvent.formatYYYYMMDDTHHMMSS(opts.endDate)
+        : this.startDate;
       if (location?.getTzid()) {
         this.dtargs = `;TZID=${location.getTzid()}`;
       }
@@ -352,6 +366,20 @@ export class IcalEvent {
   static formatYYYYMMDD(dt: Date): string {
     return (
       pad4(dt.getFullYear()) + pad2(dt.getMonth() + 1) + pad2(dt.getDate())
+    );
+  }
+
+  /**
+   * Formats a `Date`'s local wall-clock as an iCalendar date-time
+   * (`YYYYMMDDTHHMMSS`), used for the `DTEND` of a timed event.
+   */
+  static formatYYYYMMDDTHHMMSS(dt: Date): string {
+    return (
+      IcalEvent.formatYYYYMMDD(dt) +
+      'T' +
+      pad2(dt.getHours()) +
+      pad2(dt.getMinutes()) +
+      pad2(dt.getSeconds())
     );
   }
 

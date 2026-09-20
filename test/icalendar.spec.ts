@@ -209,6 +209,66 @@ test('ical-candles', () => {
   expect(findLine(lines, 'LOCATION')).toBe('Chicago');
 });
 
+test('timed event endDate gives non-zero duration', () => {
+  const location = new Location(
+    41.85003,
+    -87.65005,
+    false,
+    'America/Chicago',
+    'Chicago',
+    'US',
+    4887398
+  );
+  const timedEv = new TimedEvent(
+    new HDate(new Date(1993, 2, 12)),
+    'Foo Bar',
+    flags.LIGHT_CANDLES,
+    new Date(1993, 2, 12, 17, 37),
+    location
+  );
+  // by default DTEND equals DTSTART (zero-length event)
+  const ical0 = new IcalEvent(timedEv, {dtstamp: 'X', location});
+  const lines0 = ical0.toString().split('\r\n');
+  const dtstart = findLine(lines0, 'DTSTART');
+  expect(findLine(lines0, 'DTEND')).toBe(dtstart);
+
+  // an explicit endDate produces a distinct, later DTEND, tagged with the
+  // same TZID as DTSTART. Built from the Date's local wall-clock fields, so
+  // the value is independent of the runtime timezone.
+  const ical = new IcalEvent(timedEv, {
+    dtstamp: 'X',
+    location,
+    endDate: new Date(1993, 2, 12, 18, 7, 0),
+  });
+  const lines = ical.toString().split('\r\n');
+  expect(lines.find(line => line.startsWith('DTSTART'))).toMatch(
+    /^DTSTART;TZID=America\/Chicago:19930312T\d{6}$/
+  );
+  expect(lines.find(line => line.startsWith('DTEND'))).toBe(
+    'DTEND;TZID=America/Chicago:19930312T180700'
+  );
+  expect(findLine(lines, 'DTEND')).not.toBe(findLine(lines, 'DTSTART'));
+});
+
+test('endDate is ignored for all-day events', () => {
+  const options: CalOptions = {
+    year: 1993,
+    month: 3,
+    noHolidays: true,
+    dailyLearning: {dafYomi: true},
+    locale: 'he',
+  };
+  const ev = HebrewCalendar.calendar(options)[0];
+  const icalOpts: ICalOptions = {
+    ...options,
+    dtstamp: 'X',
+    endDate: new Date(1993, 5, 1, 12, 0, 0),
+  };
+  const lines = new IcalEvent(ev, icalOpts).toString().split('\r\n');
+  expect(findLine(lines, 'DTSTART')).toBe('19930301');
+  expect(findLine(lines, 'DTEND')).toBe('19930302');
+});
+
 test('ical-dafyomi', () => {
   const options: CalOptions = {
     year: 1993,
