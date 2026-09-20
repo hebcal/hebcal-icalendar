@@ -1,4 +1,5 @@
 import {Event, flags} from '@hebcal/core/dist/esm/event';
+import {TimedEvent} from '@hebcal/core/dist/esm/TimedEvent';
 import {CalOptions} from '@hebcal/core/dist/esm/CalOptions';
 import {Locale} from '@hebcal/core/dist/esm/locale';
 import {murmur32HexSync} from '@hebcal/murmurhash3';
@@ -111,6 +112,42 @@ const DAILY_LEARNING =
   flags.YERUSHALMI_YOMI |
   flags.NACH_YOMI;
 
+/** Formats a date-time string as `YYYYMMDDTHHMMSS` */
+function rfc5545DateTime(dt: Date, hour: number, minute: number): string {
+  return IcalEvent.formatYYYYMMDD(dt) + 'T' + pad2(hour) + pad2(minute) + '00';
+}
+
+/**
+ * Computes the DTSTART/DTEND date-time strings (in `YYYYMMDDTHHMMSS`
+ * format) for a timed event, adding `duration` minutes (if any) to the
+ * wall-clock start time. Adding to the wall clock (rather than to the
+ * underlying instant) keeps the result in the same timezone as DTSTART
+ * regardless of the host machine's own local timezone.
+ * @private
+ */
+function formatTimedStartEnd(ev: TimedEvent): {
+  startDate: string;
+  endDate: string;
+} {
+  const [hourStr, minuteStr] = ev.eventTimeStr.split(':');
+  const hour = +hourStr;
+  const minute = +minuteStr;
+  const dt = ev.greg();
+  const startDate = rfc5545DateTime(dt, hour, minute);
+  if (!ev.duration) {
+    return {startDate, endDate: startDate};
+  }
+  const totalMinutes = hour * 60 + minute + ev.duration;
+  const endHour = Math.floor(totalMinutes / 60) % 24;
+  const endMinute = totalMinutes % 60;
+  const dayOffset = Math.floor(totalMinutes / 1440);
+  if (dayOffset) {
+    dt.setDate(dt.getDate() + dayOffset);
+  }
+  const endDate = rfc5545DateTime(dt, endHour, endMinute);
+  return {startDate, endDate};
+}
+
 /**
  * Represents an RFC 2445 iCalendar VEVENT
  */
@@ -166,11 +203,9 @@ export class IcalEvent {
     this.transp = 'TRANSPARENT';
     this.busyStatus = 'FREE';
     if (timed) {
-      let [hour, minute] = ev0.eventTimeStr.split(':');
-      hour = +hour;
-      minute = +minute;
-      this.startDate += 'T' + pad2(hour) + pad2(minute) + '00';
-      this.endDate = this.startDate;
+      const {startDate, endDate} = formatTimedStartEnd(ev as TimedEvent);
+      this.startDate = startDate;
+      this.endDate = endDate;
       if (location?.getTzid()) {
         this.dtargs = `;TZID=${location.getTzid()}`;
       }

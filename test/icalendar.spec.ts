@@ -695,6 +695,97 @@ test('uid', () => {
   expect(ical5.getUid()).toBe('hebcal-20221127-568cd823-12345');
 });
 
+const CHICAGO_TZID = 'America/Chicago';
+const chicagoLocation = new Location(
+  41.85003,
+  -87.65005,
+  false,
+  CHICAGO_TZID,
+  'Chicago'
+);
+
+/**
+ * `HDate` derives its calendar day from the host's *local* Date components
+ * (not from any location's timezone), so a test that hardcodes a location
+ * like America/Chicago must also pin the process's own local timezone to
+ * match — otherwise the Gregorian day (and therefore the whole test) shifts
+ * depending on where it's run.
+ */
+function withTz<T>(tzid: string, fn: () => T): T {
+  const original = process.env.TZ;
+  process.env.TZ = tzid;
+  try {
+    return fn();
+  } finally {
+    if (original === undefined) {
+      delete process.env.TZ;
+    } else {
+      process.env.TZ = original;
+    }
+  }
+}
+
+test('timed-event-duration', () => {
+  withTz(CHICAGO_TZID, () => {
+    const startAt1430 = new Date(2023, 5, 15, 14, 30);
+    const ev1430 = new TimedEvent(
+      new HDate(startAt1430),
+      'Foo Bar',
+      flags.USER_EVENT,
+      startAt1430,
+      chicagoLocation
+    );
+    ev1430.duration = 15;
+    const ical1430 = new IcalEvent(ev1430, {
+      location: chicagoLocation,
+      dtstamp: 'X',
+    });
+    const lines1430 = ical1430.toString().split('\r\n');
+    expect(findLine(lines1430, 'DTSTART')).toBe('20230615T143000');
+    expect(findLine(lines1430, 'DTEND')).toBe('20230615T144500');
+
+    const startAt2050 = new Date(2023, 5, 15, 20, 50);
+    const ev2050 = new TimedEvent(
+      new HDate(startAt2050),
+      'Foo Bar',
+      flags.USER_EVENT,
+      startAt2050,
+      chicagoLocation
+    );
+    ev2050.duration = 20;
+    const ical2050 = new IcalEvent(ev2050, {
+      location: chicagoLocation,
+      dtstamp: 'X',
+    });
+    const lines2050 = ical2050.toString().split('\r\n');
+    expect(findLine(lines2050, 'DTSTART')).toBe('20230615T205000');
+    expect(findLine(lines2050, 'DTEND')).toBe('20230615T211000');
+  });
+});
+
+test('timed-event-duration-floating', () => {
+  // The TimedEvent still needs a location to compute its wall-clock time,
+  // but omitting `location` from ICalOptions means IcalEvent has nothing to
+  // key a TZID off of, so DTSTART/DTEND should be floating (no TZID param).
+  withTz(CHICAGO_TZID, () => {
+    const startAt1430 = new Date(2023, 5, 15, 14, 30);
+    const ev1430 = new TimedEvent(
+      new HDate(startAt1430),
+      'Foo Bar',
+      flags.USER_EVENT,
+      startAt1430,
+      chicagoLocation
+    );
+    ev1430.duration = 15;
+    const ical1430 = new IcalEvent(ev1430, {dtstamp: 'X'});
+    const lines1430 = ical1430.toString().split('\r\n');
+    const dtstart = lines1430.find(line => line.startsWith('DTSTART'));
+    const dtend = lines1430.find(line => line.startsWith('DTEND'));
+    expect(dtstart).toBe('DTSTART:20230615T143000');
+    expect(dtend).toBe('DTEND:20230615T144500');
+  });
+});
+
 test('yerushalmi-yomi', () => {
   const hd = new HDate(new Date(2022, 10, 15));
   const options: CalOptions = {
