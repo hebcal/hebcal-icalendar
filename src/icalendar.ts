@@ -1,4 +1,4 @@
-import {Event, flags} from '@hebcal/core/dist/esm/event';
+import {Event} from '@hebcal/core/dist/esm/event';
 import {TimedEvent} from '@hebcal/core/dist/esm/TimedEvent';
 import {CalOptions} from '@hebcal/core/dist/esm/CalOptions';
 import {Locale} from '@hebcal/core/dist/esm/locale';
@@ -105,13 +105,6 @@ function appendTrackingToUrl(
   );
 }
 
-const DAILY_LEARNING =
-  flags.DAILY_LEARNING |
-  flags.DAF_YOMI |
-  flags.MISHNA_YOMI |
-  flags.YERUSHALMI_YOMI |
-  flags.NACH_YOMI;
-
 /** Formats a date-time string as `YYYYMMDDTHHMMSS` */
 function rfc5545DateTime(dt: Date, hour: number, minute: number): string {
   return IcalEvent.formatYYYYMMDD(dt) + 'T' + pad2(hour) + pad2(minute) + '00';
@@ -188,12 +181,20 @@ export class IcalEvent {
     let subj = shouldRenderBrief(ev)
       ? ev.renderBrief(locale)
       : ev.render(locale);
-    const mask = ev.getFlags();
     if (ev0.locationName) {
       this.locationName = ev0.locationName;
     } else if (timed && location) {
       this.locationName = location.getShortName();
-    } else if (mask & DAILY_LEARNING && ev0.category) {
+    } else if (
+      ev.hasAnyFlag(
+        'DAILY_LEARNING',
+        'DAF_YOMI',
+        'MISHNA_YOMI',
+        'YERUSHALMI_YOMI',
+        'NACH_YOMI'
+      ) &&
+      ev0.category
+    ) {
       this.locationName = Locale.gettext(ev0.category, locale);
     }
     const hd = ev.getDate();
@@ -215,7 +216,7 @@ export class IcalEvent {
       // It's more compatible with everthing except ancient versions of
       // Lotus Notes circa 2004
       this.dtargs = ';VALUE=DATE';
-      if (mask & flags.CHAG) {
+      if (ev.hasFlag('CHAG')) {
         this.transp = 'OPAQUE';
         this.busyStatus = 'OOF';
       }
@@ -224,7 +225,7 @@ export class IcalEvent {
     if (opts.emoji) {
       const prefix = ev.getEmoji();
       if (prefix) {
-        if (mask & flags.OMER_COUNT) {
+        if (ev.hasFlag('OMER_COUNT')) {
           subj = subj + ' ' + prefix;
         } else {
           subj = prefix + ' ' + subj;
@@ -249,7 +250,6 @@ export class IcalEvent {
 
   getAlarm(): string | null {
     const ev = this.ev;
-    const mask = ev.getFlags();
     const evAlarm = ev.alarm;
     if (typeof evAlarm === 'string') {
       return 'TRIGGER:' + evAlarm;
@@ -259,9 +259,9 @@ export class IcalEvent {
       const alarmDt = evAlarm as Date;
       alarmDt.setSeconds(0);
       return 'TRIGGER;VALUE=DATE-TIME:' + IcalEvent.makeDtstamp(alarmDt);
-    } else if (mask & flags.OMER_COUNT) {
+    } else if (ev.hasFlag('OMER_COUNT')) {
       return 'TRIGGER:-P0DT3H30M0S'; // 8:30pm Omer alarm evening before
-    } else if (mask & flags.USER_EVENT) {
+    } else if (ev.hasFlag('USER_EVENT')) {
       return 'TRIGGER:-P0DT12H0M0S'; // noon the day before
     } else if (this.timed && ev.getDesc().startsWith('Candle lighting')) {
       return 'TRIGGER:-P0DT0H10M0S';
@@ -311,8 +311,7 @@ export class IcalEvent {
     }
 
     const ev = this.ev;
-    const mask = ev.getFlags();
-    const isUserEvent = Boolean(mask & flags.USER_EVENT);
+    const isUserEvent = ev.hasFlag('USER_EVENT');
     if (!isUserEvent) {
       arr.push('CLASS:PUBLIC');
     }
