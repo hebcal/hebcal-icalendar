@@ -991,3 +991,16 @@ test('prodid-locale-fr', async () => {
   expect(prodid).not.toBeNull();
   expect(prodid!.endsWith('//FR')).toBe(true);
 });
+
+test('alarm-date-not-mutated', () => {
+  const ev = new Event(
+    new HDate(new Date(2024, 0, 15)),
+    'Test',
+    flags.USER_EVENT
+  );
+  const alarm = new Date(Date.UTC(2024, 0, 14, 17, 30, 45));
+  ev.alarm = alarm;
+  const ical = new IcalEvent(ev, {dtstamp: 'X'});
+  expect(ical.getAlarm()).toBe('TRIGGER;VALUE=DATE-TIME:20240114T173000Z');
+  expect(alarm.getUTCSeconds()).toBe(45);
+});

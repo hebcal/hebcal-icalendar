@@ -1,6 +1,6 @@
-import {Event} from '@hebcal/core/dist/esm/event';
-import {TimedEvent} from '@hebcal/core/dist/esm/TimedEvent';
-import {CalOptions} from '@hebcal/core/dist/esm/CalOptions';
+import type {Event} from '@hebcal/core/dist/esm/event';
+import type {TimedEvent} from '@hebcal/core/dist/esm/TimedEvent';
+import type {CalOptions} from '@hebcal/core/dist/esm/CalOptions';
 import {Locale} from '@hebcal/core/dist/esm/locale';
 import {murmur32HexSync} from '@hebcal/murmurhash3';
 import {pad2, pad4, isDate} from '@hebcal/hdate';
@@ -18,7 +18,7 @@ import {foldLine} from './foldLine.js';
 const ESC_NEWLINE = String.raw`\n`;
 
 const vtimezoneCache = new Map<string, string>();
-const CATEGORY = {
+const CATEGORY: Readonly<Record<string, string | null>> = {
   candles: 'Holiday',
   dafyomi: 'Daf Yomi',
   mishnayomi: 'Mishna Yomi',
@@ -34,7 +34,30 @@ const CATEGORY = {
   roshchodesh: 'Holiday',
   user: 'Personal',
   zmanim: null,
-} as const;
+};
+
+/**
+ * Optional properties that some Event subclasses (e.g. `TimedEvent`,
+ * `DailyLearningEvent`) or callers attach to an event. They aren't declared
+ * on `Event` itself, so we read them structurally.
+ * @private
+ */
+type EventExtras = {
+  sequence?: unknown;
+  uid?: string;
+  eventTime?: Date;
+  locationName?: string;
+  category?: string;
+};
+
+/**
+ * Narrows `isDate()` from `@hebcal/hdate` (which returns a plain boolean)
+ * into a type guard.
+ * @private
+ */
+function isDateObj(obj: unknown): obj is Date {
+  return isDate(obj);
+}
 
 /**
  * @private
@@ -43,7 +66,7 @@ function addOptional(
   arr: string[],
   key: string,
   val: string | null | undefined
-) {
+): void {
   if (val) {
     const str = IcalEvent.escape(val);
     arr.push(key + ':' + str);
@@ -98,7 +121,7 @@ function appendTrackingToUrl(
   const utmCampaign = options.utmCampaign;
   return appendIsraelAndTracking(
     url,
-    options.il!,
+    Boolean(options.il),
     utmSource,
     utmMedium,
     utmCampaign
@@ -168,8 +191,7 @@ export class IcalEvent {
     const opts: ICalOptions = {...options};
     this.options = opts;
     this.dtstamp = opts.dtstamp || IcalEvent.makeDtstamp(new Date());
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const ev0 = ev as any;
+    const ev0: Event & EventExtras = ev;
     if (typeof ev0.sequence === 'number') {
       this.sequence = ev0.sequence;
     } else if (typeof opts.sequence === 'number') {
@@ -244,8 +266,7 @@ export class IcalEvent {
     }
     this.subj = subj;
     this.category =
-      ev0.category ||
-      (CATEGORY[getEventCategories(ev)?.[0] as keyof typeof CATEGORY] ?? null);
+      ev0.category || (CATEGORY[getEventCategories(ev)[0]] ?? null);
   }
 
   getAlarm(): string | null {
@@ -253,10 +274,11 @@ export class IcalEvent {
     const evAlarm = ev.alarm;
     if (typeof evAlarm === 'string') {
       return 'TRIGGER:' + evAlarm;
-    } else if (typeof evAlarm === 'boolean' && !evAlarm) {
+    } else if (evAlarm === false) {
       return null;
-    } else if (isDate(evAlarm)) {
-      const alarmDt = evAlarm as Date;
+    } else if (isDateObj(evAlarm)) {
+      // copy so we don't mutate the caller's Date
+      const alarmDt = new Date(evAlarm);
       alarmDt.setSeconds(0);
       return 'TRIGGER;VALUE=DATE-TIME:' + IcalEvent.makeDtstamp(alarmDt);
     } else if (ev.hasFlag('OMER_COUNT')) {
@@ -270,19 +292,20 @@ export class IcalEvent {
   }
 
   getUid(): string {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let uid = (this.ev as any).uid;
-    if (uid) {
-      return uid;
+    const ev: Event & EventExtras = this.ev;
+    if (ev.uid) {
+      return ev.uid;
     }
-    const digest = murmur32HexSync(this.ev.getDesc());
-    uid = `hebcal-${this.isoDateOnly}-${digest}`;
+    const digest = murmur32HexSync(ev.getDesc());
+    let uid = `hebcal-${this.isoDateOnly}-${digest}`;
     const loc = this.options.location;
     if (this.timed && loc) {
-      if (loc.getGeoId()) {
-        uid += `-${loc.getGeoId()}`;
-      } else if (loc.getName()) {
-        uid += '-' + makeAnchor(loc.getName()!);
+      const geoId = loc.getGeoId();
+      const name = loc.getName();
+      if (geoId) {
+        uid += `-${geoId}`;
+      } else if (name) {
+        uid += '-' + makeAnchor(name);
       }
     }
     return uid;
@@ -290,21 +313,19 @@ export class IcalEvent {
 
   getLongLines(): string[] {
     if (this.lines) return this.lines;
-    const categoryLine = this.category ? [`CATEGORIES:${this.category}`] : [];
     const uid = this.getUid();
-    if (this.sequence) {
-      categoryLine.unshift(`SEQUENCE:${this.sequence}`);
-    }
-    const arr = (this.lines = ['BEGIN:VEVENT', `DTSTAMP:${this.dtstamp}`]
-      .concat(categoryLine)
-      .concat([
-        `SUMMARY:${this.subj}`,
-        `DTSTART${this.dtargs}:${this.startDate}`,
-        `DTEND${this.dtargs}:${this.endDate}`,
-        `UID:${uid}`,
-        `TRANSP:${this.transp}`,
-        `X-MICROSOFT-CDO-BUSYSTATUS:${this.busyStatus}`,
-      ]));
+    const arr = (this.lines = [
+      'BEGIN:VEVENT',
+      `DTSTAMP:${this.dtstamp}`,
+      ...(this.sequence ? [`SEQUENCE:${this.sequence}`] : []),
+      ...(this.category ? [`CATEGORIES:${this.category}`] : []),
+      `SUMMARY:${this.subj}`,
+      `DTSTART${this.dtargs}:${this.startDate}`,
+      `DTEND${this.dtargs}:${this.endDate}`,
+      `UID:${uid}`,
+      `TRANSP:${this.transp}`,
+      `X-MICROSOFT-CDO-BUSYSTATUS:${this.busyStatus}`,
+    ]);
 
     if (!this.timed) {
       arr.push('X-MICROSOFT-CDO-ALLDAYEVENT:TRUE');
@@ -345,7 +366,7 @@ export class IcalEvent {
         'BEGIN:VALARM',
         'ACTION:DISPLAY',
         'DESCRIPTION:Event reminder',
-        `${trigger}`,
+        trigger,
         'END:VALARM'
       );
     }
@@ -436,7 +457,7 @@ export async function eventsToIcalendar(
   return icalEventsToString(icals, opts);
 }
 
-const localeMap: Record<string, string> = {
+const localeMap: Readonly<Record<string, string>> = {
   'he-x-NoNikud': 'he',
   'he-x-nonikud': 'he',
   h: 'he',
@@ -444,7 +465,7 @@ const localeMap: Record<string, string> = {
   s: 'en',
   ashkenazi: 'en',
   ashkenazi_romanian: 'ro',
-} as const;
+};
 
 async function getVtimezone(tzid: string): Promise<string | undefined> {
   const vtz = vtimezoneCache.get(tzid);
@@ -513,7 +534,7 @@ export async function icalEventsToString(
 ): Promise<string> {
   if (!icals.length) throw new RangeError('Events can not be empty');
   if (!options) throw new TypeError('Invalid options object');
-  const stream = [];
+  const stream: string[] = [];
   const preamble = makeIcalPreamble(options);
   for (const line of preamble.map(foldLine)) {
     stream.push(line);

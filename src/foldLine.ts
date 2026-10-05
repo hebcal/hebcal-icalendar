@@ -52,9 +52,7 @@ export function foldLine(line: string): string {
   // lineBytes/74 of them, so we ask it about those offsets via
   // `containing()` rather than iterating every cluster in the line --
   // the same fold points for a fraction of the work.
-  if (!foldSegmenter) {
-    foldSegmenter = new Intl.Segmenter('en', {granularity: 'grapheme'});
-  }
+  foldSegmenter ??= new Intl.Segmenter('en', {granularity: 'grapheme'});
   const segments = foldSegmenter.segment(line);
   const parts: string[] = [];
   const n = line.length;
